@@ -153,7 +153,7 @@ def build_training_data(cache_path=".bc_cache.json", min_lookback=5):
     # Load cache
     cache_file = Path(cache_path)
     if not cache_file.exists():
-        print(f"⚠️  Cache file {cache_path} not found!")
+        print(f"Cache file {cache_path} not found!")
         return np.zeros((0, 13)), np.zeros(0), []
 
     with open(cache_file, "r") as f:
@@ -176,11 +176,11 @@ def build_training_data(cache_path=".bc_cache.json", min_lookback=5):
             all_rows.extend(player_rows)
 
     if not all_rows:
-        print("⚠️  No replay details found in cache.")
+        print("No replay details found in cache.")
         return np.zeros((0, 13)), np.zeros(0), []
 
     df = pd.DataFrame(all_rows)
-    print(f"📊 Found {len(df)} player-game records across {df['replay_id'].nunique()} replays")
+    print(f"Found {len(df)} player-game records across {df['replay_id'].nunique()} replays")
 
     # Step 2: Group by player and generate training rows
     features_list = []
@@ -252,13 +252,13 @@ def build_training_data(cache_path=".bc_cache.json", min_lookback=5):
                     processed += 1
 
     if not features_list:
-        print("⚠️  Not enough player history to generate training data.")
+        print("Not enough player history to generate training data.")
         return np.zeros((0, 13)), np.zeros(0), []
 
     features_arr = np.array(features_list, dtype=np.float32)
     labels_arr = np.array(labels_list, dtype=np.float32)
 
-    print(f"✅ Generated {len(features_arr)} training samples from {len(player_groups)} players")
-    print(f"   Label distribution: {labels_arr.mean():.1%} over / {1 - labels_arr.mean():.1%} under")
+    print(f"Generated {len(features_arr)} training samples from {len(player_groups)} players")
+    print(f"Label distribution: {labels_arr.mean():.1%} over / {1 - labels_arr.mean():.1%} under")
 
     return features_arr, labels_arr, meta_list

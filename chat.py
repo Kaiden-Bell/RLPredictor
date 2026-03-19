@@ -91,9 +91,9 @@ def run_chat(row, bc, idMap):
     # Load neural network model (if trained)
     nn_model = load_model()
     if nn_model:
-        print("🧠 Neural Net model loaded!")
+        print("Neural Net model loaded!")
     else:
-        print("⚠️  No trained model found. Run 'python3 train.py' to train.")
+        print("No trained model found. Run 'python3 train.py' to train.")
 
     print("Fetching H2H history and recent general games... please wait.")
     logs = []
@@ -128,9 +128,9 @@ def run_chat(row, bc, idMap):
             confident_h2h = True
 
         if confident_h2h:
-            print("✅ High Confidence: H2H data heavily matches the current rosters!")
+            print("High Confidence: H2H data heavily matches the current rosters!")
         else:
-            print("⚠️ Low Confidence: H2H history features mostly old or different rosters.")
+            print("Low Confidence: H2H history features mostly old or different rosters.")
 
     # Combine available names to help resolver
     av_names = set()
@@ -171,7 +171,7 @@ def run_chat(row, bc, idMap):
         # Display target
         condition_str = f"Over {threshold}" if is_over else f"Under {threshold}"
         games_str = f" in {num_games} games" if num_games else " (per game)"
-        print(f"\n🎯 Target: {matched_player} - {condition_str} {stat}{games_str}")
+        print(f"\nTarget: {matched_player} - {condition_str} {stat}{games_str}")
 
         # H2H calculation (per-game probability)
         prob_h2h = None
@@ -187,7 +187,7 @@ def run_chat(row, bc, idMap):
                 per_game_avg_h2h = stat_values.mean()
                 hits = (stat_values > threshold).sum() if is_over else (stat_values < threshold).sum()
                 prob_h2h = (hits / games_played) * 100
-                print(f"⚔️  H2H per-game: {prob_h2h:.1f}% ({hits}/{games_played} games) | Avg {stat}: {per_game_avg_h2h:.2f}/game - Confident: {confident_h2h}")
+                print(f"H2H per-game: {prob_h2h:.1f}% ({hits}/{games_played} games) | Avg {stat}: {per_game_avg_h2h:.2f}/game - Confident: {confident_h2h}")
 
         # Generic calculation (per-game probability)
         if not gen_df.empty and matched_player in gen_df['Player'].values:
@@ -198,7 +198,7 @@ def run_chat(row, bc, idMap):
                 per_game_avg_gen = stat_values.mean()
                 hits = (stat_values > threshold).sum() if is_over else (stat_values < threshold).sum()
                 prob_gen = (hits / games_played) * 100
-                print(f"🌎 Generic per-game: {prob_gen:.1f}% ({hits}/{games_played} games) | Avg {stat}: {per_game_avg_gen:.2f}/game")
+                print(f"Generic per-game: {prob_gen:.1f}% ({hits}/{games_played} games) | Avg {stat}: {per_game_avg_gen:.2f}/game")
 
         # Multi-game projection
         if num_games and num_games > 1:
@@ -220,14 +220,14 @@ def run_chat(row, bc, idMap):
                     else:
                         multi_prob = max(5.0, best_prob - (projected_total - threshold) / max(projected_total, 1) * 30)
 
-                print(f"📊 Multi-game projection ({num_games} games): ~{projected_total:.1f} total {stat} expected | Adj. Probability: ~{multi_prob:.1f}%")
+                print(f"Multi-game projection ({num_games} games): ~{projected_total:.1f} total {stat} expected | Adj. Probability: ~{multi_prob:.1f}%")
 
         # Sentiment Analysis
         sent_data = get_player_sentiment(matched_player)
         s_score = sent_data["score"]
         s_status = sent_data["status"]
         s_count = sent_data["count"]
-        print(f"🗣️  Reddit Sentiment: {s_score:+.2f} ({s_status} across {s_count} recent posts/threads)")
+        print(f"Reddit Sentiment: {s_score:+.2f} ({s_status} across {s_count} recent posts/threads)")
 
         # Momentum Check — resolve player name through idMap properly
         p_canon = matched_player.strip().lower()
@@ -244,16 +244,16 @@ def run_chat(row, bc, idMap):
                 avg = mdata["avg_score"]
                 wr = mdata["win_rate"]
                 if g >= 20:
-                    label = "🔥 High"
+                    label = "High"
                 elif g >= 5:
-                    label = "📊 Moderate"
+                    label = "Moderate"
                 else:
-                    label = "❄️ Cold"
+                    label = "Cold"
                 print(f"{label} Ranked 2s Momentum: {g} games (last 14d) | Avg Score: {avg} | Win Rate: {wr}%")
                 momentum_shown = True
                 break
         if not momentum_shown:
-            print(f"❄️ Ranked 2s Momentum: No recent 2s data found")
+            print(f"Ranked 2s Momentum: No recent 2s data found")
 
         # Neural Net Prediction
         # Resolve momentum data for this player
@@ -283,27 +283,27 @@ def run_chat(row, bc, idMap):
             confidence = "High" if abs(display_prob - 0.5) > 0.2 else "Medium" if abs(display_prob - 0.5) > 0.1 else "Low"
 
             ou_label = "Over" if is_over else "Under"
-            print(f"\n🧠 Neural Net Prediction: {display_prob:.1%} chance of {ou_label} {threshold} {stat}")
-            print(f"📈 Confidence: {confidence}")
+            print(f"\nNeural Net Prediction: {display_prob:.1%} chance of {ou_label} {threshold} {stat}")
+            print(f"Confidence: {confidence}")
 
             # Smart betting advice based on NN + heuristics
             if display_prob > 0.65:
-                print(f"💰 Suggestion: {ou_label} looks strong — {matched_player} has {display_prob:.0%} predicted probability.")
+                print(f"Suggestion: {ou_label} looks strong — {matched_player} has {display_prob:.0%} predicted probability.")
             elif display_prob < 0.35:
                 flip_label = "Under" if is_over else "Over"
-                print(f"💡 Suggestion: Lean {flip_label} instead — only {display_prob:.0%} chance of {ou_label}.")
+                print(f"Suggestion: Lean {flip_label} instead — only {display_prob:.0%} chance of {ou_label}.")
             else:
-                print(f"⚖️  Suggestion: This is close to a coin flip — proceed with caution.")
+                print(f"Suggestion: This is close to a coin flip — proceed with caution.")
         else:
             # Fallback heuristic advice when no model is trained
             target_prob = prob_h2h if prob_h2h is not None else prob_gen
             if target_prob is not None:
                 if is_over and target_prob < 40 and s_score < 0:
-                    print(f"\n💡 Suggestion: Lean UNDER — {matched_player}'s hit rate is only {target_prob:.1f}% and sentiment is negative ({s_score:+.2f}).")
+                    print(f"\nSuggestion: Lean UNDER — {matched_player}'s hit rate is only {target_prob:.1f}% and sentiment is negative ({s_score:+.2f}).")
                 elif is_over and target_prob < 40:
-                    print(f"\n💡 Suggestion: Lean UNDER — {matched_player}'s hit rate is only {target_prob:.1f}%.")
+                    print(f"\nSuggestion: Lean UNDER — {matched_player}'s hit rate is only {target_prob:.1f}%.")
                 elif not is_over and target_prob < 40 and s_score > 0:
-                    print(f"\n💡 Suggestion: Lean OVER — under-hit rate is only {target_prob:.1f}% and sentiment is positive ({s_score:+.2f}).")
+                    print(f"\nSuggestion: Lean OVER — under-hit rate is only {target_prob:.1f}% and sentiment is positive ({s_score:+.2f}).")
                 elif not is_over and target_prob < 40:
-                    print(f"\n💡 Suggestion: Lean OVER — under-hit rate is only {target_prob:.1f}%.")
-            print(f"\n⚠️  Train the neural net for better predictions: python3 train.py")
+                    print(f"\nSuggestion: Lean OVER — under-hit rate is only {target_prob:.1f}%.")
+            print(f"\nTrain the neural net for better predictions: python3 train.py")

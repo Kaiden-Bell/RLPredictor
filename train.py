@@ -27,23 +27,23 @@ def main():
     args = parser.parse_args()
 
     if not HAS_TORCH:
-        print("❌ PyTorch is not installed. Run: pip install torch")
+        print("PyTorch is not installed. Run: pip install torch")
         sys.exit(1)
 
     print("=" * 60)
-    print("  RLPredictor — Neural Network Training")
+    print("RLPredictor — Neural Network Training")
     print("=" * 60)
 
     # Step 1: Generate training data from cache
-    print("\n📦 Step 1: Generating training data from cached replays...\n")
+    print("\nStep 1: Generating training data from cached replays...\n")
     features, labels, meta = build_training_data(
         cache_path=args.cache,
         min_lookback=args.min_lookback,
     )
 
     if len(features) == 0:
-        print("❌ No training data could be generated. Make sure .bc_cache.json has replay data.")
-        print("   Run some queries first: python3 main.py <url> --mode chat")
+        print("No training data could be generated. Make sure .bc_cache.json has replay data.")
+        print("Run some queries first: python3 main.py <url> --mode chat")
         sys.exit(1)
 
     # Optional: subsample for a quick test
@@ -52,10 +52,10 @@ def main():
         features = features[idx]
         labels = labels[idx]
         meta = [meta[i] for i in idx]
-        print(f"🔬 Subsampled to {args.sample} rows for quick test\n")
+        print(f"Subsampled to {args.sample} rows for quick test\n")
 
     # Step 2: Train
-    print(f"\n🧠 Step 2: Training model ({args.epochs} epochs, lr={args.lr})...\n")
+    print(f"\nStep 2: Training model ({args.epochs} epochs, lr={args.lr})...\n")
     model, history = train_model(
         features, labels,
         epochs=args.epochs,
@@ -64,25 +64,25 @@ def main():
     )
 
     # Step 3: Save
-    print("\n💾 Step 3: Saving model...\n")
+    print("\nStep 3: Saving model...\n")
     save_model(model)
 
     # Step 4: Quick sanity check
-    print("\n🔍 Step 4: Sanity check on a few samples...\n")
+    print("\nStep 4: Sanity check on a few samples...\n")
     from model import predict
     test_indices = np.random.choice(len(features), min(5, len(features)), replace=False)
     for i in test_indices:
         prob = predict(model, features[i])
-        actual = "OVER ✅" if labels[i] == 1 else "UNDER ❌"
+        actual = "OVER" if labels[i] == 1 else "UNDER"
         m = meta[i]
         pred_str = "OVER" if prob > 0.5 else "UNDER"
-        correct = "✅" if (prob > 0.5) == (labels[i] == 1) else "❌"
-        print(f"  {m['player']:>15s} | {m['stat']} > {m['threshold']} | "
+        correct = ":)" if (prob > 0.5) == (labels[i] == 1) else ":("
+        print(f"{m['player']:>15s} | {m['stat']} > {m['threshold']} | "
               f"Predicted: {prob:.1%} ({pred_str}) | Actual: {actual} {correct}")
 
     print(f"\n{'=' * 60}")
-    print(f"  Training complete! Model saved to data/model.pt")
-    print(f"  {len(features)} samples, best val acc: {max(history['val_acc']):.1%}")
+    print(f"Training complete! Model saved to data/model.pt")
+    print(f"{len(features)} samples, best val acc: {max(history['val_acc']):.1%}")
     print(f"{'=' * 60}\n")
 
 

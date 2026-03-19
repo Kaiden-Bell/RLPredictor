@@ -21,10 +21,10 @@ def list_matches(df: pd.DataFrame) -> pd.DataFrame:
     mask = df["team1"].notna() & df["team2"].notna()
     matches = df[mask].reset_index(drop=True).copy()
     if matches.empty:
-        print("⚠️  No concrete matchups yet.")
+        print("No concrete matchups yet.")
         return matches
 
-    print("\n📋 Available matchups:")
+    print("\nAvailable matchups:")
     for i, r in matches.iterrows():
         sec = r.get("section") or ""
         rnd = r.get("round") or ""
@@ -54,7 +54,7 @@ def preselect_match(matches: pd.DataFrame, match_arg: str) -> pd.Series | None:
         i = int(s)
         if 0 <= i < len(matches):
             return matches.iloc[i]
-        print(f"⚠️  --match index {i} out of range (0..{len(matches)-1}).")
+        print(f"--match index {i} out of range (0..{len(matches)-1}).")
         return None
 
     # substring search (case-insensitive in team1/team2)
@@ -65,10 +65,10 @@ def preselect_match(matches: pd.DataFrame, match_arg: str) -> pd.Series | None:
     )
     found = matches[mask]
     if found.empty:
-        print(f"⚠️  --match '{match_arg}' did not match any team names.")
+        print(f"--match '{match_arg}' did not match any team names.")
         return None
     if len(found) > 1:
-        print(f"⚠️  --match '{match_arg}' matched multiple rows; picking the first.")
+        print(f"--match '{match_arg}' matched multiple rows; picking the first.")
     return found.iloc[0]
 
 
@@ -76,7 +76,7 @@ def run_h2h(row: pd.Series, bc: Ballchasing):
     t1, t2 = row["team1"], row["team2"]
     r1, r2 = row["team1_players"], row["team2_players"]
 
-    print(f"\n🎯 H2H comparison: {t1} vs {t2}\n")
+    print(f"\nH2H comparison: {t1} vs {t2}\n")
     stats_raw, logs = getH2HStats(t1, t2, r1, r2, bc)
     
     from scrapers.h2h_ballchasing import aggregatePlayers
@@ -85,7 +85,7 @@ def run_h2h(row: pd.Series, bc: Ballchasing):
     
     print(stats if not stats.empty else "No stats found.")
     if logs:
-        print("\n📝 Logs:")
+        print("\nLogs:")
         for l in logs[:10]:
             print("-", l)
 
@@ -99,9 +99,9 @@ def run_features(row: pd.Series, bc: Ballchasing):
     print(out)
     os.makedirs("data", exist_ok=True)
     out.to_csv("data/features_playoffs_selected.csv", index=False)
-    print("\n✅ Saved to data/features_playoffs_selected.csv\n")
+    print("\nSaved to data/features_playoffs_selected.csv\n")
     if logs:
-        print("📝 Logs:")
+        print("Logs:")
         for l in logs[:12]:
             print("-", l)
 
@@ -139,11 +139,11 @@ def main():
     if sections and "all" in [s.lower() for s in sections]:
         sections = None  # None = scrape everything
 
-    print(f"\n🔍 Scraping Liquipedia data from: {args.url}")
+    print(f"\nScraping Liquipedia data from: {args.url}")
     if sections:
-        print(f"   Sections: {', '.join(sections)}")
+        print(f"Sections: {', '.join(sections)}")
     else:
-        print(f"   Sections: all")
+        print(f"Sections: all")
     print()
     df = scrape_playoffs(args.url, sections=sections)
     print(df.head())

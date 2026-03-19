@@ -86,7 +86,7 @@ def train_model(features, labels, epochs=200, lr=0.001, val_split=0.2, verbose=T
     X_val, y_val = X[val_idx], y[val_idx]
 
     if verbose:
-        print(f"📊 Training: {len(X_train)} samples, Validation: {len(X_val)} samples")
+        print(f"Training: {len(X_train)} samples, Validation: {len(X_val)} samples")
 
     # Model, loss, optimizer
     model = RLPredictorNet()
@@ -159,7 +159,7 @@ def train_model(features, labels, epochs=200, lr=0.001, val_split=0.2, verbose=T
 
         if patience_counter >= patience_limit:
             if verbose:
-                print(f"  ⏹️  Early stopping at epoch {epoch} (no improvement for {patience_limit} epochs)")
+                print(f"  Early stopping at epoch {epoch} (no improvement for {patience_limit} epochs)")
             break
 
     # Restore best model
@@ -167,7 +167,7 @@ def train_model(features, labels, epochs=200, lr=0.001, val_split=0.2, verbose=T
         model.load_state_dict(best_state)
 
     if verbose:
-        print(f"\n✅ Training complete! Best val loss: {best_val_loss:.4f}, Final val acc: {history['val_acc'][-1]:.1%}")
+        print(f"\nTraining complete! Best val loss: {best_val_loss:.4f}, Final val acc: {history['val_acc'][-1]:.1%}")
 
     return model, history
 
@@ -201,7 +201,7 @@ def save_model(model, path=MODEL_PATH):
     """Save trained model weights to disk."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
     torch.save(model.state_dict(), path)
-    print(f"💾 Model saved to {path}")
+    print(f"Model saved to {path}")
 
 
 def load_model(path=MODEL_PATH):
