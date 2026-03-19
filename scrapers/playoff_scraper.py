@@ -42,7 +42,7 @@ def fetchHTML(url, session=None):
 
 def cleanPlayers(names):
     # filter obvious non-players and staff-y entries
-    block = {'coach','twitter','country','substitute','manager','owner','analyst','staff'}
+    block = {'coach','twitter','country','substitute','manager','owner','analyst','staff','edit'}
     out = []
     for n in names or []:
         n = cleanTitle(n)
@@ -57,6 +57,20 @@ def cleanPlayers(names):
     return uniq
 
 def extractRoster(team_soup):
+    # Modern Liquipedia active roster table extraction
+    for tab in team_soup.select('.table2.table2--generic'):
+        title = tab.parent.find('.table2__title')
+        if title and 'former' in title.get_text().lower():
+            continue
+            
+        players = []
+        for a in tab.select('.table2__row--body b a[title]'):
+            players.append(a.get('title') or a.get_text(strip=True))
+            
+        players = cleanPlayers(players)
+        if len(players) >= 3:
+            return players[:3]
+
     headers = team_soup.find_all(['h2','h3','h4'])
     pr_idx = None
     for i, h in enumerate(headers):
@@ -132,8 +146,15 @@ def nearestSect(n):
     return (hl.get_text(strip=True) if hl else hd.get_text(strip=True)) or "Unknown"
 
 
-def scrape(URL):
-
+def scrape(URL, sections=None):
+    """
+    Scrape matchups from a Liquipedia tournament page.
+    
+    Args:
+        URL: Liquipedia tournament URL
+        sections: list of section keywords to include, e.g. ['playoff', 'group'].
+                  If None, scrapes all bracket sections found on the page.
+    """
     opts = Options()
     opts.add_argument("--headless=new")
     driver = webdriver.Chrome(options=opts)
@@ -146,8 +167,22 @@ def scrape(URL):
     rows = []
     for b in soup.find_all('div', class_='brkts-bracket'):
         section = nearestSect(b)
-        if 'playoff' not in section.lower():
-            continue
+        section_lower = section.lower()
+        
+        # Filter by requested sections (if specified)
+        if sections:
+            if not any(s.lower() in section_lower for s in sections):
+                continue
+        
+        # Auto-detect best_of from section type
+        if 'playoff' in section_lower:
+            best_of = 7
+        elif 'group' in section_lower:
+            best_of = 5
+        elif 'swiss' in section_lower:
+            best_of = 5
+        else:
+            best_of = 5  # default
 
         rmap = roundMap(b)
 
@@ -158,14 +193,25 @@ def scrape(URL):
 
             t1 = getTeamName(ops[0])
             t2 = getTeamName(ops[1])
+            
+            def _extract_url(op, name):
+                if isPlaceholder(name): return None
+                a_tag = op.select_one('a[href]')
+                if a_tag:
+                    href = a_tag.get('href', '')
+                    if href.startswith('/'):
+                        return "https://liquipedia.net" + href
+                    elif href.startswith('http'):
+                        return href
+                return getTeamUrl(name)
 
             rows.append({
                 'section': section,
                 'round': rmap.get(id(m)) or "Unknown",
-                'best_of': 7,
+                'best_of': best_of,
                 'team1': t1, 'team2': t2,
-                'team1_url': (None if isPlaceholder(t1) else getTeamUrl(t1)),
-                'team2_url': (None if isPlaceholder(t2) else getTeamUrl(t2)),
+                'team1_url': _extract_url(ops[0], t1),
+                'team2_url': _extract_url(ops[1], t2),
             })
 
     sess = requests.Session()

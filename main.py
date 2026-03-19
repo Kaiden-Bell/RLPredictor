@@ -77,7 +77,12 @@ def run_h2h(row: pd.Series, bc: Ballchasing):
     r1, r2 = row["team1_players"], row["team2_players"]
 
     print(f"\n🎯 H2H comparison: {t1} vs {t2}\n")
-    stats, logs = getH2HStats(t1, t2, r1, r2, bc)
+    stats_raw, logs = getH2HStats(t1, t2, r1, r2, bc)
+    
+    from scrapers.h2h_ballchasing import aggregatePlayers
+    # Handle the fact that getH2HStats now returns a raw dataframe
+    stats = aggregatePlayers(stats_raw.to_dict('records') if not stats_raw.empty else [])
+    
     print(stats if not stats.empty else "No stats found.")
     if logs:
         print("\n📝 Logs:")
@@ -111,20 +116,36 @@ def main():
     )
     parser.add_argument(
         "--mode",
-        choices=["h2h", "features"],
+        choices=["h2h", "features", "chat"],
         default="features",
-        help="Choose 'h2h' for head-to-head comparison or 'features' for feature build (default).",
+        help="Choose 'h2h' for head-to-head, 'features' for feature build, or 'chat' for O/U chat.",
     )
     parser.add_argument(
         "--match",
         help="Preselect a match by index (e.g., 0) or team substring (e.g., 'Karmine'). If omitted, prompts interactively.",
     )
+    parser.add_argument(
+        "--section",
+        nargs="+",
+        default=None,
+        help="Section(s) to scrape: 'group', 'playoff', 'swiss', or 'all'. Examples: --section group playoff, --section all. Default: all.",
+    )
 
     args = parser.parse_args()
     bc = Ballchasing()
 
-    print(f"\n🔍 Scraping Liquipedia data from: {args.url}\n")
-    df = scrape_playoffs(args.url)
+    # Resolve sections
+    sections = args.section
+    if sections and "all" in [s.lower() for s in sections]:
+        sections = None  # None = scrape everything
+
+    print(f"\n🔍 Scraping Liquipedia data from: {args.url}")
+    if sections:
+        print(f"   Sections: {', '.join(sections)}")
+    else:
+        print(f"   Sections: all")
+    print()
+    df = scrape_playoffs(args.url, sections=sections)
     print(df.head())
 
     matches = list_matches(df)
@@ -145,6 +166,10 @@ def main():
 
     if args.mode == "h2h":
         run_h2h(row, bc)
+    elif args.mode == "chat":
+        from chat import run_chat
+        idMap = load_player_id_map()
+        run_chat(row, bc, idMap)
     else:
         run_features(row, bc)
 

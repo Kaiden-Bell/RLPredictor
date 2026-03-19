@@ -20,14 +20,88 @@ def _in_window(dateStr, days=RECENT_DAYS):
         return True
     return dt >= datetime.now(timezone.utc) - timedelta(days=days)
 
-def pullReplays(bc, playerID, count=MAX_REPLAYS):
-    data = bc.listReplays(**{
+def pullReplays(bc, playerID, count=MAX_REPLAYS, playlist="private"):
+    params = {
         "player-id": playerID,
         "sort-by": "replay-date",
         "sort-dir": "desc",
         "count": min(200, int(count)),
-    })
+    }
+    if playlist:
+        params["playlist"] = playlist
+        
+    data = bc.listReplays(**params)
     return data.get("list", []) or []
+
+MOMENTUM_DAYS = 14  # only count recent ranked 2s for momentum
+
+def rankedActivity(bc, playerIDs, logs):
+    """
+    Returns a dict mapping PlayerID -> {games, avg_score, win_rate}.
+    Provides a richer "momentum" input vector for the Neural Network
+    by only considering ranked-doubles games from the last MOMENTUM_DAYS.
+    """
+    activity = {}
+    cutoff = datetime.now(timezone.utc) - timedelta(days=MOMENTUM_DAYS)
+
+    for pid in set(playerIDs):
+        info = {"games": 0, "avg_score": 0.0, "win_rate": 0.0}
+        try:
+            params = {
+                "player-id": pid,
+                "playlist": "ranked-doubles",
+                "sort-by": "replay-date",
+                "sort-dir": "desc",
+                "count": 50,
+            }
+            data = bc.listReplays(**params)
+            reps = data.get("list", []) or []
+
+            scores, wins, total = [], 0, 0
+            for rep in reps:
+                # Filter by recency using the replay date
+                date_str = rep.get("date") or rep.get("created")
+                if date_str and not _in_window(str(date_str), days=MOMENTUM_DAYS):
+                    continue
+
+                rid = rep.get("id")
+                if not rid:
+                    continue
+
+                try:
+                    detail = bc.getReplay(rid)
+                except Exception:
+                    continue
+
+                # Find this player's stats in the replay
+                for side in ("blue", "orange"):
+                    team = detail.get(side) or {}
+                    for pl in team.get("players", []) or []:
+                        pl_id = (pl.get("id") or {}).get("id") or ""
+                        pl_platform_id = f"{(pl.get('id') or {}).get('platform', '')}:{pl_id}"
+                        if pid.lower() in (pl_id.lower(), pl_platform_id.lower()):
+                            core = (pl.get("stats") or {}).get("core") or {}
+                            scores.append(core.get("score", 0))
+                            # Check if this player's side won
+                            team_goals = (team.get("stats") or {}).get("core", {}).get("goals", 0)
+                            opp_side = "orange" if side == "blue" else "blue"
+                            opp_goals = ((detail.get(opp_side) or {}).get("stats") or {}).get("core", {}).get("goals", 0)
+                            if team_goals > opp_goals:
+                                wins += 1
+                            total += 1
+
+            if total > 0:
+                info["games"] = total
+                info["avg_score"] = round(sum(scores) / len(scores), 1) if scores else 0.0
+                info["win_rate"] = round((wins / total) * 100, 1)
+
+            time.sleep(bc.delay)
+        except Exception as e:
+            logs.append(f"Ranked 2s fetch failed for {pid}: {e}")
+
+        activity[pid] = info
+
+    return activity
 
 def replayStats(bc, playerIDs, logs):
     players = []

@@ -52,7 +52,7 @@ def resolve_ids(names, idmap) -> list[str]:
 
 
 
-LP_BASE = "https://liquipedia.net/"
+LP_BASE = "https://liquipedia.net"
 LP_RL = f"{LP_BASE}/rocketleague"
 BC_API = "https://ballchasing.com/api"
 
@@ -122,17 +122,36 @@ def extractBallchasing(url, session):
 
 # Ballchasing API setup
 
+import hashlib
+
 class Ballchasing:
-    def __init__(self, key=None, delay=0.35):
+    def __init__(self, key=None, delay=0.35, cache_file=".bc_cache.json"):
         self.key = key or os.getenv("BALLCHASING_API_KEY") or ""
         if not self.key:
             raise RuntimeError("set BALLCHASING API KEY env or pass key=...")
         self.sess = requests.Session()
         self.sess.headers.update({"Authorization": self.key, "Accept": "application/json"})
         self.delay = delay
+        self.cache_file = cache_file
+        self.cache = {}
+        if os.path.exists(self.cache_file):
+            try:
+                with open(self.cache_file, "r") as f:
+                    self.cache = json.load(f)
+            except:
+                pass
 
+    def _save_cache(self):
+        with open(self.cache_file, "w") as f:
+            json.dump(self.cache, f)
 
     def __get(self, path, params=None):
+        key_str = f"{path}?{urlencode(params or {})}"
+        cache_key = hashlib.md5(key_str.encode()).hexdigest()
+        
+        if cache_key in self.cache:
+            return self.cache[cache_key]
+
         url = f"{BC_API}{path}"
         r = self.sess.get(url, params=params, timeout=30)
         if r.status_code == 429:
@@ -140,7 +159,11 @@ class Ballchasing:
             r = self.sess.get(url, params=params, timeout=30)
         r.raise_for_status()
         time.sleep(self.delay)
-        return r.json()
+        
+        data = r.json()
+        self.cache[cache_key] = data
+        self._save_cache()
+        return data
     
     def getReplay(self, replayID):
         return self.__get(f"/replays/{replayID}")
@@ -203,78 +226,63 @@ def aggregatePlayers(rows):
 
 def getH2HStats(t1, t2, r1, r2, bc: Ballchasing, limit: int=6, fallback: int=30):
     logs = []
-    session = requests.Session()
-    h2h = parseH2H(t1, t2)
-    if not h2h: 
-        logs.append("No H2H rows found on LP.")
-        return pd.DataFrame(), logs
-
-    h2h = h2h[:limit]
-    replayIDs = set()
-
-    for row in h2h:
-        seriesURL = row["matchLink"]
-        try:
-            pairs = extractBallchasing(seriesURL, session=session)
-        except Exception as e:
-            logs.append(f"Failed to extract series {seriesURL} ({e})")
-            pairs = []
-        for kind, rid in pairs:
-            if kind == "replay":
-                replayIDs.add(rid)
-            elif kind == "group":
-                try:
-                    g = bc.getGroup(rid)
-                    for it in g.get("replays", []) or []:
-                        if "id" in it:
-                            replayIDs.add(it["id"])
-                except Exception as e:
-                    logs.append(f"Failed group fetch {rid}: {e}")
     
-    if not replayIDs:
-        logs.append("No Ballchasing links on pages! Attempting name-based")
-
-        cutoff = 50
-        by_name = []
-
-        for name in set((r1 or []) + (r2 or [])):
-            try:
-                data = bc.listReplays(**{
-                    "player-name": name,
-                    "sort-by": "date",
-                    "order": "desc",
-                    "count": 25, "page": 0,
-                })
-                by_name.extend(data.get("list", []))
-                time.sleep(0.2)
-            except Exception as e:
-                logs.append(f"BC list error for {name}: {e}")
-
-            if len (by_name) > cutoff:
-                break
-
-        for it in by_name:
-            try:
-                d = bc.getReplay(it["id"])
-            except Exception as e:
-                logs.append(f"BC detail error {it.get('id')}: {e}")
-                continue
-                
-            names = set([n.lower() for n in playersInReplay(d)])
-            r1Hit = sum(1 for p in (r1 or []) if p and p.lower() in names)
-            r2Hit = sum(1 for p in (r2 or []) if p and p.lower() in names)
-            if r1Hit >= 2 and r2Hit >= 2:
-                replayIDs.add(d["id"])
-
+    idMap = load_player_id_map()
+    ids1 = resolve_ids(r1, idMap)
+    ids2 = resolve_ids(r2, idMap)
+    
+    if not ids1 or not ids2:
+        logs.append("Could not resolve player IDs for both teams to perform H2H.")
+        return pd.DataFrame(), logs
+        
+    p1_str = ids1[0]
+    p2_str = ids2[0]
+    
+    logs.append(f"Querying Ballchasing for private matches containing {p1_str} and {p2_str}...")
+    
+    params = [
+        ("player-id", p1_str),
+        ("player-id", p2_str),
+        ("playlist", "private"),
+        ("count", fallback)
+    ]
+    
+    try:
+        key_str = f"h2h_replays_{p1_str}_{p2_str}_{fallback}"
+        cache_key = hashlib.md5(key_str.encode()).hexdigest()
+        
+        if cache_key in bc.cache:
+            data = bc.cache[cache_key]
+        else:
+            url = "https://ballchasing.com/api/replays"
+            r = bc.sess.get(url, params=params, timeout=30)
+            r.raise_for_status()
+            data = r.json()
+            time.sleep(bc.delay)
+            bc.cache[cache_key] = data
+            bc._save_cache()
+            
+    except Exception as e:
+        logs.append(f"Ballchasing API request failed: {e}")
+        return pd.DataFrame(), logs
+        
+    replays = data.get("list", [])
+    if not replays:
+        logs.append("No direct H2H replays found on Ballchasing.")
+        return pd.DataFrame(), logs
+        
+    replays = replays[:limit]
+    
     perPlayerRows = []
-
-    for rid in replayIDs:
+    for rep in replays:
+        rid = rep.get("id")
+        if not rid: continue
         try:
             d = bc.getReplay(rid)
+            perPlayerRows.extend(extractStats(d))
         except Exception as e:
-            logs.append(f"Replay {rid} fetch failed: {e}")
+            logs.append(f"Failed to fetch replay stats {rid}: {e}")
             continue
-        perPlayerRows.extend(extractStats(d))
-
-    return aggregatePlayers(perPlayerRows), logs
-
+            
+    df = pd.DataFrame(perPlayerRows)
+    return df, logs
