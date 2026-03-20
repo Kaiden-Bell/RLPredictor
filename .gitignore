@@ -213,5 +213,6 @@ outline.pdf
 RLPredictor/
 
 # Trained model & personal training data (keep private)
+data/
 data/model.pt
 data/prediction_log.csv
