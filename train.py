@@ -12,7 +12,9 @@ Usage:
 
 import argparse
 import sys
+import os
 import numpy as np
+import pandas as pd
 from features import build_training_data
 from model import train_model, save_model, HAS_TORCH
 
@@ -40,6 +42,31 @@ def main():
         cache_path=args.cache,
         min_lookback=args.min_lookback,
     )
+
+    # NEW: Load verified live predictions if they exist
+    log_path = "data/prediction_log.csv"
+    if os.path.exists(log_path):
+        try:
+            df_live = pd.read_csv(log_path)
+            # Only take rows that have been verified (have a label)
+            df_live = df_live.dropna(subset=["label"])
+            if not df_live.empty:
+                print(f"📈 Found {len(df_live)} verified live predictions. Merging into training set...")
+                
+                live_feats = []
+                live_labels = []
+                for _, row in df_live.iterrows():
+                    # Parse semicolon-separated features
+                    f_vec = np.array([float(x) for x in str(row["features"]).split(";")], dtype=np.float32)
+                    live_feats.append(f_vec)
+                    live_labels.append(float(row["label"]))
+                
+                # Stack and append
+                features = np.vstack([features, np.array(live_feats)])
+                labels = np.concatenate([labels, np.array(live_labels)])
+                print(f"✅ Total samples now: {len(features)} ({len(df_live)} from live log)")
+        except Exception as e:
+            print(f"⚠️  Could not load live log: {e}")
 
     if len(features) == 0:
         print("No training data could be generated. Make sure .bc_cache.json has replay data.")

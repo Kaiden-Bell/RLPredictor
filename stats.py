@@ -1,8 +1,31 @@
 # stats_pipeline.py (patched)
 
+import sys
 import time
 import pandas as pd
 from datetime import datetime, timedelta, timezone
+
+
+def _progress(msg, current, total, start_time, cached=0):
+    """Print an inline progress indicator with ETA."""
+    elapsed = time.time() - start_time
+    if current > 0:
+        per_item = elapsed / current
+        remaining = per_item * (total - current)
+        eta_str = f"ETA ~{remaining:.0f}s" if remaining > 1 else "almost done"
+    else:
+        eta_str = "calculating..."
+    cache_str = f" | {cached} cached" if cached else ""
+    sys.stdout.write(f"\r  {msg}: [{current}/{total}] {elapsed:.0f}s elapsed, {eta_str}{cache_str}    ")
+    sys.stdout.flush()
+
+
+def _progress_done(msg, total, start_time, cached=0):
+    """Finish a progress line."""
+    elapsed = time.time() - start_time
+    cache_str = f" ({cached} from cache)" if cached else ""
+    sys.stdout.write(f"\r  {msg}: {total} replays in {elapsed:.1f}s{cache_str}                    \n")
+    sys.stdout.flush()
 
 RECENT_DAYS = 90
 MAX_REPLAYS = 150
@@ -43,8 +66,11 @@ def rankedActivity(bc, playerIDs, logs):
     """
     activity = {}
     cutoff = datetime.now(timezone.utc) - timedelta(days=MOMENTUM_DAYS)
+    unique_pids = list(set(playerIDs))
 
-    for pid in set(playerIDs):
+    for p_idx, pid in enumerate(unique_pids):
+        short_id = pid.split(":")[-1][:12] if ":" in pid else pid[:12]
+        print(f"  Ranked 2s momentum: player {p_idx + 1}/{len(unique_pids)} ({short_id})")
         info = {"games": 0, "avg_score": 0.0, "win_rate": 0.0}
         try:
             params = {
@@ -58,16 +84,18 @@ def rankedActivity(bc, playerIDs, logs):
             reps = data.get("list", []) or []
 
             scores, wins, total = [], 0, 0
+            t0 = time.time()
+            valid_reps = []
             for rep in reps:
-                # Filter by recency using the replay date
                 date_str = rep.get("date") or rep.get("created")
                 if date_str and not _in_window(str(date_str), days=MOMENTUM_DAYS):
                     continue
-
                 rid = rep.get("id")
-                if not rid:
-                    continue
+                if rid:
+                    valid_reps.append(rid)
 
+            for r_idx, rid in enumerate(valid_reps):
+                _progress("Ranked replays", r_idx + 1, len(valid_reps), t0)
                 try:
                     detail = bc.getReplay(rid)
                 except Exception:
@@ -82,13 +110,15 @@ def rankedActivity(bc, playerIDs, logs):
                         if pid.lower() in (pl_id.lower(), pl_platform_id.lower()):
                             core = (pl.get("stats") or {}).get("core") or {}
                             scores.append(core.get("score", 0))
-                            # Check if this player's side won
                             team_goals = (team.get("stats") or {}).get("core", {}).get("goals", 0)
                             opp_side = "orange" if side == "blue" else "blue"
                             opp_goals = ((detail.get(opp_side) or {}).get("stats") or {}).get("core", {}).get("goals", 0)
                             if team_goals > opp_goals:
                                 wins += 1
                             total += 1
+
+            if valid_reps:
+                _progress_done("Ranked replays", len(valid_reps), t0)
 
             if total > 0:
                 info["games"] = total
@@ -105,25 +135,47 @@ def rankedActivity(bc, playerIDs, logs):
 
 def replayStats(bc, playerIDs, logs):
     players = []
-    for pid in set(playerIDs):
+    unique_pids = list(set(playerIDs))
+    for p_idx, pid in enumerate(unique_pids):
+        short_id = pid.split(":")[-1][:12] if ":" in pid else pid[:12]
+        print(f"  Listing replays: player {p_idx + 1}/{len(unique_pids)} ({short_id})")
         try:
             players.extend(pullReplays(bc, pid))
             time.sleep(0.12)
         except Exception as e:
             logs.append(f"List replays failed for {pid}: {e}")
 
-    rows = []
+    # Deduplicate
+    unique_replays = []
     seen = set()
     for it in players:
         rid = it.get("id")
-        if not rid or rid in seen:
-            continue
-        seen.add(rid)
+        if rid and rid not in seen:
+            seen.add(rid)
+            unique_replays.append(it)
+
+    total_replays = len(unique_replays)
+    print(f"  Fetching details for {total_replays} unique replays...")
+    t0 = time.time()
+
+    rows = []
+    cached_count = 0
+    for idx, it in enumerate(unique_replays):
+        rid = it.get("id")
+
+        call_start = time.time()
         try:
             detail = bc.getReplay(rid)
         except Exception as e:
             logs.append(f"getReplay {rid} failed: {e}")
+            _progress("Generic stats", idx + 1, total_replays, t0, cached_count)
             continue
+        # If the call returned in <10ms, it was a cache hit
+        if time.time() - call_start < 0.01:
+            cached_count += 1
+
+        _progress("Generic stats", idx + 1, total_replays, t0, cached_count)
+
         date_s = _iso(detail.get("date"))
         if not _in_window(date_s):
             continue
@@ -144,6 +196,8 @@ def replayStats(bc, playerIDs, logs):
                     "replay_id": detail.get("id"), 
                     "Date": date_s,
                 })
+
+    _progress_done("Generic stats", total_replays, t0, cached_count)
     return pd.DataFrame(rows)
 
 def teamFeats(bc, rosterIDs, logs):

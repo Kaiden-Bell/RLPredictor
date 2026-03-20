@@ -1,3 +1,5 @@
+import os
+import datetime
 import re
 import math
 import pandas as pd
@@ -7,6 +9,24 @@ from scrapers.h2h_ballchasing import getH2HStats
 from sentiment import get_player_sentiment
 from features import extract_features
 from model import load_model, predict as nn_predict
+
+
+def log_prediction(player, stat, threshold, is_over, num_games, nn_prob, features):
+    """Save prediction metadata to data/prediction_log.csv for future learning."""
+    log_path = os.path.join("data", "prediction_log.csv")
+    os.makedirs("data", exist_ok=True)
+    
+    # Header if file is new
+    if not os.path.exists(log_path):
+        with open(log_path, "w") as f:
+            f.write("timestamp,player,stat,threshold,is_over,num_games,nn_prob,features\n")
+            
+    # Serialize features (13 floats) as a semicolon-separated string
+    feat_str = ";".join([f"{x:.4f}" for x in features])
+    
+    timestamp = datetime.datetime.now().isoformat()
+    with open(log_path, "a", encoding="utf-8") as f:
+        f.write(f"{timestamp},{player},{stat},{threshold},{is_over},{num_games or 1},{nn_prob:.4f},{feat_str}\n")
 
 
 def parse_query(query: str, available_players=None):
@@ -59,10 +79,16 @@ def parse_query(query: str, available_players=None):
     player = None
 
     # Strategy: if we know the available players, try to match roster names first
+    # Sort by longest name first so multi-word names match before fragments
     if available_players:
-        for pname in available_players:
-            if pname.lower() in query_lower:
-                player = pname.lower()
+        sorted_players = sorted(available_players, key=lambda x: len(str(x)), reverse=True)
+        for pname in sorted_players:
+            pname_str = str(pname).strip()
+            if len(pname_str) < 2:
+                continue  # skip broken 1-char names from replay data
+            # Use word boundary matching to avoid "s" matching "goals"
+            if re.search(r'\b' + re.escape(pname_str.lower()) + r'\b', query_lower):
+                player = pname_str.lower()
                 break
 
     # Fallback: find the first word that isn't a stop word (allow 2-letter names)
@@ -95,20 +121,25 @@ def run_chat(row, bc, idMap):
     else:
         print("No trained model found. Run 'python3 train.py' to train.")
 
-    print("Fetching H2H history and recent general games... please wait.")
+    print("Fetching H2H history and recent general games...")
+    print("(This may take a few minutes on first run — subsequent runs are cached)\n")
     logs = []
 
     # 1. Fetch generic recent stats (Private / Scrims)
+    print("[Step 1/3] Fetching generic recent stats (scrims/private)...")
     ids1 = resolve_ids(r1, idMap)
     ids2 = resolve_ids(r2, idMap)
     all_roster_ids = ids1 + ids2
     gen_df = replayStats(bc, all_roster_ids, logs)
 
     # 2. Fetch Ranked Grind stats (2s volume)
+    print("[Step 2/3] Fetching ranked 2s momentum...")
     ranked_momentum = rankedActivity(bc, all_roster_ids, logs)
 
     # 3. Fetch H2H specific stats
+    print("[Step 3/3] Fetching head-to-head history...")
     h2h_df, h2h_logs = getH2HStats(t1, t2, r1, r2, bc)
+    print("Done!\n")
 
     if gen_df.empty and h2h_df.empty:
         print("No replay data found anywhere! Exiting chat.")
@@ -285,6 +316,12 @@ def run_chat(row, bc, idMap):
             ou_label = "Over" if is_over else "Under"
             print(f"\nNeural Net Prediction: {display_prob:.1%} chance of {ou_label} {threshold} {stat}")
             print(f"Confidence: {confidence}")
+
+            # Log the prediction
+            log_prediction(
+                matched_player, stat, threshold, is_over, num_games, 
+                nn_prob, feat_vec
+            )
 
             # Smart betting advice based on NN + heuristics
             if display_prob > 0.65:
