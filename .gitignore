@@ -211,3 +211,7 @@ __marimo__/
 .bc_cache.json
 outline.pdf
 RLPredictor/
+
+# Trained model & personal training data (keep private)
+data/model.pt
+data/prediction_log.csv
