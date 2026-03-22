@@ -359,17 +359,17 @@ def verify_from_match_group(group_id, log_path="data/prediction_log.csv", refres
             actual_total = p_games[stat].iloc[0]
             detail_str = ""
 
-        label = 1.0 if actual_total > thresh else 0.0
+        label = 1.0 if actual_total >= thresh else 0.0
         df_log.at[i, "label"] = label
 
-        over_under = "OVER" if label == 1.0 else "UNDER"
         is_over = row.get("is_over", True)
         if isinstance(is_over, str):
             is_over = is_over.lower() == "true"
+        nn_pick = "OVER" if is_over else "UNDER"
         correct = "✅" if (is_over and label == 1.0) or (not is_over and label == 0.0) else "❌"
 
         matches_found += 1
-        print(f"  {p_name} | {stat} > {thresh} | Actual: {actual_total}{detail_str} → {over_under} {correct}")
+        print(f"  {p_name} | {stat} {'≥' if is_over else '<'} {thresh} | Actual: {actual_total}{detail_str} → Picked {nn_pick} {correct}")
 
     if matches_found > 0:
         df_log.to_csv(log_path, index=False)
@@ -462,23 +462,18 @@ def verify_predictions(log_path="data/prediction_log.csv", cache_path=".bc_cache
             print(f"  ⚠ {p_name} {stat}: Only found {actual_games_found}/{num_games} games, skipping")
             continue
 
-        # Label: 1.0 = the actual result was OVER the threshold, 0.0 = UNDER
-        label = 1.0 if actual_total > thresh else 0.0
+        # Label: 1.0 = the actual result was OVER/equal the threshold, 0.0 = UNDER
+        label = 1.0 if actual_total >= thresh else 0.0
         df_log.at[i, "label"] = label
 
-        over_under = "OVER" if label == 1.0 else "UNDER"
-        was_correct = ""
         is_over = row.get("is_over", True)
         if isinstance(is_over, str):
             is_over = is_over.lower() == "true"
-        predicted_over = is_over
-        if (predicted_over and label == 1.0) or (not predicted_over and label == 0.0):
-            was_correct = " ✅"
-        else:
-            was_correct = " ❌"
+        nn_pick = "OVER" if is_over else "UNDER"
+        correct = "✅" if (is_over and label == 1.0) or (not is_over and label == 0.0) else "❌"
 
         matches_found += 1
-        print(f"  {p_name} | {stat} > {thresh} | Actual: {actual_total}{per_game} → {over_under}{was_correct}")
+        print(f"  {p_name} | {stat} {'≥' if is_over else '<'} {thresh} | Actual: {actual_total}{per_game} → Picked {nn_pick} {correct}")
 
     if matches_found > 0:
         df_log.to_csv(log_path, index=False)
