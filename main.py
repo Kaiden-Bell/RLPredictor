@@ -12,6 +12,7 @@ from scrapers import (
     resolve_ids,
 )
 from stats import buildFeatRows
+from utils.database import initialize_database
 
 load_dotenv()  # BALLCHASING_API_KEY from .env
 
@@ -132,6 +133,10 @@ def main():
     )
 
     args = parser.parse_args()
+
+    # Ensure the database schema is ready
+    initialize_database()
+
     bc = Ballchasing()
 
     # Resolve sections

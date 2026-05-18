@@ -5,6 +5,15 @@ from urllib.parse import urljoin, quote
 import time, re, requests
 import pandas as pd
 
+from utils.database import (
+    initialize_database,
+    get_connection,
+    save_tournament,
+    save_matchups,
+    cache_roster,
+    get_cached_roster,
+)
+
 
 BASE = "https://liquipedia.net/rocketleague/"
 PLACEHOLDER = re.compile(r'\b(winner|loser)\s+of\b|^tbd$|^[-—]$', re.I)
@@ -155,6 +164,9 @@ def scrape(URL, sections=None):
         sections: list of section keywords to include, e.g. ['playoff', 'group'].
                   If None, scrapes all bracket sections found on the page.
     """
+    # Ensure the DB schema exists before we start
+    initialize_database()
+
     opts = Options()
     opts.add_argument("--headless=new")
     driver = webdriver.Chrome(options=opts)
@@ -214,22 +226,36 @@ def scrape(URL, sections=None):
                 'team2_url': _extract_url(ops[1], t2),
             })
 
+    # --- Roster fetching with DB-backed cache ---
     sess = requests.Session()
-    cache = {}
     for r in rows:
         for side in ('team1','team2'):
             url = r[side + '_url']
             if not url:
                 r[side + '_players'] = []
                 continue
-            if url not in cache:
-                try:
-                    ts = fetchHTML(url, session=sess)
-                    cache[url] = extractRoster(ts)
-                    time.sleep(0.4)
-                except Exception:
-                    cache[url] = []
-            r[side + '_players'] = cache[url]
+
+            # Check the DB cache first
+            cached = get_cached_roster(url)
+            if cached is not None:
+                r[side + '_players'] = cached
+                continue
+
+            # Not cached — scrape and persist
+            try:
+                ts = fetchHTML(url, session=sess)
+                roster = extractRoster(ts)
+                cache_roster(url, roster)
+                r[side + '_players'] = roster
+                time.sleep(0.4)
+            except Exception:
+                r[side + '_players'] = []
+
+    # --- Persist the tournament + matchups to DB ---
+    conn = get_connection()
+    tid = save_tournament(URL, conn=conn)
+    save_matchups(tid, rows, conn=conn)
+    conn.close()
 
     return pd.DataFrame(rows)
 

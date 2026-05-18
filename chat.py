@@ -12,16 +12,15 @@ from model import load_model, predict as nn_predict
 
 
 def log_prediction(player, stat, threshold, is_over, num_games, nn_prob, features, team1="", team2=""):
-    """Save prediction metadata to data/prediction_log.csv for future learning."""
+    
     log_path = os.path.join("data", "prediction_log.csv")
     os.makedirs("data", exist_ok=True)
     
-    # Header if file is new
     if not os.path.exists(log_path):
         with open(log_path, "w") as f:
             f.write("timestamp,player,stat,threshold,is_over,num_games,nn_prob,features,team1,team2\n")
             
-    # Serialize features (13 floats) as a semicolon-separated string
+
     feat_str = ";".join([f"{x:.4f}" for x in features])
     
     timestamp = datetime.datetime.now().isoformat()
@@ -38,11 +37,10 @@ def parse_query(query: str, available_players=None):
     """
     query_lower = query.lower()
 
-    # Over/Under
     is_over = None
-    if "over" in query_lower or "o/" in query_lower:
+    if "over" in query_lower or "o/" in query_lower: 
         is_over = True
-    elif "under" in query_lower or "u/" in query_lower:
+    elif "under" in query_lower or "u/" in query_lower: 
         is_over = False
 
     # Extract "in X games/maps" first so we can exclude that number
@@ -53,20 +51,17 @@ def parse_query(query: str, available_players=None):
     all_numbers = [(m.group(1), m.start()) for m in re.finditer(r'(\d+(?:\.\d+)?)', query_lower)]
     threshold = None
     for num_str, pos in all_numbers:
-        # Skip the number that's part of "in X games"
-        if games_match and pos == games_match.start(1):
-            continue
+        if games_match and pos == games_match.start(1): continue
         threshold = float(num_str)
-        break  # take the first non-games number
+        break 
 
-    # Stat name
     stat = None
     for s in ["goals", "shots", "saves", "demos", "assists", "score"]:
         if s in query_lower:
             stat = s.capitalize()
             break
 
-    # Player name — build stop words, then find the first non-stop word
+    # Collection of stop words
     known = {"over", "under", "for", "will", "get", "in", "the", "a", "an",
              "is", "o/u", "on", "he", "she", "to", "of", "maps", "map",
              "games", "game", "rounds", "round"}
@@ -78,20 +73,15 @@ def parse_query(query: str, available_players=None):
     words = [w.strip("?!.,") for w in query.split()]
     player = None
 
-    # Strategy: if we know the available players, try to match roster names first
-    # Sort by longest name first so multi-word names match before fragments
     if available_players:
         sorted_players = sorted(available_players, key=lambda x: len(str(x)), reverse=True)
         for pname in sorted_players:
             pname_str = str(pname).strip()
-            if len(pname_str) < 2:
-                continue  # skip broken 1-char names from replay data
-            # Use word boundary matching to avoid "s" matching "goals"
+            if len(pname_str) < 2: continue
             if re.search(r'\b' + re.escape(pname_str.lower()) + r'\b', query_lower):
                 player = pname_str.lower()
                 break
-
-    # Fallback: find the first word that isn't a stop word (allow 2-letter names)
+    
     if not player:
         for w in words:
             w_clean = w.lower().strip("?!.,")
@@ -110,8 +100,7 @@ def run_chat(row, bc, idMap):
     print(f"Matchup: {t1} vs {t2}")
     if r1 and r2:
         print(f"Rosters: {', '.join(r1)} vs {', '.join(r2)}")
-    print("Ask a question like: 'Will Zen get over 2.5 demos in 3 games?'")
-    print("You can specify 'in X games/maps' for multi-game bets.")
+    print("Ask a question like: 'Zen o/u 2.5 demos in X games?'")
     print("Type 'q' or 'quit' to exit.\n")
 
     # Load neural network model (if trained)
@@ -178,7 +167,7 @@ def run_chat(row, bc, idMap):
 
         if not player_query or not stat or threshold is None or is_over is None:
             print("Could not parse query. Make sure to include Over/Under, a number, a stat (goals, saves, shots, demos), and a player.")
-            print("Example: 'Will LJ get over 4 saves in 3 games?'")
+            print("Example: 'LJ o/u 4 saves in X games?'")
             continue
 
         # Resolve player name

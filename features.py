@@ -11,6 +11,8 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
+from utils.database import get_all_replay_details, initialize_database
+
 # Feature normalization caps
 MAX_GAMES_H2H = 30
 MAX_GAMES_GEN = 150
@@ -40,7 +42,7 @@ def extract_features(
     momentum_data=None,
     sentiment_data=None,
     confident_h2h=False,
-    playlist_type=1,  # 0=ranked-2s, 1=private/scrims
+    playlist_type=1,
 ):
     """
     Build the 13-dimensional feature vector for a single prediction query.
@@ -150,34 +152,42 @@ def build_training_data(cache_path=".bc_cache.json", min_lookback=5):
       labels_array:   np.ndarray of shape (num_samples,) — 0 or 1
       metadata_list:  list of dicts with player/stat/threshold info
     """
-    # Load cache
-    cache_file = Path(cache_path)
-    if not cache_file.exists():
-        print(f"Cache file {cache_path} not found!")
+    # Try the DB first; fall back to .bc_cache.json for backwards compat
+    initialize_database()
+    all_details = get_all_replay_details()
+
+    if not all_details:
+        # Fallback: try the old JSON cache file
+        cache_file = Path(cache_path)
+        if not cache_file.exists():
+            print(f"No replay data found in DB or {cache_path}!")
+            return np.zeros((0, 13)), np.zeros(0), []
+
+        print(f"DB empty, falling back to {cache_path}...")
+        with open(cache_file, "r") as f:
+            cache = json.load(f)
+        all_details = [
+            data for data in cache.values()
+            if _is_replay_detail(data)
+        ]
+
+    if not all_details:
+        print("No replay details found.")
         return np.zeros((0, 13)), np.zeros(0), []
 
-    with open(cache_file, "r") as f:
-        cache = json.load(f)
-
-    # Step 1: Extract all replay details from cache
+    # Step 1: Extract all player stats from replay details
     all_rows = []
     replay_playlists = {}
-
-    for key, data in cache.items():
-        if _is_replay_detail(data):
-            rid = data.get("id", key)
-            playlist_type = _detect_playlist(data)
-            replay_playlists[rid] = playlist_type
-            player_rows = _extract_player_stats(data)
-            for row in player_rows:
-                row["replay_id"] = rid
-                row["date"] = data.get("date", "")
-                row["playlist_type"] = playlist_type
-            all_rows.extend(player_rows)
-
-    if not all_rows:
-        print("No replay details found in cache.")
-        return np.zeros((0, 13)), np.zeros(0), []
+    for data in all_details:
+        rid = data.get("id", "")
+        playlist_type = _detect_playlist(data)
+        replay_playlists[rid] = playlist_type
+        player_rows = _extract_player_stats(data)
+        for row in player_rows:
+            row["replay_id"] = rid
+            row["date"] = data.get("date", "")
+            row["playlist_type"] = playlist_type
+        all_rows.extend(player_rows)
 
     df = pd.DataFrame(all_rows)
     print(f"Found {len(df)} player-game records across {df['replay_id'].nunique()} replays")

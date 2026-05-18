@@ -212,6 +212,12 @@ __marimo__/
 outline.pdf
 RLPredictor/
 
+# SQLite database (schema lives in utils/database.py)
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/*.db.bak
+
 # Trained model & personal training data (keep private)
 data/
 data/model.pt

@@ -2,9 +2,19 @@ import os, re, time, requests, pandas as pd
 from typing import List, Dict, Any, Optional, Tuple
 from urllib.parse import quote_plus, urlencode
 from bs4 import BeautifulSoup
-import json, unicodedata
+import json, unicodedata, hashlib
 from pathlib import Path
 
+from utils.database import (
+    initialize_database,
+    get_connection,
+    get_cached_api_response,
+    cache_api_response,
+    cache_replay,
+    cache_player_stats,
+    load_player_id_map_db,
+    import_ids_json,
+)
 
 ID_FILE = Path(__file__).resolve().parents[1] / "data" / "ids.json"
 
@@ -16,19 +26,34 @@ def _canon(s: str) -> str:
     return " ".join(s.strip().split()).lower()
 
 def load_player_id_map(path: Path = ID_FILE) -> dict:
-    if not path.exists():
-        return {"aliases": {}, "players": {}}
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    aliases = { _canon(k): v for k, v in (data.get("aliases") or {}).items() }
-    players = {}
-    for k, v in (data.get("players") or {}).items():
-        key = _canon(k)
-        ids = v if isinstance(v, list) else [v]
-        clean = [pid for pid in ids if isinstance(pid, str) and _PLAYER_ID_RE.search(pid)]
-        if clean:
-            players[key] = clean
-    return {"aliases": aliases, "players": players}
+    """Load the player-ID map.
+
+    Tries the DB first; falls back to ids.json for backwards compat.
+    """
+    try:
+        initialize_database()
+        conn = get_connection()
+        count = conn.execute("SELECT COUNT(*) FROM player_ids").fetchone()[0]
+        if count == 0 and path.exists():
+            import_ids_json(str(path), conn)
+        data = load_player_id_map_db(conn)
+        conn.close()
+        return data
+    except Exception:
+        # Graceful fallback to the old JSON file
+        if not path.exists():
+            return {"aliases": {}, "players": {}}
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        aliases = { _canon(k): v for k, v in (data.get("aliases") or {}).items() }
+        players = {}
+        for k, v in (data.get("players") or {}).items():
+            key = _canon(k)
+            ids = v if isinstance(v, list) else [v]
+            clean = [pid for pid in ids if isinstance(pid, str) and _PLAYER_ID_RE.search(pid)]
+            if clean:
+                players[key] = clean
+        return {"aliases": aliases, "players": players}
 
 def resolve_ids(names, idmap) -> list[str]:
     if not names: return []
@@ -122,36 +147,39 @@ def extractBallchasing(url, session):
 
 # Ballchasing API setup
 
-import hashlib
 
 class Ballchasing:
-    def __init__(self, key=None, delay=0.35, cache_file=".bc_cache.json"):
+    """Ballchasing API wrapper with SQLite-backed caching.
+
+    Drop-in replacement for the old JSON-file cache. The public interface
+    (getReplay, getGroup, listReplays, cache dict access) is identical.
+    """
+
+    def __init__(self, key=None, delay=0.35):
         self.key = key or os.getenv("BALLCHASING_API_KEY") or ""
         if not self.key:
             raise RuntimeError("set BALLCHASING API KEY env or pass key=...")
         self.sess = requests.Session()
         self.sess.headers.update({"Authorization": self.key, "Accept": "application/json"})
         self.delay = delay
-        self.cache_file = cache_file
-        self.cache = {}
-        if os.path.exists(self.cache_file):
-            try:
-                with open(self.cache_file, "r") as f:
-                    self.cache = json.load(f)
-            except:
-                pass
 
-    def _save_cache(self):
-        with open(self.cache_file, "w") as f:
-            json.dump(self.cache, f)
+        # Ensure DB is ready
+        initialize_database()
+
+    def _cache_key(self, path, params=None):
+        """Generate the same MD5 cache key the old code used."""
+        key_str = f"{path}?{urlencode(params or {})}"
+        return hashlib.md5(key_str.encode()).hexdigest()
 
     def __get(self, path, params=None):
-        key_str = f"{path}?{urlencode(params or {})}"
-        cache_key = hashlib.md5(key_str.encode()).hexdigest()
-        
-        if cache_key in self.cache:
-            return self.cache[cache_key]
+        cache_key = self._cache_key(path, params)
 
+        # Check DB cache first
+        cached = get_cached_api_response(cache_key)
+        if cached is not None:
+            return cached
+
+        # Not cached — hit the API
         url = f"{BC_API}{path}"
         r = self.sess.get(url, params=params, timeout=30)
         if r.status_code == 429:
@@ -161,8 +189,15 @@ class Ballchasing:
         time.sleep(self.delay)
         
         data = r.json()
-        self.cache[cache_key] = data
-        self._save_cache()
+
+        # Store in API cache
+        raw = json.dumps(data)
+        cache_api_response(cache_key, path, raw)
+
+        # If this is a replay detail, also populate the replays + player_stats tables
+        if isinstance(data, dict) and "blue" in data and "orange" in data:
+            _persist_replay(data)
+
         return data
     
     def getReplay(self, replayID):
@@ -171,6 +206,45 @@ class Ballchasing:
         return self.__get(f"/groups/{groupID}")
     def listReplays(self, **params):
         return self.__get("/replays", params=params)
+
+
+def _persist_replay(detail: dict):
+    """Extract a replay detail into the replays + player_stats tables."""
+    rid = detail.get("id")
+    if not rid:
+        return
+    date_val = str(detail.get("date", ""))
+    playlist_id = str(detail.get("playlist_id", ""))
+    playlist_name = str(detail.get("playlist_name", ""))
+    raw = json.dumps(detail)
+
+    conn = get_connection()
+    cache_replay(rid, date_val, playlist_id, playlist_name, raw, conn=conn)
+
+    for side in ("blue", "orange"):
+        team = detail.get(side) or {}
+        for pl in team.get("players", []) or []:
+            name = pl.get("name") or (pl.get("player") or {}).get("name")
+            if not name:
+                continue
+            stats = pl.get("stats") or {}
+            core = stats.get("core") or {}
+            demo = stats.get("demo") or {}
+            goals = core.get("goals", 0)
+            shots = core.get("shots", 0)
+            cache_player_stats(
+                rid, name, side,
+                goals, shots,
+                core.get("saves", 0),
+                demo.get("inflicted", 0),
+                core.get("score", 0),
+                (goals / shots) if shots else 0.0,
+                date_val,
+                conn=conn,
+            )
+    conn.commit()
+    conn.close()
+
     
 # Parse Rosters, Players, Stats
 
@@ -251,16 +325,17 @@ def getH2HStats(t1, t2, r1, r2, bc: Ballchasing, limit: int=6, fallback: int=30)
         key_str = f"h2h_replays_{p1_str}_{p2_str}_{fallback}"
         cache_key = hashlib.md5(key_str.encode()).hexdigest()
         
-        if cache_key in bc.cache:
-            data = bc.cache[cache_key]
+        # Check DB cache
+        cached = get_cached_api_response(cache_key)
+        if cached is not None:
+            data = cached
         else:
             url = "https://ballchasing.com/api/replays"
             r = bc.sess.get(url, params=params, timeout=30)
             r.raise_for_status()
             data = r.json()
             time.sleep(bc.delay)
-            bc.cache[cache_key] = data
-            bc._save_cache()
+            cache_api_response(cache_key, "h2h_replays", json.dumps(data))
             
     except Exception as e:
         logs.append(f"Ballchasing API request failed: {e}")
