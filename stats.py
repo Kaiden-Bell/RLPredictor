@@ -29,7 +29,7 @@ def _progress_done(msg, total, start_time, cached=0):
 
 RECENT_DAYS = 90
 MAX_REPLAYS = 150
-AGG_KEYS = ["Goals", "Shots", "Saves", "Demos"]
+AGG_KEYS = ["Goals", "Saves", "Demos"]
 
 def _iso(dt_ms_or_iso):
     if isinstance(dt_ms_or_iso, (int, float)):
@@ -190,7 +190,6 @@ def replayStats(bc, playerIDs, logs):
                 rows.append({
                     "Player": name,
                     "Goals": core.get("goals", 0),
-                    "Shots": core.get("shots", 0),
                     "Saves": core.get("saves", 0),
                     "Demos": demo.get("inflicted", 0),
                     "replay_id": detail.get("id"), 
@@ -202,29 +201,25 @@ def replayStats(bc, playerIDs, logs):
 
 def teamFeats(bc, rosterIDs, logs):
     if not rosterIDs:
-        return pd.Series({k: 0 for k in AGG_KEYS + ["Shot %", "Games"]})
+        return pd.Series({k: 0 for k in AGG_KEYS + ["Games"]})
     dfp = replayStats(bc, rosterIDs, logs)
     if dfp.empty:
-        return pd.Series({k: 0 for k in AGG_KEYS + ["Shot %", "Games"]})
+        return pd.Series({k: 0 for k in AGG_KEYS + ["Games"]})
 
     perPlayer = dfp.groupby("Player", dropna=False).agg(
         Games=("replay_id", "nunique"),
         Goals=("Goals","sum"),
-        Shots=("Shots","sum"),
         Saves=("Saves","sum"),
         Demos=("Demos","sum"),
     ).reset_index()
 
-    totals = perPlayer[["Goals","Shots","Saves","Demos"]].sum()
+    totals = perPlayer[["Goals","Saves","Demos"]].sum()
     games = perPlayer["Games"].sum()
-    shot_pct = (totals["Goals"]/totals["Shots"]) if totals["Shots"] else 0.0
     out = pd.Series({
         "Games": int(games),
         "Goals": int(totals["Goals"]),
-        "Shots": int(totals["Shots"]),
         "Saves": int(totals["Saves"]),
         "Demos": int(totals["Demos"]),
-        "Shot %": float(shot_pct),
     })
     return out
 

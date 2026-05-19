@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RLPredictor — Rocket League O/U Predictor</title>
+    <meta name="description" content="AI-powered Over/Under prediction engine for Rocket League esports. Analyze player stats, evaluate prop sheets, and find the best bets.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- HEADER -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <header id="app-header">
+        <div class="header-left">
+            <h1 class="logo">RL<span class="logo-accent">Predictor</span></h1>
+        </div>
+        <div class="header-right">
+            <span id="session-badge" class="badge badge-inactive">No Session</span>
+            <button id="btn-download-db" class="btn btn-sm btn-ghost" style="display:none;">
+                ⬇ Download DB
+            </button>
+            <button id="btn-end-session" class="btn btn-sm btn-danger" style="display:none;">
+                End Session
+            </button>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- MAIN CONTENT -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <main id="app-main">
+
+        <!-- ─── STEP 1: Session Setup ─────────────────── -->
+        <section id="step-setup" class="step active">
+            <div class="card card-lg card-glow">
+                <div class="card-header">
+                    <h2>Get Started</h2>
+                    <p class="subtitle">Enter your Ballchasing API key to begin. Optionally upload an existing database.</p>
+                </div>
+                <form id="form-setup" class="card-body">
+                    <div class="form-group">
+                        <label for="input-api-key">Ballchasing API Key</label>
+                        <input type="password" id="input-api-key" placeholder="paste your API key here" required autocomplete="off">
+                        <span class="form-hint">Get yours at <a href="https://ballchasing.com/upload" target="_blank">ballchasing.com</a></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-db-upload">Upload Existing Database <span class="optional">(optional)</span></label>
+                        <div class="file-upload" id="drop-zone">
+                            <input type="file" id="input-db-upload" accept=".db" hidden>
+                            <div class="file-upload-label">
+                                <span class="file-icon">📁</span>
+                                <span id="file-name">Drop .db file here or click to browse</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        Launch Session →
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ─── STEP 2: Tournament URL ────────────────── -->
+        <section id="step-scrape" class="step">
+            <div class="card card-lg">
+                <div class="card-header">
+                    <h2>Select Tournament</h2>
+                    <p class="subtitle">Enter a Liquipedia tournament URL to scrape matchups.</p>
+                </div>
+                <form id="form-scrape" class="card-body">
+                    <div class="form-group">
+                        <label for="input-url">Liquipedia URL</label>
+                        <input type="url" id="input-url" placeholder="https://liquipedia.net/rocketleague/..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Sections</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox"><input type="checkbox" value="playoff" checked> Playoff</label>
+                            <label class="checkbox"><input type="checkbox" value="group"> Group</label>
+                        </div>
+                        <span class="form-hint">Uncheck all to scrape every section on the page.</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        Scrape Matchups →
+                    </button>
+                </form>
+                <div id="scrape-progress" class="progress-area" style="display:none;">
+                    <div class="spinner"></div>
+                    <p id="scrape-status">Scraping tournament data...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── STEP 3: Match Selection ───────────────── -->
+        <section id="step-matches" class="step">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Choose a Matchup</h2>
+                    <div class="search-bar">
+                        <input type="text" id="match-search" placeholder="Search teams...">
+                    </div>
+                </div>
+                <div id="match-grid" class="match-grid card-body">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── STEP 4: Match Dashboard ───────────────── -->
+        <section id="step-dashboard" class="step">
+            <!-- Match header -->
+            <div class="dashboard-header">
+                <button id="btn-back-matches" class="btn btn-sm btn-ghost">← Back to Matches</button>
+                <h2 id="dash-title" class="dash-title">Team1 vs Team2</h2>
+                <div id="dash-meta" class="dash-meta"></div>
+            </div>
+
+            <!-- Tab bar -->
+            <div class="tab-bar">
+                <button class="tab active" data-tab="tab-propsheet">Prop Sheet</button>
+                <button class="tab" data-tab="tab-single">Single Query</button>
+                <button class="tab" data-tab="tab-train">Train Model</button>
+                <button class="tab" data-tab="tab-verify">Verify Picks</button>
+                <button class="tab" data-tab="tab-stats">Raw Stats</button>
+            </div>
+
+            <!-- ─── Tab: Prop Sheet ─── -->
+            <div id="tab-propsheet" class="tab-content active">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Prop Sheet</h3>
+                        <p class="subtitle">Enter the sportsbook lines for all players — the AI evaluates everything at once.</p>
+                    </div>
+                    <form id="form-propsheet" class="card-body">
+                        <div class="form-group">
+                            <label for="input-num-games">Games Needed to Win (Target)</label>
+                            <input type="number" id="input-num-games" value="3" min="1" max="5" readonly>
+                            <span class="form-hint">Auto-set: 3 games for BO5, 4 games for BO7.</span>
+                        </div>
+                        <div id="propsheet-teams" class="propsheet-teams">
+                            <!-- Populated by JS -->
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">
+                            Evaluate All Lines →
+                        </button>
+                    </form>
+                    <div id="propsheet-progress" class="progress-area" style="display:none;">
+                        <div class="spinner"></div>
+                        <p>Evaluating lines...</p>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div id="propsheet-results" style="display:none;">
+                    <div class="best-picks-row" id="best-picks">
+                        <!-- Two best pick cards -->
+                    </div>
+                    <div class="card" style="margin-top:1rem;">
+                        <div class="card-header"><h3>Full Breakdown</h3></div>
+                        <div class="card-body">
+                            <table id="breakdown-table" class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Player</th>
+                                        <th>Stat</th>
+                                        <th>Line</th>
+                                        <th>Pick</th>
+                                        <th>Prob</th>
+                                        <th>Conf</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── Tab: Single Query ─── -->
+            <div id="tab-single" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Single Prediction</h3>
+                        <p class="subtitle">Ask about one player at a time.</p>
+                    </div>
+                    <form id="form-single" class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="input-player">Player</label>
+                                <input type="text" id="input-player" list="player-suggestions" placeholder="e.g. Firstkiller" autocomplete="off">
+                                <datalist id="player-suggestions"></datalist>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-stat">Stat</label>
+                                <select id="input-stat">
+                                    <option>Goals</option>
+                                    <option>Saves</option>
+                                    <option>Demos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="input-threshold">Threshold</label>
+                                <input type="number" id="input-threshold" value="2.5" step="0.5" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="input-direction">Direction</label>
+                                <select id="input-direction">
+                                    <option value="over">Over</option>
+                                    <option value="under">Under</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="input-single-games">Games</label>
+                                <input type="number" id="input-single-games" value="1" min="1">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Predict →</button>
+                    </form>
+                </div>
+                <div id="single-result" style="display:none;"></div>
+            </div>
+
+            <!-- ─── Tab: Train ─── -->
+            <div id="tab-train" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Train Neural Network</h3>
+                        <p class="subtitle">Build or retrain the model from cached replay data in your session DB.</p>
+                    </div>
+                    <form id="form-train" class="card-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="input-epochs">Epochs</label>
+                                <input type="number" id="input-epochs" value="200" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="input-lr">Learning Rate</label>
+                                <input type="number" id="input-lr" value="0.001" step="0.0001" min="0.0001">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Start Training →</button>
+                    </form>
+                    <div id="train-progress" class="progress-area" style="display:none;">
+                        <div class="spinner"></div>
+                        <p id="train-status">Training model...</p>
+                    </div>
+                    <div id="train-result" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- ─── Tab: Verify Picks ─── -->
+            <div id="tab-verify" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Verify Predictions</h3>
+                        <p class="subtitle">Check your logged predictions against the real match results (parsed from Ballchasing).</p>
+                    </div>
+                    <div class="card-body">
+                        <button id="btn-run-verify" class="btn btn-primary">Run Verification (Auto)</button>
+                        <div id="verify-progress" class="progress-area" style="display:none; margin-top:1rem;">
+                            <div class="spinner"></div>
+                            <p>Fetching actual stats and verifying...</p>
+                        </div>
+                        <div id="verify-result" style="display:none; margin-top:1rem;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── Tab: Raw Stats ─── -->
+            <div id="tab-stats" class="tab-content">
+                <div class="card">
+                    <div class="card-header"><h3>Loaded Data Summary</h3></div>
+                    <div id="stats-summary" class="card-body">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ─── Loading overlay ─── -->
+    <div id="loading-overlay" class="overlay" style="display:none;">
+        <div class="overlay-content">
+            <div class="spinner spinner-lg"></div>
+            <p id="loading-text">Loading...</p>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

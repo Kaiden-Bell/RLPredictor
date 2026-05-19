@@ -272,8 +272,6 @@ def extractStats(detail):
             rows.append({
                 "Player": name,
                 "Goals": core.get("goals", 0),
-                "Shots": core.get("shots", 0),
-                "Shot %": (core.get("goals",0) / core.get("shots",1)) if core.get("shots") else 0.0,
                 "Saves": core.get("saves", 0),
                 "Demos": demo.get("inflicted", 0),
                 "replay_id": detail.get("id"),
@@ -285,17 +283,15 @@ def extractStats(detail):
 
 def aggregatePlayers(rows):
     if not rows:
-        return pd.DataFrame(columns=["Player", "Games", "Goals", "Shots", "Shot %", "Saves", "Demos"])
+        return pd.DataFrame(columns=["Player", "Games", "Goals", "Saves", "Demos"])
     df = pd.DataFrame(rows)
     g = df.groupby("Player", dropna=False).agg(
         Games = ("replay_id", "nunique"),
         Goals = ("Goals", "sum"),
-        Shots = ("Shots", "sum"),
         Saves = ("Saves", "sum"),
-        Demos = ("Demos", "sum"), 
+        Demos = ("Demos", "sum")
     ).reset_index()
-    g["Shot %"] = g.apply(lambda r: (r["Goals"]/r["Shots"]) if r["Shots"] else 0.0, axis=1)
-    return g[["Player", "Games", "Goals", "Shots", "Shot %", "Saves", "Demos"]].sort_values(["Games", "Shot %"], ascending=[False, False])
+    return g[["Player", "Games", "Goals", "Saves", "Demos"]].sort_values(["Games"], ascending=[False])
 
 
 def getH2HStats(t1, t2, r1, r2, bc: Ballchasing, limit: int=6, fallback: int=30):

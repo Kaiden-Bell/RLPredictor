@@ -183,7 +183,17 @@ def scrape(URL, sections=None):
         
         # Filter by requested sections (if specified)
         if sections:
-            if not any(s.lower() in section_lower for s in sections):
+            matches = False
+            for s in sections:
+                s_low = s.lower()
+                if s_low in section_lower:
+                    matches = True
+                    break
+                # Relaxed matching for "playoff"
+                if s_low == 'playoff' and any(k in section_lower for k in ['bracket', 'knockout']):
+                    matches = True
+                    break
+            if not matches:
                 continue
         
         # Auto-detect best_of from section type

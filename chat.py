@@ -185,7 +185,7 @@ def run_chat(row, bc, idMap):
             continue
 
         if (not gen_df.empty and stat not in gen_df.columns) and (not h2h_df.empty and stat not in h2h_df.columns):
-            print(f"Stat '{stat}' is not available. Try one of: Goals, Shots, Saves, Demos")
+            print(f"Stat '{stat}' is not available. Try one of: Goals, Saves, Demos")
             continue
 
         # ─── Gather all stats silently ─────────────────────────
@@ -217,7 +217,7 @@ def run_chat(row, bc, idMap):
                 prob_gen = (hits / gen_games) * 100
 
         if (not gen_df.empty and stat not in gen_df.columns) and (not h2h_df.empty and stat not in h2h_df.columns):
-            print(f"Stat '{stat}' is not available. Try one of: Goals, Shots, Saves, Demos")
+            print(f"Stat '{stat}' is not available. Try one of: Goals, Saves, Demos")
             continue
 
         # Sentiment

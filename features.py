@@ -18,13 +18,13 @@ MAX_GAMES_H2H = 30
 MAX_GAMES_GEN = 150
 MAX_GAMES_MOMENTUM = 50
 MAX_SCORE = 1000.0
-STAT_CAPS = {"Goals": 8, "Shots": 12, "Saves": 10, "Demos": 8}
-STATS = ["Goals", "Shots", "Saves", "Demos"]
+STAT_CAPS = {"Goals": 8, "Saves": 10, "Demos": 8}
+STATS = ["Goals", "Saves", "Demos"]
+
 THRESHOLDS = {
-    "Goals": [0.5, 1.5, 2.5, 3.5],
-    "Shots": [1.5, 2.5, 3.5, 5.5],
-    "Saves": [0.5, 1.5, 2.5, 3.5],
-    "Demos": [0.5, 1.5, 2.5, 4.5],
+    "Goals": [0.5, 1.5, 2.5, 4.5],
+    "Saves": [1.5, 2.5, 3.5, 5.5],
+    "Demos": [0.5, 1.5, 2.5, 4.5]
 }
 
 
@@ -104,7 +104,6 @@ def _extract_player_stats(detail):
             rows.append({
                 "Player": name,
                 "Goals": core.get("goals", 0),
-                "Shots": core.get("shots", 0),
                 "Saves": core.get("saves", 0),
                 "Demos": demo.get("inflicted", 0),
                 "Score": core.get("score", 0),

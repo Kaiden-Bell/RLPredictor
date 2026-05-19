@@ -154,6 +154,24 @@ def initialize_database(db_path: Path = DB_PATH):
         )
     """)
 
+    # ------------------------------------------------------------------
+    # 9. Models — stores trained PyTorch model weights as BLOBs.
+    #    Single-file export: the entire user state is one .db file.
+    # ------------------------------------------------------------------
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS models (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            name        TEXT NOT NULL DEFAULT 'default',
+            weights     BLOB NOT NULL,
+            input_dim   INTEGER DEFAULT 13,
+            trained_at  TEXT NOT NULL,
+            epochs      INTEGER,
+            val_acc     REAL,
+            samples     INTEGER,
+            UNIQUE(name)
+        )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -492,7 +510,70 @@ def get_cached_roster(team_url: str,
 
 
 # ---------------------------------------------------------------------------
-# Import / Export — for the future webserver data-sharing feature
+# Model weights BLOB operations
+# ---------------------------------------------------------------------------
+
+def save_model_to_db(model, epochs: int = 0, val_acc: float = 0.0,
+                     samples: int = 0, name: str = "default",
+                     db_path: Path = DB_PATH):
+    """Save PyTorch model weights as a BLOB in the models table."""
+    import io
+    try:
+        import torch
+    except ImportError:
+        raise RuntimeError("PyTorch is not installed.")
+
+    buffer = io.BytesIO()
+    torch.save(model.state_dict(), buffer)
+    blob = buffer.getvalue()
+
+    now = datetime.now(timezone.utc).isoformat()
+    conn = get_connection(db_path)
+    conn.execute(
+        """INSERT OR REPLACE INTO models
+           (name, weights, input_dim, trained_at, epochs, val_acc, samples)
+           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (name, blob, 13, now, epochs, val_acc, samples),
+    )
+    conn.commit()
+    conn.close()
+
+
+def load_model_from_db(name: str = "default", db_path: Path = DB_PATH):
+    """Load a PyTorch model from the models table. Returns (model, metadata) or (None, None)."""
+    import io
+    try:
+        import torch
+    except ImportError:
+        return None, None
+
+    conn = get_connection(db_path)
+    row = conn.execute(
+        "SELECT weights, trained_at, epochs, val_acc, samples FROM models WHERE name = ?",
+        (name,),
+    ).fetchone()
+    conn.close()
+
+    if not row:
+        return None, None
+
+    from model import RLPredictorNet
+    net = RLPredictorNet()
+    buffer = io.BytesIO(row["weights"])
+    net.load_state_dict(torch.load(buffer, weights_only=True))
+    net.eval()
+
+    meta = {
+        "trained_at": row["trained_at"],
+        "epochs": row["epochs"],
+        "val_acc": row["val_acc"],
+        "samples": row["samples"],
+    }
+    return net, meta
+
+
+# ---------------------------------------------------------------------------
+# Import / Export — for the webserver data-sharing feature
 # ---------------------------------------------------------------------------
 
 def export_database_file(destination_path: str) -> bool:
