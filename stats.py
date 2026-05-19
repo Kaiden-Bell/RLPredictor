@@ -24,7 +24,7 @@ def _progress_done(msg, total, start_time, cached=0):
     """Finish a progress line."""
     elapsed = time.time() - start_time
     cache_str = f" ({cached} from cache)" if cached else ""
-    sys.stdout.write(f"\r  {msg}: {total} replays in {elapsed:.1f}s{cache_str}                    \n")
+    sys.stdout.write(f"\r{msg}: {total} replays in {elapsed:.1f}s{cache_str}\n")
     sys.stdout.flush()
 
 RECENT_DAYS = 90
@@ -56,13 +56,19 @@ def pullReplays(bc, playerID, count=MAX_REPLAYS, playlist="private"):
     data = bc.listReplays(**params)
     return data.get("list", []) or []
 
-MOMENTUM_DAYS = 14  # only count recent ranked 2s for momentum
+MOMENTUM_DAYS = 14  # only count recent ranked 2s
 
 def rankedActivity(bc, playerIDs, logs):
     """
-    Returns a dict mapping PlayerID -> {games, avg_score, win_rate}.
-    Provides a richer "momentum" input vector for the Neural Network
-    by only considering ranked-doubles games from the last MOMENTUM_DAYS.
+        Feat:
+            - Recent ranked activity
+            - 2s matchmaking
+        Arguments:
+            bc: Ballchasing client
+            playerIDs: List of player IDs
+            logs: List to append logs to
+        Returns:
+            A dict mapping PlayerID -> {games, avg_score, win_rate}.
     """
     activity = {}
     cutoff = datetime.now(timezone.utc) - timedelta(days=MOMENTUM_DAYS)
@@ -101,7 +107,6 @@ def rankedActivity(bc, playerIDs, logs):
                 except Exception:
                     continue
 
-                # Find this player's stats in the replay
                 for side in ("blue", "orange"):
                     team = detail.get(side) or {}
                     for pl in team.get("players", []) or []:
@@ -145,7 +150,6 @@ def replayStats(bc, playerIDs, logs):
         except Exception as e:
             logs.append(f"List replays failed for {pid}: {e}")
 
-    # Deduplicate
     unique_replays = []
     seen = set()
     for it in players:
@@ -170,7 +174,6 @@ def replayStats(bc, playerIDs, logs):
             logs.append(f"getReplay {rid} failed: {e}")
             _progress("Generic stats", idx + 1, total_replays, t0, cached_count)
             continue
-        # If the call returned in <10ms, it was a cache hit
         if time.time() - call_start < 0.01:
             cached_count += 1
 

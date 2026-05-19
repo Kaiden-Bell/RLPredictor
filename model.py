@@ -103,11 +103,9 @@ def train_model(features, labels, epochs=200, lr=0.001, val_split=0.2, verbose=T
     patience_limit = 30
 
     for epoch in range(1, epochs + 1):
-        # --- Train ---
         model.train()
         optimizer.zero_grad()
 
-        # Mini-batch training for better generalisation
         batch_size = min(256, len(X_train))
         perm_t = torch.randperm(len(X_train))
         epoch_loss = 0.0
@@ -128,7 +126,6 @@ def train_model(features, labels, epochs=200, lr=0.001, val_split=0.2, verbose=T
 
         avg_train_loss = epoch_loss / n_batches
 
-        # --- Validate ---
         model.eval()
         with torch.no_grad():
             val_pred = model(X_val)
@@ -141,7 +138,6 @@ def train_model(features, labels, epochs=200, lr=0.001, val_split=0.2, verbose=T
 
         scheduler.step(val_loss)
 
-        # Early stopping
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             best_state = {k: v.clone() for k, v in model.state_dict().items()}
@@ -174,13 +170,12 @@ def train_model(features, labels, epochs=200, lr=0.001, val_split=0.2, verbose=T
 
 def predict(model, features):
     """
-    Run inference on a single feature vector or batch.
-
-    Args:
-        model: trained RLPredictorNet
-        features: np.ndarray of shape (13,) or (N, 13)
-
-    Returns: float probability or np.ndarray of probabilities
+        Feat: Run inference on a single feature vector or batch.
+        Args:
+            model: trained RLPredictorNet
+            features: np.ndarray of shape (13,) or (N, 13)
+        Returns:
+            float probability or np.ndarray of probabilities
     """
     if not HAS_TORCH:
         raise RuntimeError("PyTorch is not installed. Run: pip install torch")
