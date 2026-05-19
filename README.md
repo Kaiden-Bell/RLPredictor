@@ -19,7 +19,7 @@ RLPredictor is an advanced Machine Learning prediction engine for Rocket League 
    - Ranked 2v2 grind momentum (matches played, avg score, and win rate over the last 14 days).
    - Scaled Reddit sentiment scores.
 3. **Inference & Logic Generation:** The PyTorch model calculates a raw $P(\text{Over})$ expectation. The conversational engine then scales per-game averages over the specified series length, fusing the neural projection with human-readable heuristics to give strong betting advice.
-4. **Self-Supervised Learning:** Running `train.py` continuously scales the neural network. The script dynamically constructs training data by rolling through your local `.bc_cache.json` replay history, utilizing previous games to predict subsequent target games without manual labels.
+4. **Self-Supervised Learning:** Running `train.py` continuously scales the neural network. The script dynamically constructs training data by rolling through your local SQLite database (`data/predictor.db`) replay history, utilizing previous games to predict subsequent target games without manual labels.
 
 ## Usage
 

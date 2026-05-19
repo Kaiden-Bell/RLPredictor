@@ -209,8 +209,8 @@ __marimo__/
 
 # Project-specific
 .bc_cache.json
-outline.pdf
-RLPredictor/
+outline.txt
+venv/
 
 # SQLite database (schema lives in utils/database.py)
 data/*.db
