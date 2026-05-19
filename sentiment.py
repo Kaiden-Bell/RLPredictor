@@ -14,8 +14,13 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 sia = SentimentIntensityAnalyzer()
 
-def get_player_sentiment(player_name: str) -> dict:
-    url = f"https://www.reddit.com/r/RocketLeagueEsports/search.json?q={player_name}&restrict_sr=1&sort=new&limit=15"
+def get_player_sentiment(player_names: list) -> dict:
+    if isinstance(player_names, str):
+        player_names = [player_names]
+    
+    # take up to top 3 names to avoid giant queries
+    search_terms = " OR ".join([f'"{name}"' for name in player_names[:3]])
+    url = f"https://www.reddit.com/r/RocketLeagueEsports/search.json?q={search_terms}&restrict_sr=1&sort=new&limit=15"
     headers = {"User-Agent": "RLPredictorBot/1.0 by kbell"}
     
     try:

@@ -262,14 +262,23 @@ def playersInReplay(detail):
 
 def extractStats(detail):
     rows = []
+    from utils.player_identity import auto_detect_aliases
+    date_val = detail.get("date")
     for side in ("blue", "orange"):
         team = (detail.get(side) or {})
         for pl in team.get("players", []) or []:
             name = pl.get("name") or (pl.get("player") or {}).get("name")
+            if not name: continue
+            
+            plat = (pl.get("id") or {}).get("platform")
+            p_id = (pl.get("id") or {}).get("id")
+            cid = auto_detect_aliases(name, p_id, plat, date_val)
+            
             stats = (pl.get("stats") or {})
             core = stats.get("core") or {}
             demo = stats.get("demo") or {}
             rows.append({
+                "canonical_player_id": cid,
                 "Player": name,
                 "Goals": core.get("goals", 0),
                 "Shots": core.get("shots", 0),
@@ -285,9 +294,10 @@ def extractStats(detail):
 
 def aggregatePlayers(rows):
     if not rows:
-        return pd.DataFrame(columns=["Player", "Games", "Goals", "Shots", "Shot %", "Saves", "Demos"])
+        return pd.DataFrame(columns=["canonical_player_id", "Player", "Games", "Goals", "Shots", "Shot %", "Saves", "Demos"])
     df = pd.DataFrame(rows)
-    g = df.groupby("Player", dropna=False).agg(
+    g = df.groupby("canonical_player_id", dropna=False).agg(
+        Player = ("Player", "first"),
         Games = ("replay_id", "nunique"),
         Goals = ("Goals", "sum"),
         Shots = ("Shots", "sum"),
@@ -295,7 +305,7 @@ def aggregatePlayers(rows):
         Demos = ("Demos", "sum"), 
     ).reset_index()
     g["Shot %"] = g.apply(lambda r: (r["Goals"]/r["Shots"]) if r["Shots"] else 0.0, axis=1)
-    return g[["Player", "Games", "Goals", "Shots", "Shot %", "Saves", "Demos"]].sort_values(["Games", "Shot %"], ascending=[False, False])
+    return g[["canonical_player_id", "Player", "Games", "Goals", "Shots", "Shot %", "Saves", "Demos"]].sort_values(["Games", "Shot %"], ascending=[False, False])
 
 
 def getH2HStats(t1, t2, r1, r2, bc: Ballchasing, limit: int=6, fallback: int=30):

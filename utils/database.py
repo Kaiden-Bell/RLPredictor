@@ -68,43 +68,58 @@ def initialize_database(db_path: Path = DB_PATH):
     # -------------------------------------------------------------------------
     c.execute("""
         CREATE TABLE IF NOT EXISTS player_stats (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            replay_id   TEXT    NOT NULL,
-            player_name TEXT    NOT NULL,
-            side        TEXT,
-            goals       INTEGER DEFAULT 0,
-            shots       INTEGER DEFAULT 0,
-            saves       INTEGER DEFAULT 0,
-            demos       INTEGER DEFAULT 0,
-            score       INTEGER DEFAULT 0,
-            shot_pct    REAL    DEFAULT 0.0,
-            date        TEXT,
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            replay_id           TEXT    NOT NULL,
+            canonical_player_id TEXT NOT NULL,
+            canonical_name      TEXT NOT NULL,
+            display_name_seen   TEXT NOT NULL,
+            platform_player_id  TEXT,
+            platform            TEXT,
+            side                TEXT,
+            goals               INTEGER DEFAULT 0,
+            shots               INTEGER DEFAULT 0,
+            saves               INTEGER DEFAULT 0,
+            demos               INTEGER DEFAULT 0,
+            score               INTEGER DEFAULT 0,
+            shot_pct            REAL    DEFAULT 0.0,
+            date                TEXT,
             FOREIGN KEY (replay_id) REFERENCES replays(replay_id)
         )
     """)
-    c.execute("CREATE INDEX IF NOT EXISTS idx_ps_player  ON player_stats(player_name)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_ps_player  ON player_stats(canonical_player_id)")
     c.execute("CREATE INDEX IF NOT EXISTS idx_ps_replay  ON player_stats(replay_id)")
+
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS canonical_players (
+            canonical_player_id TEXT PRIMARY KEY,
+            canonical_name      TEXT NOT NULL,
+            first_seen          TEXT,
+            last_seen           TEXT
+        )
+    """)
 
     # ----------------------------------------
     # 4. Player IDs — replaces data/ids.json |
     # ----------------------------------------
     c.execute("""
         CREATE TABLE IF NOT EXISTS player_ids (
-            id            INTEGER PRIMARY KEY AUTOINCREMENT,
-            player_name   TEXT NOT NULL,
-            platform_id   TEXT NOT NULL,
-            UNIQUE(player_name, platform_id)
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            canonical_player_id TEXT NOT NULL,
+            platform_id         TEXT NOT NULL,
+            UNIQUE(canonical_player_id, platform_id),
+            FOREIGN KEY (canonical_player_id) REFERENCES canonical_players(canonical_player_id)
         )
     """)
-    c.execute("CREATE INDEX IF NOT EXISTS idx_pid_name ON player_ids(player_name)")
+    c.execute("CREATE INDEX IF NOT EXISTS idx_pid_canon ON player_ids(canonical_player_id)")
 
     # -------------------
     # 5. Player aliases |
     # -------------------
     c.execute("""
         CREATE TABLE IF NOT EXISTS player_aliases (
-            alias           TEXT PRIMARY KEY,
-            canonical_name  TEXT NOT NULL
+            alias               TEXT PRIMARY KEY,
+            canonical_player_id TEXT NOT NULL,
+            FOREIGN KEY (canonical_player_id) REFERENCES canonical_players(canonical_player_id)
         )
     """)
 
@@ -271,34 +286,22 @@ def get_all_replay_details(conn: Optional[sqlite3.Connection] = None) -> list[di
     return [json.loads(r["raw_json"]) for r in rows]
 
 
-def cache_player_stats(replay_id: str, player_name: str, side: str,
-                       goals: int, shots: int, saves: int, demos: int,
+def cache_player_stats(replay_id: str, canonical_player_id: str, canonical_name: str,
+                       display_name_seen: str, platform_player_id: str, platform: str,
+                       side: str, goals: int, shots: int, saves: int, demos: int,
                        score: int, shot_pct: float, date: str,
                        conn: Optional[sqlite3.Connection] = None):
     """
     Feat: Insert a single player-stat row.
-    Arguments: 
-        replay_id : Str
-        player_name : Str
-        side : Str
-        goals : Int
-        shots : Int
-        saves : Int
-        demos : Int
-        score : Int
-        shot_pct : Float
-        date : Str
-        conn : Optional[sqlite3.Connection]
-    Returns: None
     """
     own = conn is None
     if own:
         conn = get_connection()
     conn.execute("""
         INSERT OR IGNORE INTO player_stats
-            (replay_id, player_name, side, goals, shots, saves, demos, score, shot_pct, date)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (replay_id, player_name, side, goals, shots, saves, demos, score, shot_pct, date))
+            (replay_id, canonical_player_id, canonical_name, display_name_seen, platform_player_id, platform, side, goals, shots, saves, demos, score, shot_pct, date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (replay_id, canonical_player_id, canonical_name, display_name_seen, platform_player_id, platform, side, goals, shots, saves, demos, score, shot_pct, date))
     if own:
         conn.commit()
         conn.close()
@@ -319,12 +322,12 @@ def load_player_id_map_db(conn: Optional[sqlite3.Connection] = None) -> dict:
         conn = get_connection()
 
     aliases = {}
-    for row in conn.execute("SELECT alias, canonical_name FROM player_aliases"):
-        aliases[row["alias"]] = row["canonical_name"]
+    for row in conn.execute("SELECT alias, canonical_player_id FROM player_aliases"):
+        aliases[row["alias"]] = row["canonical_player_id"]
 
     players: dict[str, list[str]] = {}
-    for row in conn.execute("SELECT player_name, platform_id FROM player_ids"):
-        players.setdefault(row["player_name"], []).append(row["platform_id"])
+    for row in conn.execute("SELECT canonical_player_id, platform_id FROM player_ids"):
+        players.setdefault(row["canonical_player_id"], []).append(row["platform_id"])
 
     if own:
         conn.close()
@@ -334,10 +337,6 @@ def load_player_id_map_db(conn: Optional[sqlite3.Connection] = None) -> dict:
 def import_ids_json(json_path: str, conn: Optional[sqlite3.Connection] = None):
     """
     Feat: One-time migration: load an ids.json file into the DB tables.
-    Arguments: 
-        json_path : Str
-        conn : Optional[sqlite3.Connection]
-    Returns: None
     """
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -346,18 +345,25 @@ def import_ids_json(json_path: str, conn: Optional[sqlite3.Connection] = None):
     if own:
         conn = get_connection()
 
+    from utils.player_identity import normalize_player_name
+
     for alias, canonical in (data.get("aliases") or {}).items():
+        n_alias = normalize_player_name(alias)
+        c_id = normalize_player_name(canonical)
+        conn.execute("INSERT OR IGNORE INTO canonical_players (canonical_player_id, canonical_name) VALUES (?, ?)", (c_id, canonical))
         conn.execute(
-            "INSERT OR REPLACE INTO player_aliases (alias, canonical_name) VALUES (?, ?)",
-            (alias.strip().lower(), canonical),
+            "INSERT OR REPLACE INTO player_aliases (alias, canonical_player_id) VALUES (?, ?)",
+            (n_alias, c_id),
         )
 
     for name, ids in (data.get("players") or {}).items():
+        c_id = normalize_player_name(name)
+        conn.execute("INSERT OR IGNORE INTO canonical_players (canonical_player_id, canonical_name) VALUES (?, ?)", (c_id, name))
         id_list = ids if isinstance(ids, list) else [ids]
         for pid in id_list:
             conn.execute(
-                "INSERT OR IGNORE INTO player_ids (player_name, platform_id) VALUES (?, ?)",
-                (name.strip().lower(), pid),
+                "INSERT OR IGNORE INTO player_ids (canonical_player_id, platform_id) VALUES (?, ?)",
+                (c_id, pid),
             )
 
     conn.commit()
@@ -413,12 +419,22 @@ def migrate_json_cache(cache_path: str = ".bc_cache.json", conn: Optional[sqlite
                     (rid, date_val, playlist_id, playlist_name, raw),
                 )
 
+                from utils.player_identity import auto_detect_aliases
+                
                 for side in ("blue", "orange"):
                     team = data.get(side) or {}
                     for pl in team.get("players", []) or []:
                         name = pl.get("name") or (pl.get("player") or {}).get("name")
                         if not name:
                             continue
+                            
+                        # Extract platform ID
+                        plat = (pl.get("id") or {}).get("platform")
+                        p_id = (pl.get("id") or {}).get("id")
+                        
+                        cid = auto_detect_aliases(name, p_id, plat, date_val, conn=conn)
+                        c_name = conn.execute("SELECT canonical_name FROM canonical_players WHERE canonical_player_id = ?", (cid,)).fetchone()["canonical_name"]
+
                         stats = pl.get("stats") or {}
                         core = stats.get("core") or {}
                         demo = stats.get("demo") or {}
@@ -426,10 +442,10 @@ def migrate_json_cache(cache_path: str = ".bc_cache.json", conn: Optional[sqlite
                         shots = core.get("shots", 0)
                         conn.execute("""
                             INSERT OR IGNORE INTO player_stats
-                                (replay_id, player_name, side, goals, shots, saves, demos, score, shot_pct, date)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                (replay_id, canonical_player_id, canonical_name, display_name_seen, platform_player_id, platform, side, goals, shots, saves, demos, score, shot_pct, date)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """, (
-                            rid, name, side,
+                            rid, cid, c_name, name, p_id, plat, side,
                             goals, shots,
                             core.get("saves", 0),
                             demo.get("inflicted", 0),
@@ -607,7 +623,7 @@ if __name__ == "__main__":
         conn.close()
 
     # Auto-migrate .bc_cache.json if it exists and api_cache is empty
-    cache_json = Path(__file__).resolve().parents[1] / ".bc_cache.json"
+    cache_json = DB_PATH.parent / ".bc_cache.json"
     if cache_json.exists():
         conn = get_connection()
         count = conn.execute("SELECT COUNT(*) FROM api_cache").fetchone()[0]

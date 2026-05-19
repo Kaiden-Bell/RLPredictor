@@ -180,15 +180,23 @@ def replayStats(bc, playerIDs, logs):
         if not _in_window(date_s):
             continue
 
+        from utils.player_identity import auto_detect_aliases
         for side in ("blue", "orange"):
             team = (detail.get(side) or {})
             for pl in team.get("players", []) or []:
                 name  = pl.get("name") or (pl.get("player") or {}).get("name")
+                if not name: continue
+                
+                plat = (pl.get("id") or {}).get("platform")
+                p_id = (pl.get("id") or {}).get("id")
+                cid = auto_detect_aliases(name, p_id, plat, date_s)
+                
                 stats = (pl.get("stats") or {})
                 core  = stats.get("core") or {}
                 demo  = stats.get("demo") or {}
                 rows.append({
-                    "Player": name,
+                    "canonical_player_id": cid,
+                    "Player": name, # display name seen
                     "Goals": core.get("goals", 0),
                     "Shots": core.get("shots", 0),
                     "Saves": core.get("saves", 0),
@@ -207,7 +215,7 @@ def teamFeats(bc, rosterIDs, logs):
     if dfp.empty:
         return pd.Series({k: 0 for k in AGG_KEYS + ["Shot %", "Games"]})
 
-    perPlayer = dfp.groupby("Player", dropna=False).agg(
+    perPlayer = dfp.groupby("canonical_player_id", dropna=False).agg(
         Games=("replay_id", "nunique"),
         Goals=("Goals","sum"),
         Shots=("Shots","sum"),
