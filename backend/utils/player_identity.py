@@ -6,20 +6,30 @@ def normalize_player_name(name: str) -> str:
     """
     Normalizes a display name to generate a potential alias key.
     - lowercases
+    - removes text in parentheses (e.g. disambiguation like '(French Player)')
     - strips whitespace
     - removes common team prefixes (e.g. 'SSG.', 'NRG ')
     - removes spaces, dashes, underscores
+    - strips trailing periods
     """
     if not name:
         return ""
     
-    n = name.lower().strip()
+    n = name.lower()
+    
+    # Remove text in parentheses
+    n = re.sub(r'\(.*?\)', '', n)
+    n = n.strip()
     
     # Remove common team prefix patterns (2-4 letters followed by dot, space, or dash)
-    n = re.sub(r'^[a-z0-9]{2,4}[\.\-\s]+', '', n)
+    # Uses positive lookahead to ensure we only remove the prefix if it's followed by actual text!
+    n = re.sub(r'^[a-z0-9]{2,4}[\.\-\s]+(?=[a-z0-9])', '', n)
     
     # Remove spaces, underscores, dashes, but KEEP periods, accents, etc.
     n = n.replace('_', '').replace('-', '').replace(' ', '')
+    
+    # Strip trailing periods so "Atow." and "Atow" match perfectly
+    n = n.rstrip('.')
     
     # Optional: strip trailing 'rl' if it's longer than 3 chars (e.g., mechrl -> mech, but not 'carl' -> 'ca')
     if n.endswith('rl') and len(n) > 4:
@@ -85,7 +95,7 @@ def auto_detect_aliases(display_name: str, platform_player_id: str, platform: st
     norm = normalize_player_name(display_name)
     full_platform_id = f"{platform}:{platform_player_id}" if platform and platform_player_id else None
     
-    # 1. Try to match by platform ID
+    # 1. Try to match by platform ID (Most reliable)
     if full_platform_id:
         row = conn.execute("SELECT canonical_player_id FROM player_ids WHERE platform_id = ?", (full_platform_id,)).fetchone()
         if row:
@@ -95,22 +105,29 @@ def auto_detect_aliases(display_name: str, platform_player_id: str, platform: st
             if own: conn.commit(); conn.close()
             return cid
             
-    # 2. Try to match by existing alias
-    row = conn.execute("SELECT canonical_player_id FROM player_aliases WHERE alias = ?", (norm,)).fetchone()
-    if row:
-        cid = row["canonical_player_id"]
-        # Add ID if new
-        if full_platform_id:
-            conn.execute("INSERT OR IGNORE INTO player_ids (canonical_player_id, platform_id) VALUES (?, ?)", (cid, full_platform_id))
-        if own: conn.commit(); conn.close()
-        return cid
+    # 2. Try to match by existing alias ONLY IF we don't have a platform ID.
+    # If we have a platform ID, we DO NOT want to blindly attach it to an existing player
+    # just because the display name matches (e.g. a random fan named 'Atow').
+    if not full_platform_id:
+        row = conn.execute("SELECT canonical_player_id FROM player_aliases WHERE alias = ?", (norm,)).fetchone()
+        if row:
+            cid = row["canonical_player_id"]
+            if own: conn.commit(); conn.close()
+            return cid
         
-    # 3. Create new canonical player
+    # 3. Create new canonical player for the unseen platform ID (or unseen alias)
     cid = norm
+    if full_platform_id:
+        # Prevent PRIMARY KEY collision if the norm already exists as a canonical player
+        row = conn.execute("SELECT canonical_player_id FROM canonical_players WHERE canonical_player_id = ?", (cid,)).fetchone()
+        if row:
+            cid = f"{norm}_{platform_player_id}"
+            
     canonical_name = display_name
     conn.execute("INSERT OR IGNORE INTO canonical_players (canonical_player_id, canonical_name, first_seen, last_seen) VALUES (?, ?, ?, ?)",
                  (cid, canonical_name, date_seen, date_seen))
     conn.execute("INSERT OR IGNORE INTO player_aliases (alias, canonical_player_id) VALUES (?, ?)", (norm, cid))
+    
     if full_platform_id:
         conn.execute("INSERT OR IGNORE INTO player_ids (canonical_player_id, platform_id) VALUES (?, ?)", (cid, full_platform_id))
         
@@ -143,22 +160,37 @@ def find_possible_duplicates(conn=None) -> List[Dict]:
     if own: conn = get_connection()
     
     candidates = []
-    # Simplified version: Look for players with very similar canonical names
-    # This can be expanded based on roster context in the future
     players = conn.execute("SELECT canonical_player_id, canonical_name FROM canonical_players").fetchall()
+    
+    import difflib
     
     for i, p1 in enumerate(players):
         for p2 in players[i+1:]:
             n1 = normalize_player_name(p1["canonical_name"])
             n2 = normalize_player_name(p2["canonical_name"])
             
-            if n1 and n2 and (n1 in n2 or n2 in n1) and len(n1) > 3 and len(n2) > 3:
+            if not (n1 and n2) or len(n1) <= 3 or len(n2) <= 3:
+                continue
+                
+            ratio = difflib.SequenceMatcher(None, n1, n2).ratio()
+            is_substring = n1 in n2 or n2 in n1
+            
+            if ratio > 0.85:
                 candidates.append({
                     "canonical_player_id": p1["canonical_player_id"],
                     "possible_alias": p2["canonical_name"],
                     "duplicate_id": p2["canonical_player_id"],
-                    "reason": "Normalized names are very similar or subset",
-                    "confidence": "medium",
+                    "reason": f"High name similarity ({ratio:.2f})",
+                    "confidence": "high",
+                    "recommended_action": "merge"
+                })
+            elif is_substring:
+                candidates.append({
+                    "canonical_player_id": p1["canonical_player_id"],
+                    "possible_alias": p2["canonical_name"],
+                    "duplicate_id": p2["canonical_player_id"],
+                    "reason": "One name is a substring of the other",
+                    "confidence": "low",
                     "recommended_action": "review"
                 })
                 

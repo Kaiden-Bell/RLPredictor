@@ -218,32 +218,44 @@ def _persist_replay(detail: dict):
     playlist_name = str(detail.get("playlist_name", ""))
     raw = json.dumps(detail)
 
-    conn = get_connection()
-    cache_replay(rid, date_val, playlist_id, playlist_name, raw, conn=conn)
+    from utils.player_identity import auto_detect_aliases
 
-    for side in ("blue", "orange"):
-        team = detail.get(side) or {}
-        for pl in team.get("players", []) or []:
-            name = pl.get("name") or (pl.get("player") or {}).get("name")
-            if not name:
-                continue
-            stats = pl.get("stats") or {}
-            core = stats.get("core") or {}
-            demo = stats.get("demo") or {}
-            goals = core.get("goals", 0)
-            shots = core.get("shots", 0)
-            cache_player_stats(
-                rid, name, side,
-                goals, shots,
-                core.get("saves", 0),
-                demo.get("inflicted", 0),
-                core.get("score", 0),
-                (goals / shots) if shots else 0.0,
-                date_val,
-                conn=conn,
-            )
-    conn.commit()
-    conn.close()
+    conn = get_connection()
+    try:
+        cache_replay(rid, date_val, playlist_id, playlist_name, raw, conn=conn)
+
+        for side in ("blue", "orange"):
+            team = detail.get(side) or {}
+            for pl in team.get("players", []) or []:
+                name = pl.get("name") or (pl.get("player") or {}).get("name")
+                if not name:
+                    continue
+                    
+                plat = (pl.get("id") or {}).get("platform")
+                p_id = (pl.get("id") or {}).get("id")
+                
+                cid = auto_detect_aliases(name, p_id, plat, date_val, conn=conn)
+                c_name = conn.execute("SELECT canonical_name FROM canonical_players WHERE canonical_player_id = ?", (cid,)).fetchone()["canonical_name"]
+
+                stats = pl.get("stats") or {}
+                core = stats.get("core") or {}
+                demo = stats.get("demo") or {}
+                goals = core.get("goals", 0)
+                shots = core.get("shots", 0)
+                cache_player_stats(
+                    rid, cid, c_name, name, p_id, plat,
+                    side,
+                    goals, shots,
+                    core.get("saves", 0),
+                    demo.get("inflicted", 0),
+                    core.get("score", 0),
+                    (goals / shots) if shots else 0.0,
+                    date_val,
+                    conn=conn,
+                )
+        conn.commit()
+    finally:
+        conn.close()
 
     
 # Parse Rosters, Players, Stats

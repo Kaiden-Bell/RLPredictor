@@ -36,6 +36,21 @@ def _iso(dt_ms_or_iso):
         return datetime.fromtimestamp(dt_ms_or_iso/1000, tz=timezone.utc).isoformat()
     return str(dt_ms_or_iso)
 
+def _get_canonical_name(pid):
+    try:
+        from utils.database import get_connection
+        conn = get_connection()
+        row = conn.execute(
+            "SELECT cp.canonical_name FROM player_ids pid "
+            "JOIN canonical_players cp ON pid.canonical_player_id = cp.canonical_player_id "
+            "WHERE pid.platform_id = ?", (pid,)
+        ).fetchone()
+        conn.close()
+        if row: return row["canonical_name"]
+    except Exception:
+        pass
+    return pid.split(":")[-1][:12] if ":" in pid else pid[:12]
+
 def _in_window(dateStr, days=RECENT_DAYS):
     try:
         dt = datetime.fromisoformat(dateStr.replace("Z", "+00:00"))
@@ -75,8 +90,8 @@ def rankedActivity(bc, playerIDs, logs):
     unique_pids = list(set(playerIDs))
 
     for p_idx, pid in enumerate(unique_pids):
-        short_id = pid.split(":")[-1][:12] if ":" in pid else pid[:12]
-        print(f"  Ranked 2s momentum: player {p_idx + 1}/{len(unique_pids)} ({short_id})")
+        cname = _get_canonical_name(pid)
+        print(f"  Ranked 2s momentum: player {p_idx + 1}/{len(unique_pids)} ({cname})")
         info = {"games": 0, "avg_score": 0.0, "win_rate": 0.0}
         try:
             params = {
@@ -142,8 +157,8 @@ def replayStats(bc, playerIDs, logs):
     players = []
     unique_pids = list(set(playerIDs))
     for p_idx, pid in enumerate(unique_pids):
-        short_id = pid.split(":")[-1][:12] if ":" in pid else pid[:12]
-        print(f"  Listing replays: player {p_idx + 1}/{len(unique_pids)} ({short_id})")
+        cname = _get_canonical_name(pid)
+        print(f"  Listing replays: player {p_idx + 1}/{len(unique_pids)} ({cname})")
         try:
             players.extend(pullReplays(bc, pid))
             time.sleep(0.12)

@@ -98,20 +98,24 @@ def populate_players_from_liquipedia(limit=50, conn=None):
                 
             display_name = data["display_name"]
             
-            # Use auto_detect_aliases to insert into DB
-            # We don't have replay_id, so we just use the name and platform IDs
+            # Ensure the canonical player exists
+            from utils.player_identity import normalize_player_name
+            cid = normalize_player_name(display_name)
+            if not cid:
+                continue
+                
+            conn.execute("INSERT OR IGNORE INTO canonical_players (canonical_player_id, canonical_name) VALUES (?, ?)", (cid, display_name))
+            conn.execute("INSERT OR IGNORE INTO player_aliases (alias, canonical_player_id) VALUES (?, ?)", (cid, cid))
             
             for alt_id in data["alternate_ids"]:
-                platform = None
-                p_id = alt_id
-                if alt_id.startswith('steam:'):
-                    platform = 'steam'
-                    p_id = alt_id.split(':', 1)[1]
-                elif alt_id.startswith('epic:'):
-                    platform = 'epic'
-                    p_id = alt_id.split(':', 1)[1]
-                    
-                auto_detect_aliases(display_name, p_id, platform, "", conn=conn)
+                if alt_id.startswith('steam:') or alt_id.startswith('epic:'):
+                    conn.execute("INSERT OR IGNORE INTO player_ids (canonical_player_id, platform_id) VALUES (?, ?)", (cid, alt_id))
+                else:
+                    alt_norm = normalize_player_name(alt_id)
+                    if alt_norm:
+                        conn.execute("INSERT OR IGNORE INTO player_aliases (alias, canonical_player_id) VALUES (?, ?)", (alt_norm, cid))
+                        
+            conn.commit()
                 
         except Exception as e:
             print(f"Error scraping {url}: {e}")
