@@ -25,11 +25,32 @@ def list_matches(df: pd.DataFrame) -> pd.DataFrame:
         print("No concrete matchups yet.")
         return matches
 
-    print("\nAvailable matchups:")
+    completed = []
+    upcoming = []
+
     for i, r in matches.iterrows():
-        sec = r.get("section") or ""
-        rnd = r.get("round") or ""
-        print(f"[{i}] {r['team1']}  vs  {r['team2']}   | {sec} {rnd}".rstrip())
+        s1 = r.get("team1_score")
+        s2 = r.get("team2_score")
+        if pd.notna(s1) and pd.notna(s2) and str(s1).strip() != "" and str(s2).strip() != "":
+            completed.append((i, r))
+        else:
+            upcoming.append((i, r))
+
+    if completed:
+        print("\nCompleted Matches:")
+        for i, r in completed:
+            sec = r.get("section") or ""
+            rnd = r.get("round") or ""
+            s1, s2 = r.get("team1_score", ""), r.get("team2_score", "")
+            print(f"[{i}] {r['team1']} [{s1}] vs [{s2}] {r['team2']}   | {sec} {rnd}".rstrip())
+
+    if upcoming:
+        print("\nUpcoming Matches:")
+        for i, r in upcoming:
+            sec = r.get("section") or ""
+            rnd = r.get("round") or ""
+            print(f"[{i}] {r['team1']}  vs  {r['team2']}   | {sec} {rnd}".rstrip())
+            
     print("")
     return matches
 

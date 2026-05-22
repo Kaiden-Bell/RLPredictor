@@ -206,6 +206,15 @@ def scrape(URL, sections=None):
             t1 = getTeamName(ops[0])
             t2 = getTeamName(ops[1])
             
+            # Extract scores
+            s1_el = ops[0].select_one('.brkts-opponent-score-inner')
+            s2_el = ops[1].select_one('.brkts-opponent-score-inner')
+            s1 = s1_el.get_text(strip=True) if s1_el else ""
+            s2 = s2_el.get_text(strip=True) if s2_el else ""
+            # Only keep digits to avoid '-' or placeholders
+            s1 = s1 if s1.isdigit() else ""
+            s2 = s2 if s2.isdigit() else ""
+            
             def _extract_url(op, name):
                 if isPlaceholder(name): return None
                 a_tag = op.select_one('a[href]')
@@ -219,9 +228,10 @@ def scrape(URL, sections=None):
 
             rows.append({
                 'section': section,
-                'round': rmap.get(id(m)) or "Unknown",
+                'round': rmap.get(id(m)) or f"Bo{best_of}",
                 'best_of': best_of,
                 'team1': t1, 'team2': t2,
+                'team1_score': s1, 'team2_score': s2,
                 'team1_url': _extract_url(ops[0], t1),
                 'team2_url': _extract_url(ops[1], t2),
             })
