@@ -1,11 +1,13 @@
 """
-model.py — RLPredictor Neural Network model definition.
-
-PyTorch MLP for Over/Under prediction:
-  13 input features → 64 → 32 → 16 → 1 (sigmoid probability)
+Author: Kaiden Bell
+Date (Coded): (I'll update this part)
+File Function:
+- Description: PyTorch MLP Neural Network model definition, training loop, and load/save utilities.
+- Usage: Imported by train.py and chat.py to train models and execute inference.
 """
 
 import os
+
 import numpy as np
 
 try:
@@ -15,68 +17,68 @@ try:
 except ImportError:
     HAS_TORCH = False
 
+
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "data", "model.pt")
 INPUT_DIM = 13
 
 
 class RLPredictorNet(nn.Module):
     """
-    MLP for predicting P(over) from a 13-dimensional feature vector.
-
-    Architecture: 13 → 64 → 32 → 16 → 1
-    Each hidden layer: Linear → BatchNorm → ReLU → Dropout(0.3)
-    Output: Sigmoid
+    Description:
+        Multi-Layer Perceptron (MLP) for predicting P(over) from a 13-dimensional feature vector.
+        Architecture: 13 -> 64 -> 32 -> 16 -> 1.
     """
 
     def __init__(self):
         super().__init__()
         self.net = nn.Sequential(
-            # Layer 1: 13 → 64
             nn.Linear(INPUT_DIM, 64),
             nn.BatchNorm1d(64),
             nn.ReLU(),
             nn.Dropout(0.3),
-            # Layer 2: 64 → 32
             nn.Linear(64, 32),
             nn.BatchNorm1d(32),
             nn.ReLU(),
             nn.Dropout(0.3),
-            # Layer 3: 32 → 16
             nn.Linear(32, 16),
             nn.BatchNorm1d(16),
             nn.ReLU(),
             nn.Dropout(0.2),
-            # Output: 16 → 1
             nn.Linear(16, 1),
             nn.Sigmoid(),
         )
 
     def forward(self, x):
+        """
+        Description:
+            Executes a forward pass through the neural network.
+        Arguments:
+            x: Input feature tensor.
+        Returns:
+            Output prediction tensor.
+        """
         return self.net(x).squeeze(-1)
 
 
 def train_model(features, labels, epochs=200, lr=0.001, val_split=0.2, verbose=True):
     """
-    Train the RLPredictorNet on the given features and labels.
-
-    Args:
-        features: np.ndarray of shape (N, 13)
-        labels:   np.ndarray of shape (N,) — binary 0/1
-        epochs:   number of training epochs
-        lr:       learning rate
-        val_split: fraction to hold out for validation
-        verbose:  print progress
-
-    Returns: trained model, training history dict
+    Description:
+        Trains the RLPredictorNet MLP model on the provided features and labels.
+    Arguments:
+        features: Numpy array of shape (N, 13) containing feature vectors.
+        labels: Numpy array of shape (N,) containing target binary labels (0/1).
+        epochs: Count of training iterations.
+        lr: Learning rate optimizer speed coefficient.
+        val_split: Fraction to hold out for evaluation.
+        verbose: print progress metrics.
+    Returns:
+        Tuple: (trained RLPredictorNet model, dictionary detailing validation history).
     """
-    if not HAS_TORCH:
-        raise RuntimeError("PyTorch is not installed. Run: pip install torch")
+    if not HAS_TORCH: raise RuntimeError("PyTorch is not installed. Run: pip install torch")
 
-    # Convert to tensors
     X = torch.tensor(features, dtype=torch.float32)
     y = torch.tensor(labels, dtype=torch.float32)
 
-    # Train/val split
     n = len(X)
     perm = torch.randperm(n)
     val_n = int(n * val_split)
@@ -85,10 +87,8 @@ def train_model(features, labels, epochs=200, lr=0.001, val_split=0.2, verbose=T
     X_train, y_train = X[train_idx], y[train_idx]
     X_val, y_val = X[val_idx], y[val_idx]
 
-    if verbose:
-        print(f"Training: {len(X_train)} samples, Validation: {len(X_val)} samples")
+    if verbose: print(f"Training: {len(X_train)} samples, Validation: {len(X_val)} samples")
 
-    # Model, loss, optimizer
     model = RLPredictorNet()
     criterion = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
@@ -154,35 +154,30 @@ def train_model(features, labels, epochs=200, lr=0.001, val_split=0.2, verbose=T
             )
 
         if patience_counter >= patience_limit:
-            if verbose:
-                print(f"  Early stopping at epoch {epoch} (no improvement for {patience_limit} epochs)")
+            if verbose: print(f"  Early stopping at epoch {epoch} (no improvement for {patience_limit} epochs)")
             break
 
-    # Restore best model
-    if best_state:
-        model.load_state_dict(best_state)
+    if best_state: model.load_state_dict(best_state)
 
-    if verbose:
-        print(f"\nTraining complete! Best val loss: {best_val_loss:.4f}, Final val acc: {history['val_acc'][-1]:.1%}")
+    if verbose: print(f"\nTraining complete! Best val loss: {best_val_loss:.4f}, Final val acc: {history['val_acc'][-1]:.1%}")
 
     return model, history
 
 
 def predict(model, features):
     """
-        Feat: Run inference on a single feature vector or batch.
-        Args:
-            model: trained RLPredictorNet
-            features: np.ndarray of shape (13,) or (N, 13)
-        Returns:
-            float probability or np.ndarray of probabilities
+    Description:
+        Runs neural network prediction inference on single or batched features.
+    Arguments:
+        model: Trained RLPredictorNet instance.
+        features: Numpy array of shape (13,) or (N, 13) containing feature vectors.
+    Returns:
+        Float or Numpy array representing probabilities.
     """
-    if not HAS_TORCH:
-        raise RuntimeError("PyTorch is not installed. Run: pip install torch")
+    if not HAS_TORCH: raise RuntimeError("PyTorch is not installed. Run: pip install torch")
 
     model.eval()
-    if features.ndim == 1:
-        features = features.reshape(1, -1)
+    if features.ndim == 1: features = features.reshape(1, -1)
 
     with torch.no_grad():
         x = torch.tensor(features, dtype=torch.float32)
@@ -193,18 +188,31 @@ def predict(model, features):
 
 
 def save_model(model, path=MODEL_PATH):
-    """Save trained model weights to disk."""
+    """
+    Description:
+        Saves trained model state dict weights to disk.
+    Arguments:
+        model: Trained RLPredictorNet instance.
+        path: target filepath string.
+    Returns:
+        None
+    """
     os.makedirs(os.path.dirname(path), exist_ok=True)
     torch.save(model.state_dict(), path)
     print(f"Model saved to {path}")
 
 
 def load_model(path=MODEL_PATH):
-    """Load a trained model from disk. Returns None if no model found."""
-    if not HAS_TORCH:
-        return None
-    if not os.path.exists(path):
-        return None
+    """
+    Description:
+        Loads a saved model from disk.
+    Arguments:
+        path: Path string to torch save file.
+    Returns:
+        RLPredictorNet instance if successful, else None.
+    """
+    if not HAS_TORCH: return None
+    if not os.path.exists(path): return None
 
     model = RLPredictorNet()
     model.load_state_dict(torch.load(path, weights_only=True))

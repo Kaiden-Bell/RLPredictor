@@ -1,9 +1,24 @@
-import os, re, time, requests, pandas as pd
+"""
+Author: Kaiden Bell
+Date (Coded): (I'll update this part)
+File Function:
+- Description: Web scraper for past Liquipedia head-to-head match history and Ballchasing API wrapper.
+- Usage: Imported by main.py and chat.py to fetch H2H stats and replay details.
+"""
+
+import hashlib
+import json
+import os
+import re
+import time
+import unicodedata
+from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 from urllib.parse import quote_plus, urlencode
+
 from bs4 import BeautifulSoup
-import json, unicodedata, hashlib
-from pathlib import Path
+import pandas as pd
+import requests
 
 from utils.database import (
     initialize_database,
@@ -15,67 +30,11 @@ from utils.database import (
     load_player_id_map_db,
     import_ids_json,
 )
+from utils.player_identity import normalize_player_name, auto_detect_aliases
+
 
 ID_FILE = Path(__file__).resolve().parents[1] / "data" / "ids.json"
-
-_PLAYER_ID_RE = re.compile(r"^(steam|epic|xbox|ps|psn|ps4|ps5):", re.I)
-
-def _canon(s: str) -> str:
-    if not s: return ""
-    s = unicodedata.normalize("NFKC", s).replace("\u200b", "")
-    return " ".join(s.strip().split()).lower()
-
-def load_player_id_map(path: Path = ID_FILE) -> dict:
-    """Load the player-ID map.
-
-    Tries the DB first; falls back to ids.json for backwards compat.
-    """
-    try:
-        initialize_database()
-        conn = get_connection()
-        count = conn.execute("SELECT COUNT(*) FROM player_ids").fetchone()[0]
-        if count == 0 and path.exists():
-            import_ids_json(str(path), conn)
-        data = load_player_id_map_db(conn)
-        conn.close()
-        return data
-    except Exception:
-        # Graceful fallback to the old JSON file
-        if not path.exists():
-            return {"aliases": {}, "players": {}}
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        aliases = { _canon(k): v for k, v in (data.get("aliases") or {}).items() }
-        players = {}
-        for k, v in (data.get("players") or {}).items():
-            key = _canon(k)
-            ids = v if isinstance(v, list) else [v]
-            clean = [pid for pid in ids if isinstance(pid, str) and _PLAYER_ID_RE.search(pid)]
-            if clean:
-                players[key] = clean
-        return {"aliases": aliases, "players": players}
-
-def resolve_ids(names, idmap) -> list[str]:
-    if not names: return []
-    aliases = idmap.get("aliases", {})
-    table   = idmap.get("players", {})
-    out = []
-    for name in names:
-        if not name: continue
-        c = _canon(name)
-        if c in aliases:
-            c = _canon(aliases[c])
-        ids = table.get(c)
-        if ids:
-            out.extend(ids)
-    seen, uniq = set(), []
-    for pid in out:
-        if pid not in seen:
-            uniq.append(pid); seen.add(pid)
-    return uniq
-
-
-
+PLAYER_ID_RE = re.compile(r"^(steam|epic|xbox|ps|psn|ps4|ps5):", re.I)
 
 LP_BASE = "https://liquipedia.net"
 LP_RL = f"{LP_BASE}/rocketleague"
@@ -86,100 +45,218 @@ HEADERS = {
     "Accept-Language": "en-US,en;q=0.9",
 }
 
-def _soup(url, session=None):
+
+def canon(s: str) -> str:
+    """
+    Description:
+        Standardizes string formats for uniform normalization.
+    Arguments:
+        s: Raw string.
+    Returns:
+        String: Standardized lowercased normalized string.
+    """
+    if not s: return ""
+    s = unicodedata.normalize("NFKC", s).replace("\u200b", "")
+    return " ".join(s.strip().split()).lower()
+
+
+def load_player_id_map(path: Path = ID_FILE) -> dict:
+    """
+    Description:
+        Loads the player platform/alias ID mapping dictionary.
+    Arguments:
+        path: Path object to ids.json file.
+    Returns:
+        Dictionary mapping players and aliases to platform IDs.
+    """
+    try:
+        initialize_database()
+        conn = get_connection()
+        count = conn.execute("SELECT COUNT(*) FROM player_ids").fetchone()[0]
+        if count == 0 and path.exists(): import_ids_json(str(path), conn)
+        data = load_player_id_map_db(conn)
+        conn.close()
+        return data
+    except Exception:
+        if not path.exists(): return {"aliases": {}, "players": {}}
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        aliases = {canon(k): v for k, v in (data.get("aliases") or {}).items()}
+        players = {}
+        for k, v in (data.get("players") or {}).items():
+            key = canon(k)
+            ids = v if isinstance(v, list) else [v]
+            clean = [pid for pid in ids if isinstance(pid, str) and PLAYER_ID_RE.search(pid)]
+            if clean: players[key] = clean
+        return {"aliases": aliases, "players": players}
+
+
+def resolve_ids(names, idmap) -> list[str]:
+    """
+    Description:
+        Resolves a list of player names into their respective platform IDs.
+    Arguments:
+        names: List of player names.
+        idmap: Dictionary containing the player ID maps.
+    Returns:
+        List of resolved platform IDs.
+    """
+    if not names: return []
+    aliases = idmap.get("aliases", {})
+    table = idmap.get("players", {})
+    out = []
+    for name in names:
+        if not name: continue
+        c = normalize_player_name(name)
+        if c in aliases: c = normalize_player_name(aliases[c])
+        ids = table.get(c)
+        if ids: out.extend(ids)
+    seen, uniq = set(), []
+    for pid in out:
+        if pid not in seen: uniq.append(pid); seen.add(pid)
+    return uniq
+
+
+def fetch_soup(url, session=None):
+    """
+    Description:
+        Requests a page URL and parses it utilizing BeautifulSoup.
+    Arguments:
+        url: Request target URL string.
+        session: Requests Session object.
+    Returns:
+        BeautifulSoup object parsed from HTML response.
+    """
     sess = session or requests.Session()
     r = sess.get(url, headers=HEADERS, timeout=30)
     r.raise_for_status()
     return BeautifulSoup(r.text, "html.parser")
 
 
-# Step 1.) Fetch LP H2H
-
-def buildH2H(t1, t2):
+def build_h2h(t1, t2):
+    """
+    Description:
+        Generates the Liquipedia head-to-head lookup query URL.
+    Arguments:
+        t1: Team 1 name.
+        t2: Team 2 name.
+    Returns:
+        String: Liquipedia Head-to-Head query URL.
+    """
     params = {
         "Headtohead[team1]": t1,
         "Headtohead[team2]": t2,
         "RunQuery": "Run",
         "pfRunQueryFormName": "Head2head"
     }
-
     return f"{LP_RL}/Special:RunQuery/Head2head?{urlencode(params)}"
 
-def parseH2H(t1, t2):
-    # Return a list of key terms from past series (date, event, match link, score)
-    url = buildH2H(t1, t2)
-    s = _soup(url)
+
+def parse_h2h(t1, t2):
+    """
+    Description:
+        Queries Liquipedia for previous H2H match history details.
+    Arguments:
+        t1: Team 1 name.
+        t2: Team 2 name.
+    Returns:
+        List of dictionaries with past series details.
+    """
+    url = build_h2h(t1, t2)
+    s = fetch_soup(url)
     rows = []
 
     for tr in s.select("table tr"):
         tds = tr.find_all("td")
-        if len(tds) < 2:
-            continue
+        if len(tds) < 2: continue
         
         a = tr.select_one("a[href*='/rocketleague/']")
-        if not a:
-            continue
+        if not a: continue
         href = a.get("href")
-        if not href:
-            continue
+        if not href: continue
         ml = href if href.startswith("http") else (LP_BASE + href)
         date = (tds[0].get_text(" ", strip=True) if tds else " ")[:32]
         score = tr.get_text(" ", strip=True)
         rows.append({"date": date, "matchLink": ml, "score": score})
     return rows
 
+
 BC_ID_RE = re.compile(r"(?:ballchasing\.com/(?:replay|group)/)([A-Za-z0-9-]+)")
 
-def extractBallchasing(url, session):
-    s = _soup(url, session=session)
+
+def extract_ballchasing(url, session):
+    """
+    Description:
+        Scrapes a page for Ballchasing replay or group IDs.
+    Arguments:
+        url: target URL string.
+        session: Requests Session object.
+    Returns:
+        List of tuples: (type, ID) found on the page.
+    """
+    s = fetch_soup(url, session=session)
     out = []
 
     for a in s.select("a[href*='ballchasing.com']"):
         href = a.get("href") or "" 
         m = BC_ID_RE.search(href)
-
         if m:
             rid = m.group(1)
             tt = "group" if "/group/" in href else "replay"
             out.append((tt, rid))
-
     return out
-
-# Ballchasing API setup
 
 
 class Ballchasing:
-    """Ballchasing API wrapper with SQLite-backed caching.
-
-    Drop-in replacement for the old JSON-file cache. The public interface
-    (getReplay, getGroup, listReplays, cache dict access) is identical.
+    """
+    Description:
+        Ballchasing API wrapper class with SQLite-backed caching mechanism.
     """
 
     def __init__(self, key=None, delay=0.35):
+        """
+        Description:
+            Initializes the Ballchasing client.
+        Arguments:
+            key: Ballchasing API Key.
+            delay: Time delay between API requests.
+        Returns:
+            None
+        """
         self.key = key or os.getenv("BALLCHASING_API_KEY") or ""
-        if not self.key:
-            raise RuntimeError("set BALLCHASING API KEY env or pass key=...")
+        if not self.key: raise RuntimeError("set BALLCHASING API KEY env or pass key=...")
         self.sess = requests.Session()
         self.sess.headers.update({"Authorization": self.key, "Accept": "application/json"})
         self.delay = delay
-
-        # Ensure DB is ready
         initialize_database()
 
-    def _cache_key(self, path, params=None):
-        """Generate the same MD5 cache key the old code used."""
+    def cache_key(self, path, params=None):
+        """
+        Description:
+            Generates the MD5 cache key identifier.
+        Arguments:
+            path: API Endpoint string.
+            params: API Request parameters.
+        Returns:
+            String: MD5 hash string representing the cache key.
+        """
         key_str = f"{path}?{urlencode(params or {})}"
         return hashlib.md5(key_str.encode()).hexdigest()
 
-    def __get(self, path, params=None):
-        cache_key = self._cache_key(path, params)
+    def fetch_api(self, path, params=None):
+        """
+        Description:
+            Fetches parsed JSON data from the API endpoint (hits local cache first).
+        Arguments:
+            path: API Endpoint path string.
+            params: API Request parameters dictionary.
+        Returns:
+            Parsed JSON dictionary response.
+        """
+        ckey = self.cache_key(path, params)
+        cached = get_cached_api_response(ckey)
+        if cached is not None: return cached
 
-        # Check DB cache first
-        cached = get_cached_api_response(cache_key)
-        if cached is not None:
-            return cached
-
-        # Not cached — hit the API
         url = f"{BC_API}{path}"
         r = self.sess.get(url, params=params, timeout=30)
         if r.status_code == 429:
@@ -189,36 +266,63 @@ class Ballchasing:
         time.sleep(self.delay)
         
         data = r.json()
-
-        # Store in API cache
         raw = json.dumps(data)
-        cache_api_response(cache_key, path, raw)
+        cache_api_response(ckey, path, raw)
 
-        # If this is a replay detail, also populate the replays + player_stats tables
         if isinstance(data, dict) and "blue" in data and "orange" in data:
-            _persist_replay(data)
+            persist_replay(data)
 
         return data
     
-    def getReplay(self, replayID):
-        return self.__get(f"/replays/{replayID}")
-    def getGroup(self, groupID):
-        return self.__get(f"/groups/{groupID}")
-    def listReplays(self, **params):
-        return self.__get("/replays", params=params)
+    def get_replay(self, replay_id):
+        """
+        Description:
+            Fetches parsed JSON details of a single replay.
+        Arguments:
+            replay_id: Ballchasing Replay ID string.
+        Returns:
+            Replay detail dictionary.
+        """
+        return self.fetch_api(f"/replays/{replay_id}")
+
+    def get_group(self, group_id):
+        """
+        Description:
+            Fetches parsed JSON details of a series group.
+        Arguments:
+            group_id: Ballchasing group ID string.
+        Returns:
+            Group detail dictionary.
+        """
+        return self.fetch_api(f"/groups/{group_id}")
+
+    def list_replays(self, **params):
+        """
+        Description:
+            Fetches parsed JSON listing replays.
+        Arguments:
+            params: Query parameters.
+        Returns:
+            Replay list dictionary.
+        """
+        return self.fetch_api("/replays", params=params)
 
 
-def _persist_replay(detail: dict):
-    """Extract a replay detail into the replays + player_stats tables."""
+def persist_replay(detail: dict):
+    """
+    Description:
+        Extracts and records parsed replay information into local database tables.
+    Arguments:
+        detail: Replay detail parsed JSON dictionary.
+    Returns:
+        None
+    """
     rid = detail.get("id")
-    if not rid:
-        return
+    if not rid: return
     date_val = str(detail.get("date", ""))
     playlist_id = str(detail.get("playlist_id", ""))
     playlist_name = str(detail.get("playlist_name", ""))
     raw = json.dumps(detail)
-
-    from utils.player_identity import auto_detect_aliases
 
     conn = get_connection()
     try:
@@ -228,8 +332,7 @@ def _persist_replay(detail: dict):
             team = detail.get(side) or {}
             for pl in team.get("players", []) or []:
                 name = pl.get("name") or (pl.get("player") or {}).get("name")
-                if not name:
-                    continue
+                if not name: continue
                     
                 plat = (pl.get("id") or {}).get("platform")
                 p_id = (pl.get("id") or {}).get("id")
@@ -257,27 +360,39 @@ def _persist_replay(detail: dict):
     finally:
         conn.close()
 
-    
-# Parse Rosters, Players, Stats
 
-def playersInReplay(detail):
+def players_in_replay(detail):
+    """
+    Description:
+        Extracts raw player names active in a single replay detail.
+    Arguments:
+        detail: Replay detail dictionary.
+    Returns:
+        List of raw player name strings.
+    """
     out = []
-
     blue = (detail.get("blue") or {}).get("players") or []
     orange = (detail.get("orange") or {}).get("players") or []
 
     for pl in blue + orange:
         name = pl.get("name") or (pl.get("player") or {}).get("name")
         if name: out.append(name)
-
     return out
 
-def extractStats(detail):
+
+def extract_stats(detail):
+    """
+    Description:
+        Extracts stats data rows per player from a replay detail structure.
+    Arguments:
+        detail: Replay detail parsed JSON dictionary.
+    Returns:
+        List of dictionaries with stats.
+    """
     rows = []
-    from utils.player_identity import auto_detect_aliases
     date_val = detail.get("date")
     for side in ("blue", "orange"):
-        team = (detail.get(side) or {})
+        team = detail.get(side) or {}
         for pl in team.get("players", []) or []:
             name = pl.get("name") or (pl.get("player") or {}).get("name")
             if not name: continue
@@ -286,7 +401,7 @@ def extractStats(detail):
             p_id = (pl.get("id") or {}).get("id")
             cid = auto_detect_aliases(name, p_id, plat, date_val)
             
-            stats = (pl.get("stats") or {})
+            stats = pl.get("stats") or {}
             core = stats.get("core") or {}
             demo = stats.get("demo") or {}
             rows.append({
@@ -294,7 +409,7 @@ def extractStats(detail):
                 "Player": name,
                 "Goals": core.get("goals", 0),
                 "Shots": core.get("shots", 0),
-                "Shot %": (core.get("goals",0) / core.get("shots",1)) if core.get("shots") else 0.0,
+                "Shot %": (core.get("goals", 0) / core.get("shots", 1)) if core.get("shots") else 0.0,
                 "Saves": core.get("saves", 0),
                 "Demos": demo.get("inflicted", 0),
                 "replay_id": detail.get("id"),
@@ -303,29 +418,48 @@ def extractStats(detail):
     return rows
 
 
-
-def aggregatePlayers(rows):
-    if not rows:
-        return pd.DataFrame(columns=["canonical_player_id", "Player", "Games", "Goals", "Shots", "Shot %", "Saves", "Demos"])
+def aggregate_players(rows):
+    """
+    Description:
+        Aggregates raw player stats into consolidated records.
+    Arguments:
+        rows: List of player stats dictionaries.
+    Returns:
+        Pandas DataFrame containing aggregated player statistics.
+    """
+    if not rows: return pd.DataFrame(columns=["canonical_player_id", "Player", "Games", "Goals", "Shots", "Shot %", "Saves", "Demos"])
     df = pd.DataFrame(rows)
     g = df.groupby("canonical_player_id", dropna=False).agg(
-        Player = ("Player", "first"),
-        Games = ("replay_id", "nunique"),
-        Goals = ("Goals", "sum"),
-        Shots = ("Shots", "sum"),
-        Saves = ("Saves", "sum"),
-        Demos = ("Demos", "sum"), 
+        Player=("Player", "first"),
+        Games=("replay_id", "nunique"),
+        Goals=("Goals", "sum"),
+        Shots=("Shots", "sum"),
+        Saves=("Saves", "sum"),
+        Demos=("Demos", "sum"), 
     ).reset_index()
-    g["Shot %"] = g.apply(lambda r: (r["Goals"]/r["Shots"]) if r["Shots"] else 0.0, axis=1)
+    g["Shot %"] = g.apply(lambda r: (r["Goals"] / r["Shots"]) if r["Shots"] else 0.0, axis=1)
     return g[["canonical_player_id", "Player", "Games", "Goals", "Shots", "Shot %", "Saves", "Demos"]].sort_values(["Games", "Shot %"], ascending=[False, False])
 
 
-def getH2HStats(t1, t2, r1, r2, bc: Ballchasing, limit: int=6, fallback: int=30):
+def get_h2h_stats(t1, t2, r1, r2, bc: Ballchasing, limit: int = 6, fallback: int = 30):
+    """
+    Description:
+        Resolves active rosters and fetches direct H2H statistics from private replays.
+    Arguments:
+        t1: Team 1 name.
+        t2: Team 2 name.
+        r1: Roster player names for Team 1.
+        r2: Roster player names for Team 2.
+        bc: Ballchasing client.
+        limit: Max direct replays to query details for.
+        fallback: Total private games list count to pull.
+    Returns:
+        Tuple: (Pandas DataFrame containing stats, List of query logs).
+    """
     logs = []
-    
-    idMap = load_player_id_map()
-    ids1 = resolve_ids(r1, idMap)
-    ids2 = resolve_ids(r2, idMap)
+    id_map = load_player_id_map()
+    ids1 = resolve_ids(r1, id_map)
+    ids2 = resolve_ids(r2, id_map)
     
     if not ids1 or not ids2:
         logs.append("Could not resolve player IDs for both teams to perform H2H.")
@@ -333,7 +467,6 @@ def getH2HStats(t1, t2, r1, r2, bc: Ballchasing, limit: int=6, fallback: int=30)
         
     p1_str = ids1[0]
     p2_str = ids2[0]
-    
     logs.append(f"Querying Ballchasing for private matches containing {p1_str} and {p2_str}...")
     
     params = [
@@ -347,7 +480,6 @@ def getH2HStats(t1, t2, r1, r2, bc: Ballchasing, limit: int=6, fallback: int=30)
         key_str = f"h2h_replays_{p1_str}_{p2_str}_{fallback}"
         cache_key = hashlib.md5(key_str.encode()).hexdigest()
         
-        # Check DB cache
         cached = get_cached_api_response(cache_key)
         if cached is not None:
             data = cached
@@ -370,16 +502,16 @@ def getH2HStats(t1, t2, r1, r2, bc: Ballchasing, limit: int=6, fallback: int=30)
         
     replays = replays[:limit]
     
-    perPlayerRows = []
+    per_player_rows = []
     for rep in replays:
         rid = rep.get("id")
         if not rid: continue
         try:
-            d = bc.getReplay(rid)
-            perPlayerRows.extend(extractStats(d))
+            d = bc.get_replay(rid)
+            per_player_rows.extend(extract_stats(d))
         except Exception as e:
             logs.append(f"Failed to fetch replay stats {rid}: {e}")
             continue
             
-    df = pd.DataFrame(perPlayerRows)
+    df = pd.DataFrame(per_player_rows)
     return df, logs

@@ -1,13 +1,40 @@
-# stats_pipeline.py (patched)
+"""
+Author: Kaiden Bell
+Date (Coded): (I'll update this part)
+File Function:
+- Description: Stats compilation pipeline fetching recent scrims and ranked activity records.
+- Usage: Imported by main.py and chat.py to calculate team stats and momentum features.
+"""
 
 import sys
 import time
-import pandas as pd
 from datetime import datetime, timedelta, timezone
 
+import pandas as pd
 
-def _progress(msg, current, total, start_time, cached=0):
-    """Print an inline progress indicator with ETA."""
+from utils.database import get_connection
+from utils.player_identity import auto_detect_aliases
+
+
+RECENT_DAYS = 90
+MAX_REPLAYS = 150
+AGG_KEYS = ["Goals", "Shots", "Saves", "Demos"]
+MOMENTUM_DAYS = 14
+
+
+def progress(msg, current, total, start_time, cached=0):
+    """
+    Description:
+        Prints an inline command line progress bar with ETA calculations.
+    Arguments:
+        msg: Display message.
+        current: Current index.
+        total: Total items.
+        start_time: Process start epoch time float.
+        cached: Count of items loaded from cache.
+    Returns:
+        None
+    """
     elapsed = time.time() - start_time
     if current > 0:
         per_item = elapsed / current
@@ -20,25 +47,48 @@ def _progress(msg, current, total, start_time, cached=0):
     sys.stdout.flush()
 
 
-def _progress_done(msg, total, start_time, cached=0):
-    """Finish a progress line."""
+def progress_done(msg, total, start_time, cached=0):
+    """
+    Description:
+        Completes the command line progress bar with total stats.
+    Arguments:
+        msg: Display message.
+        total: Total items.
+        start_time: Process start epoch time float.
+        cached: Count of items loaded from cache.
+    Returns:
+        None
+    """
     elapsed = time.time() - start_time
     cache_str = f" ({cached} from cache)" if cached else ""
     sys.stdout.write(f"\r{msg}: {total} replays in {elapsed:.1f}s{cache_str}\n")
     sys.stdout.flush()
 
-RECENT_DAYS = 90
-MAX_REPLAYS = 150
-AGG_KEYS = ["Goals", "Shots", "Saves", "Demos"]
 
-def _iso(dt_ms_or_iso):
+def iso_format(dt_ms_or_iso):
+    """
+    Description:
+        Converts millisecond epoch floats or generic inputs to standard ISO strings.
+    Arguments:
+        dt_ms_or_iso: Input value.
+    Returns:
+        String: ISO-formatted timestamp string.
+    """
     if isinstance(dt_ms_or_iso, (int, float)):
         return datetime.fromtimestamp(dt_ms_or_iso/1000, tz=timezone.utc).isoformat()
     return str(dt_ms_or_iso)
 
-def _get_canonical_name(pid):
+
+def get_canonical_name(pid):
+    """
+    Description:
+        Resolves a canonical player display name from their platform ID.
+    Arguments:
+        pid: Platform ID string.
+    Returns:
+        String: Canonical player display name.
+    """
     try:
-        from utils.database import get_connection
         conn = get_connection()
         row = conn.execute(
             "SELECT cp.canonical_name FROM player_ids pid "
@@ -51,46 +101,64 @@ def _get_canonical_name(pid):
         pass
     return pid.split(":")[-1][:12] if ":" in pid else pid[:12]
 
-def _in_window(dateStr, days=RECENT_DAYS):
+
+def in_window(date_str, days=RECENT_DAYS):
+    """
+    Description:
+        Checks if a given date string falls inside the active query window.
+    Arguments:
+        date_str: Date string.
+        days: Limit window size in days.
+    Returns:
+        Boolean: True if date falls within window, False otherwise.
+    """
     try:
-        dt = datetime.fromisoformat(dateStr.replace("Z", "+00:00"))
+        dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
     except Exception:
         return True
     return dt >= datetime.now(timezone.utc) - timedelta(days=days)
 
-def pullReplays(bc, playerID, count=MAX_REPLAYS, playlist="private"):
+
+def pull_replays(bc, player_id, count=MAX_REPLAYS, playlist="private"):
+    """
+    Description:
+        Pulls recent list of replays from Ballchasing API.
+    Arguments:
+        bc: Ballchasing client.
+        player_id: Platform ID to pull for.
+        count: Max replay count.
+        playlist: Target playlist category (scrims / public, etc.).
+    Returns:
+        List of replay dictionaries.
+    """
     params = {
-        "player-id": playerID,
+        "player-id": player_id,
         "sort-by": "replay-date",
         "sort-dir": "desc",
         "count": min(200, int(count)),
     }
-    if playlist:
-        params["playlist"] = playlist
+    if playlist: params["playlist"] = playlist
         
-    data = bc.listReplays(**params)
+    data = bc.list_replays(**params)
     return data.get("list", []) or []
 
-MOMENTUM_DAYS = 14  # only count recent ranked 2s
 
-def rankedActivity(bc, playerIDs, logs):
+def ranked_activity(bc, player_ids, logs):
     """
-        Feat:
-            - Recent ranked activity
-            - 2s matchmaking
-        Arguments:
-            bc: Ballchasing client
-            playerIDs: List of player IDs
-            logs: List to append logs to
-        Returns:
-            A dict mapping PlayerID -> {games, avg_score, win_rate}.
+    Description:
+        Queries Ballchasing API for active player ranked doubles (2v2) momentum statistics.
+    Arguments:
+        bc: Ballchasing client.
+        player_ids: List of platform player IDs.
+        logs: Diagnostic logs list.
+    Returns:
+        Dictionary mapping player platform ID to ranked activity metrics.
     """
     activity = {}
-    cutoff = datetime.now(timezone.utc) - timedelta(days=MOMENTUM_DAYS)
-    unique_pids = list(set(playerIDs))
+    unique_pids = list(set(player_ids))
 
     for p_idx, pid in enumerate(unique_pids):
-        cname = _get_canonical_name(pid)
+        cname = get_canonical_name(pid)
         print(f"  Ranked 2s momentum: player {p_idx + 1}/{len(unique_pids)} ({cname})")
         info = {"games": 0, "avg_score": 0.0, "win_rate": 0.0}
         try:
@@ -101,7 +169,7 @@ def rankedActivity(bc, playerIDs, logs):
                 "sort-dir": "desc",
                 "count": 50,
             }
-            data = bc.listReplays(**params)
+            data = bc.list_replays(**params)
             reps = data.get("list", []) or []
 
             scores, wins, total = [], 0, 0
@@ -109,16 +177,14 @@ def rankedActivity(bc, playerIDs, logs):
             valid_reps = []
             for rep in reps:
                 date_str = rep.get("date") or rep.get("created")
-                if date_str and not _in_window(str(date_str), days=MOMENTUM_DAYS):
-                    continue
+                if date_str and not in_window(str(date_str), days=MOMENTUM_DAYS): continue
                 rid = rep.get("id")
-                if rid:
-                    valid_reps.append(rid)
+                if rid: valid_reps.append(rid)
 
             for r_idx, rid in enumerate(valid_reps):
-                _progress("Ranked replays", r_idx + 1, len(valid_reps), t0)
+                progress("Ranked replays", r_idx + 1, len(valid_reps), t0)
                 try:
-                    detail = bc.getReplay(rid)
+                    detail = bc.get_replay(rid)
                 except Exception:
                     continue
 
@@ -133,12 +199,10 @@ def rankedActivity(bc, playerIDs, logs):
                             team_goals = (team.get("stats") or {}).get("core", {}).get("goals", 0)
                             opp_side = "orange" if side == "blue" else "blue"
                             opp_goals = ((detail.get(opp_side) or {}).get("stats") or {}).get("core", {}).get("goals", 0)
-                            if team_goals > opp_goals:
-                                wins += 1
+                            if team_goals > opp_goals: wins += 1
                             total += 1
 
-            if valid_reps:
-                _progress_done("Ranked replays", len(valid_reps), t0)
+            if valid_reps: progress_done("Ranked replays", len(valid_reps), t0)
 
             if total > 0:
                 info["games"] = total
@@ -153,14 +217,25 @@ def rankedActivity(bc, playerIDs, logs):
 
     return activity
 
-def replayStats(bc, playerIDs, logs):
+
+def replay_stats(bc, player_ids, logs):
+    """
+    Description:
+        Retrieves recent generic (private/scrim) replay details for players.
+    Arguments:
+        bc: Ballchasing client.
+        player_ids: List of platform player IDs.
+        logs: Diagnostic logs list.
+    Returns:
+        Pandas DataFrame of stats.
+    """
     players = []
-    unique_pids = list(set(playerIDs))
+    unique_pids = list(set(player_ids))
     for p_idx, pid in enumerate(unique_pids):
-        cname = _get_canonical_name(pid)
+        cname = get_canonical_name(pid)
         print(f"  Listing replays: player {p_idx + 1}/{len(unique_pids)} ({cname})")
         try:
-            players.extend(pullReplays(bc, pid))
+            players.extend(pull_replays(bc, pid))
             time.sleep(0.12)
         except Exception as e:
             logs.append(f"List replays failed for {pid}: {e}")
@@ -184,25 +259,22 @@ def replayStats(bc, playerIDs, logs):
 
         call_start = time.time()
         try:
-            detail = bc.getReplay(rid)
+            detail = bc.get_replay(rid)
         except Exception as e:
             logs.append(f"getReplay {rid} failed: {e}")
-            _progress("Generic stats", idx + 1, total_replays, t0, cached_count)
+            progress("Generic stats", idx + 1, total_replays, t0, cached_count)
             continue
-        if time.time() - call_start < 0.01:
-            cached_count += 1
+        if time.time() - call_start < 0.01: cached_count += 1
 
-        _progress("Generic stats", idx + 1, total_replays, t0, cached_count)
+        progress("Generic stats", idx + 1, total_replays, t0, cached_count)
 
-        date_s = _iso(detail.get("date"))
-        if not _in_window(date_s):
-            continue
+        date_s = iso_format(detail.get("date"))
+        if not in_window(date_s): continue
 
-        from utils.player_identity import auto_detect_aliases
         for side in ("blue", "orange"):
             team = (detail.get(side) or {})
             for pl in team.get("players", []) or []:
-                name  = pl.get("name") or (pl.get("player") or {}).get("name")
+                name = pl.get("name") or (pl.get("player") or {}).get("name")
                 if not name: continue
                 
                 plat = (pl.get("id") or {}).get("platform")
@@ -210,39 +282,48 @@ def replayStats(bc, playerIDs, logs):
                 cid = auto_detect_aliases(name, p_id, plat, date_s)
                 
                 stats = (pl.get("stats") or {})
-                core  = stats.get("core") or {}
-                demo  = stats.get("demo") or {}
+                core = stats.get("core") or {}
+                demo = stats.get("demo") or {}
                 rows.append({
                     "canonical_player_id": cid,
-                    "Player": name, # display name seen
+                    "Player": name,
                     "Goals": core.get("goals", 0),
                     "Shots": core.get("shots", 0),
                     "Saves": core.get("saves", 0),
                     "Demos": demo.get("inflicted", 0),
-                    "replay_id": detail.get("id"), 
+                    "replay_id": detail.get("id"),
                     "Date": date_s,
                 })
 
-    _progress_done("Generic stats", total_replays, t0, cached_count)
+    progress_done("Generic stats", total_replays, t0, cached_count)
     return pd.DataFrame(rows)
 
-def teamFeats(bc, rosterIDs, logs):
-    if not rosterIDs:
-        return pd.Series({k: 0 for k in AGG_KEYS + ["Shot %", "Games"]})
-    dfp = replayStats(bc, rosterIDs, logs)
-    if dfp.empty:
-        return pd.Series({k: 0 for k in AGG_KEYS + ["Shot %", "Games"]})
 
-    perPlayer = dfp.groupby("canonical_player_id", dropna=False).agg(
+def team_feats(bc, roster_ids, logs):
+    """
+    Description:
+        Aggregates recent generic replay stats for a list of roster platform IDs.
+    Arguments:
+        bc: Ballchasing client.
+        roster_ids: List of resolved player platform IDs.
+        logs: Diagnostic logs list.
+    Returns:
+        Pandas Series containing summed and averaged team features.
+    """
+    if not roster_ids: return pd.Series({k: 0 for k in AGG_KEYS + ["Shot %", "Games"]})
+    dfp = replay_stats(bc, roster_ids, logs)
+    if dfp.empty: return pd.Series({k: 0 for k in AGG_KEYS + ["Shot %", "Games"]})
+
+    per_player = dfp.groupby("canonical_player_id", dropna=False).agg(
         Games=("replay_id", "nunique"),
-        Goals=("Goals","sum"),
-        Shots=("Shots","sum"),
-        Saves=("Saves","sum"),
-        Demos=("Demos","sum"),
+        Goals=("Goals", "sum"),
+        Shots=("Shots", "sum"),
+        Saves=("Saves", "sum"),
+        Demos=("Demos", "sum"),
     ).reset_index()
 
-    totals = perPlayer[["Goals","Shots","Saves","Demos"]].sum()
-    games = perPlayer["Games"].sum()
+    totals = per_player[["Goals", "Shots", "Saves", "Demos"]].sum()
+    games = per_player["Games"].sum()
     shot_pct = (totals["Goals"]/totals["Shots"]) if totals["Shots"] else 0.0
     out = pd.Series({
         "Games": int(games),
@@ -254,14 +335,27 @@ def teamFeats(bc, rosterIDs, logs):
     })
     return out
 
-def buildFeatRows(bc, matchups, resolve, idMap, logs):
-    t1, t2 = matchups["team1"], matchups["team2"]
-    r1, r2 = matchups["team1_players"], matchups["team2_players"] 
-    ids1 = resolve(r1, idMap)
-    ids2 = resolve(r2, idMap)
 
-    f1 = teamFeats(bc, ids1, logs)
-    f2 = teamFeats(bc, ids2, logs)
+def build_feat_rows(bc, matchups, resolve, id_map, logs):
+    """
+    Description:
+        Compiles high-level training and prediction team stats vectors from playoff matchups.
+    Arguments:
+        bc: Ballchasing client.
+        matchups: Match data dict or row series.
+        resolve: ID resolver function.
+        id_map: Active player platform mappings.
+        logs: Diagnostic logs list.
+    Returns:
+        Tuple of two Pandas Series representing team1 and team2 feature rows.
+    """
+    t1, t2 = matchups["team1"], matchups["team2"]
+    r1, r2 = matchups["team1_players"], matchups["team2_players"]
+    ids1 = resolve(r1, id_map)
+    ids2 = resolve(r2, id_map)
+
+    f1 = team_feats(bc, ids1, logs)
+    f2 = team_feats(bc, ids2, logs)
 
     left = pd.Series({
         "team": t1,

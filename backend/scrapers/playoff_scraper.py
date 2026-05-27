@@ -1,9 +1,20 @@
+"""
+Author: Kaiden Bell
+Date (Coded): (I'll update this part)
+File Function:
+- Description: Headless browser scraper for Liquipedia playoff brackets, tournament schedules and active team rosters.
+- Usage: Imported by main.py to fetch and cache matchup and roster data.
+"""
+
+import re
+import time
+from urllib.parse import urljoin, quote
+
+from bs4 import BeautifulSoup
+import pandas as pd
+import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin, quote
-import time, re, requests
-import pandas as pd
 
 from utils.database import (
     initialize_database,
@@ -22,71 +33,124 @@ HEADERS = {
     "Accept-Language": "en-US,en;q=0.9",
 }
 
-def cleanTitle(s):
+
+def clean_title(s):
+    """
+    Description:
+        Strips control characters, extra spacing, acccents, Accented characters from title strings.
+    Arguments:
+        s: Raw input title string.
+    Returns:
+        String: Standard clean string.
+    """
     if not s: return ""
     s = s.replace("\u200b", "").replace("\xa0", " ").strip()
     s = re.sub(r'\s+', ' ', s)
     return s
 
 
-def getTeamName(op):
+def get_team_name(op):
+    """
+    Description:
+        Extracts team name attribute from bracket element.
+    Arguments:
+        op: Bracket opponent entry parsed HTML element.
+    Returns:
+        String: Team name if found, else None.
+    """
     name = op.get('aria-label')
-    return cleanTitle(name) if name else None
+    return clean_title(name) if name else None
 
 
-def getTeamUrl(teamURL):
-    teamURL = cleanTitle(teamURL).replace(' ', '_')
-    slug = quote(teamURL, safe="()_'!-")
+def get_team_url(team_url_str):
+    """
+    Description:
+        Constructs standard Liquipedia team URL string.
+    Arguments:
+        team_url_str: Team name string.
+    Returns:
+        String: Fully qualified team profile URL.
+    """
+    team_url_str = clean_title(team_url_str).replace(' ', '_')
+    slug = quote(team_url_str, safe="()_'!-")
     return BASE + slug
 
-def isPlaceholder(name):
+
+def is_placeholder(name):
+    """
+    Description:
+        Checks if team name is a placeholder (TBD, Winner/Loser of, etc.).
+    Arguments:
+        name: Team name string.
+    Returns:
+        Boolean: True if placeholder, False otherwise.
+    """
     return not name or bool(PLACEHOLDER.search(name.strip()))
 
-def fetchHTML(url, session=None):
+
+def fetch_html(url, session=None):
+    """
+    Description:
+        Performs HTTP GET request and returns parsed BeautifulSoup object.
+    Arguments:
+        url: Request target URL string.
+        session: Requests Session object.
+    Returns:
+        BeautifulSoup object of the HTML target.
+    """
     sess = session or requests.Session()
     r = sess.get(url, headers=HEADERS, timeout=20)
     r.raise_for_status()
     return BeautifulSoup(r.text, "html.parser")
     
 
-def cleanPlayers(names):
-    # filter obvious non-players and staff-y entries
-    block = {'coach','twitter','country','substitute','manager','owner','analyst','staff','edit'}
+def clean_players(names):
+    """
+    Description:
+        Filters staff, coaches and standard non-player items from roster lists.
+    Arguments:
+        names: List of raw string player names.
+    Returns:
+        List: Deduplicated standard player roster names.
+    """
+    block = {'coach', 'twitter', 'country', 'substitute', 'manager', 'owner', 'analyst', 'staff', 'edit'}
     out = []
     for n in names or []:
-        n = cleanTitle(n)
-        if not n or any(b in n.lower() for b in block) or len(n) > 40:
-            continue
+        n = clean_title(n)
+        if not n or any(b in n.lower() for b in block) or len(n) > 40: continue
         out.append(n)
-    # de-dupe preserving order
+    
     seen, uniq = set(), []
     for n in out:
-        if n not in seen:
-            uniq.append(n); seen.add(n)
+        if n not in seen: uniq.append(n); seen.add(n)
     return uniq
 
-def extractRoster(team_soup):
-    # Modern Liquipedia active roster table extraction
+
+def extract_roster(team_soup):
+    """
+    Description:
+        Extracts active players from parsed Liquipedia team profiles.
+    Arguments:
+        team_soup: Parsed BeautifulSoup HTML structure.
+    Returns:
+        List of active player name strings (up to 3).
+    """
     for tab in team_soup.select('.table2.table2--generic'):
         title = tab.parent.find('.table2__title')
-        if title and 'former' in title.get_text().lower():
-            continue
+        if title and 'former' in title.get_text().lower(): continue
             
         players = []
         for a in tab.select('.table2__row--body b a[title]'):
             players.append(a.get('title') or a.get_text(strip=True))
             
-        players = cleanPlayers(players)
-        if len(players) >= 3:
-            return players[:3]
+        players = clean_players(players)
+        if len(players) >= 3: return players[:3]
 
-    headers = team_soup.find_all(['h2','h3','h4'])
+    headers = team_soup.find_all(['h2', 'h3', 'h4'])
     pr_idx = None
     for i, h in enumerate(headers):
         txt = h.get_text(" ", strip=True).lower()
-        if 'player roster' in txt:
-            pr_idx = i
-            break
+        if 'player roster' in txt: pr_idx = i; break
 
     if pr_idx is not None:
         for j in range(pr_idx + 1, min(pr_idx + 8, len(headers))):
@@ -96,19 +160,16 @@ def extractRoster(team_soup):
                 node = headers[j].find_next_sibling()
                 hops = 0
                 while node and hops < 12:
-                    if node.name in ('h2','h3','h4'):
-                        break
+                    if node.name in ('h2', 'h3', 'h4'): break
                     if hasattr(node, 'select'):
                         anchors = node.select('a[title]')
                         players.extend([a.get('title') or a.get_text(strip=True) for a in anchors])
                     node = node.find_next_sibling()
                     hops += 1
-                players = cleanPlayers(players)
-                players = [p for p in players if p.lower() not in {'eversax'}]  # sample coach filter; extend as needed
-                if len(players) >= 3:
-                    return players[:3]
-                if players:
-                    return players
+                players = clean_players(players)
+                players = [p for p in players if p.lower() not in {'eversax'}]
+                if len(players) >= 3: return players[:3]
+                if players: return players
 
     for sel in [
         '.roster-card .team-template-text a[title]',
@@ -120,57 +181,71 @@ def extractRoster(team_soup):
     ]:
         els = team_soup.select(sel)
         if els:
-            names = cleanPlayers([e.get('title') or e.get_text(strip=True) for e in els])
-            if names:
-                return names[:3]
+            names = clean_players([e.get('title') or e.get_text(strip=True) for e in els])
+            if names: return names[:3]
 
     els = team_soup.select('.mw-parser-output a[title]')
-    names = cleanPlayers([e.get('title') for e in els])
+    names = clean_players([e.get('title') for e in els])
     return names[:3]
 
 
-def roundMap(bracket):
+def round_map(bracket):
+    """
+    Description:
+        Maps bracket matches to their respective tournament rounds.
+    Arguments:
+        bracket: BeautifulSoup element representing the bracket structure.
+    Returns:
+        Dictionary mapping match element hashes to round label strings.
+    """
     mapping = {}
     columns = bracket.select('.brkts-column, .brkts-round, .brkts-round-wrapper') or [bracket]
     for col in columns:
         current = None
         for child in col.children:
-            if not hasattr(child, 'get'):  # text nodes
-                continue
+            if not hasattr(child, 'get'): continue
             cls = child.get('class', [])
-            if 'brkts-header' in cls:  # this is the label you found
+            if 'brkts-header' in cls:
                 current = child.get_text(" ", strip=True)
             elif 'brkts-match' in cls:
                 mapping[id(child)] = current
             else:
                 inner = child.select('.brkts-match')
-                for m in inner:
-                    mapping[id(m)] = current
+                for m in inner: mapping[id(m)] = current
     return mapping
 
-def nearestSect(n):
+
+def nearest_sect(n):
+    """
+    Description:
+        Finds the nearest logical section heading above a bracket.
+    Arguments:
+        n: BeautifulSoup tag.
+    Returns:
+        String: Heading label or "Unknown".
+    """
     hd = n.find_previous(['h2', 'h3', 'h4'])
     if not hd: return "Unknown"
     hl = hd.select_one('.mw-headline')
     return (hl.get_text(strip=True) if hl else hd.get_text(strip=True)) or "Unknown"
 
 
-def scrape(URL, sections=None):
+def scrape_playoffs(url, sections=None):
     """
-    Scrape matchups from a Liquipedia tournament page.
-    
-    Args:
-        URL: Liquipedia tournament URL
-        sections: list of section keywords to include, e.g. ['playoff', 'group'].
-                  If None, scrapes all bracket sections found on the page.
+    Description:
+        Scrapes brackets, tournament structure, and rosters from a Liquipedia page.
+    Arguments:
+        url: target URL string.
+        sections: Optional list of specific sections to include.
+    Returns:
+        Pandas DataFrame containing matchups and rosters.
     """
-    # Ensure the DB schema exists before we start
     initialize_database()
 
     opts = Options()
     opts.add_argument("--headless=new")
     driver = webdriver.Chrome(options=opts)
-    driver.get(URL)
+    driver.get(url)
     time.sleep(5)
 
     soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -178,53 +253,41 @@ def scrape(URL, sections=None):
 
     rows = []
     for b in soup.find_all('div', class_='brkts-bracket'):
-        section = nearestSect(b)
+        section = nearest_sect(b)
         section_lower = section.lower()
         
-        # Filter by requested sections (if specified)
         if sections:
-            if not any(s.lower() in section_lower for s in sections):
-                continue
+            if not any(s.lower() in section_lower for s in sections): continue
         
-        # Auto-detect best_of from section type
-        if 'playoff' in section_lower:
-            best_of = 7
-        elif 'group' in section_lower:
-            best_of = 5
-        elif 'swiss' in section_lower:
-            best_of = 5
-        else:
-            best_of = 5  # default
+        if 'playoff' in section_lower: best_of = 7
+        elif 'group' in section_lower: best_of = 5
+        elif 'swiss' in section_lower: best_of = 5
+        else: best_of = 5
 
-        rmap = roundMap(b)
+        rmap = round_map(b)
 
         for m in b.find_all('div', class_='brkts-match'):
             ops = m.select('.brkts-opponent-entry')
-            if len(ops) < 2:
-                continue
+            if len(ops) < 2: continue
 
-            t1 = getTeamName(ops[0])
-            t2 = getTeamName(ops[1])
+            t1 = get_team_name(ops[0])
+            t2 = get_team_name(ops[1])
             
-            # Extract scores
             s1_el = ops[0].select_one('.brkts-opponent-score-inner')
             s2_el = ops[1].select_one('.brkts-opponent-score-inner')
             s1 = s1_el.get_text(strip=True) if s1_el else ""
             s2 = s2_el.get_text(strip=True) if s2_el else ""
-            # Only keep digits to avoid '-' or placeholders
             s1 = s1 if s1.isdigit() else ""
             s2 = s2 if s2.isdigit() else ""
             
             def _extract_url(op, name):
-                if isPlaceholder(name): return None
+                if is_placeholder(name): return None
                 a_tag = op.select_one('a[href]')
                 if a_tag:
                     href = a_tag.get('href', '')
-                    if href.startswith('/'):
-                        return "https://liquipedia.net" + href
-                    elif href.startswith('http'):
-                        return href
-                return getTeamUrl(name)
+                    if href.startswith('/'): return "https://liquipedia.net" + href
+                    if href.startswith('http'): return href
+                return get_team_url(name)
 
             rows.append({
                 'section': section,
@@ -236,34 +299,30 @@ def scrape(URL, sections=None):
                 'team2_url': _extract_url(ops[1], t2),
             })
 
-    # --- Roster fetching with DB-backed cache ---
     sess = requests.Session()
     for r in rows:
-        for side in ('team1','team2'):
+        for side in ('team1', 'team2'):
             url = r[side + '_url']
             if not url:
                 r[side + '_players'] = []
                 continue
 
-            # Check the DB cache first
             cached = get_cached_roster(url)
             if cached is not None:
                 r[side + '_players'] = cached
                 continue
 
-            # Not cached — scrape and persist
             try:
-                ts = fetchHTML(url, session=sess)
-                roster = extractRoster(ts)
+                ts = fetch_html(url, session=sess)
+                roster = extract_roster(ts)
                 cache_roster(url, roster)
                 r[side + '_players'] = roster
                 time.sleep(0.4)
             except Exception:
                 r[side + '_players'] = []
 
-    # --- Persist the tournament + matchups to DB ---
     conn = get_connection()
-    tid = save_tournament(URL, conn=conn)
+    tid = save_tournament(url, conn=conn)
     save_matchups(tid, rows, conn=conn)
     conn.close()
 
@@ -271,7 +330,7 @@ def scrape(URL, sections=None):
 
 
 if __name__ == "__main__":
-    URL = input("Enter the Tournament you wish to scrape: ")
-    df = scrape(URL)
-    print(df[['section','round','team1','team2','team1_players','team2_players']].head(20))
+    url_input = input("Enter the Tournament you wish to scrape: ")
+    df = scrape_playoffs(url_input)
+    print(df[['section', 'round', 'team1', 'team2', 'team1_players', 'team2_players']].head(20))
     df.to_csv("playoffs-scraped.csv", index=False)

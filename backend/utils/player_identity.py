@@ -1,46 +1,53 @@
+"""
+Author: Kaiden Bell
+Date (Coded): (I'll update this part)
+File Function:
+- Description: Player identity resolution, alias parsing, platform ID matching, and deduplication logic.
+- Usage: Imported across backend modules to resolve raw player names into unique canonical profiles.
+"""
+
+import difflib
 import re
 from typing import Optional, List, Dict
-from utils.database import get_connection
+
+import utils.database as database
+
 
 def normalize_player_name(name: str) -> str:
     """
-    Normalizes a display name to generate a potential alias key.
-    - lowercases
-    - removes text in parentheses (e.g. disambiguation like '(French Player)')
-    - strips whitespace
-    - removes common team prefixes (e.g. 'SSG.', 'NRG ')
-    - removes spaces, dashes, underscores
-    - strips trailing periods
+    Description:
+        Normalizes a display name to generate a potential alias key.
+    Arguments:
+        name: Raw display name string.
+    Returns:
+        String: Standardized normalized name string.
     """
-    if not name:
-        return ""
+    if not name: return ""
     
     n = name.lower()
-    
-    # Remove text in parentheses
     n = re.sub(r'\(.*?\)', '', n)
     n = n.strip()
-    
-    # Remove common team prefix patterns (2-4 letters followed by dot, space, or dash)
-    # Uses positive lookahead to ensure we only remove the prefix if it's followed by actual text!
     n = re.sub(r'^[a-z0-9]{2,4}[\.\-\s]+(?=[a-z0-9])', '', n)
-    
-    # Remove spaces, underscores, dashes, but KEEP periods, accents, etc.
     n = n.replace('_', '').replace('-', '').replace(' ', '')
-    
-    # Strip trailing periods so "Atow." and "Atow" match perfectly
     n = n.rstrip('.')
     
-    # Optional: strip trailing 'rl' if it's longer than 3 chars (e.g., mechrl -> mech, but not 'carl' -> 'ca')
-    if n.endswith('rl') and len(n) > 4:
-        n = n[:-2]
+    if n.endswith('rl') and len(n) > 4: n = n[:-2]
         
     return n
 
+
 def resolve_player_alias(alias: str, conn=None) -> Optional[str]:
-    """Returns canonical_player_id for a given alias, or None."""
+    """
+    Description:
+        Resolves a player alias to its canonical player ID.
+    Arguments:
+        alias: Raw alias string.
+        conn: Optional DB connection.
+    Returns:
+        Optional canonical player ID string or None.
+    """
     own = conn is None
-    if own: conn = get_connection()
+    if own: conn = database.get_connection()
     
     norm = normalize_player_name(alias)
     row = conn.execute("SELECT canonical_player_id FROM player_aliases WHERE alias = ?", (norm,)).fetchone()
@@ -48,10 +55,19 @@ def resolve_player_alias(alias: str, conn=None) -> Optional[str]:
     if own: conn.close()
     return row["canonical_player_id"] if row else None
 
+
 def get_canonical_player(canonical_player_id: str, conn=None) -> Optional[Dict]:
-    """Fetch full details of a canonical player."""
+    """
+    Description:
+        Fetches full canonical player profile details.
+    Arguments:
+        canonical_player_id: Unique player ID.
+        conn: Optional DB connection.
+    Returns:
+        Optional profile details dictionary or None.
+    """
     own = conn is None
-    if own: conn = get_connection()
+    if own: conn = database.get_connection()
     
     row = conn.execute("SELECT * FROM canonical_players WHERE canonical_player_id = ?", (canonical_player_id,)).fetchone()
     if not row:
@@ -65,10 +81,18 @@ def get_canonical_player(canonical_player_id: str, conn=None) -> Optional[Dict]:
     if own: conn.close()
     return player
 
+
 def get_available_players(conn=None) -> List[Dict]:
-    """Return all canonical players with their aliases."""
+    """
+    Description:
+        Pulls all active canonical players and their linked aliases.
+    Arguments:
+        conn: Optional DB connection.
+    Returns:
+        List of player detail dictionaries.
+    """
     own = conn is None
-    if own: conn = get_connection()
+    if own: conn = database.get_connection()
     
     players = []
     rows = conn.execute("SELECT * FROM canonical_players").fetchall()
@@ -84,44 +108,49 @@ def get_available_players(conn=None) -> List[Dict]:
     if own: conn.close()
     return players
 
+
 def auto_detect_aliases(display_name: str, platform_player_id: str, platform: str, date_seen: str, conn=None) -> str:
     """
-    Process a newly seen player from a replay.
-    Returns the canonical_player_id.
+    Description:
+        Processes a newly seen player name and platform ID, auto detecting or creating aliases.
+    Arguments:
+        display_name: Display name.
+        platform_player_id: Platform ID.
+        platform: Platform type (steam, epic, etc.).
+        date_seen: Timestamp string.
+        conn: Optional DB connection.
+    Returns:
+        String: Resolved canonical player ID.
     """
     own = conn is None
-    if own: conn = get_connection()
+    if own: conn = database.get_connection()
     
     norm = normalize_player_name(display_name)
     full_platform_id = f"{platform}:{platform_player_id}" if platform and platform_player_id else None
     
-    # 1. Try to match by platform ID (Most reliable)
     if full_platform_id:
         row = conn.execute("SELECT canonical_player_id FROM player_ids WHERE platform_id = ?", (full_platform_id,)).fetchone()
         if row:
             cid = row["canonical_player_id"]
-            # Add alias if new
             conn.execute("INSERT OR IGNORE INTO player_aliases (alias, canonical_player_id) VALUES (?, ?)", (norm, cid))
-            if own: conn.commit(); conn.close()
+            if own:
+                conn.commit()
+                conn.close()
             return cid
             
-    # 2. Try to match by existing alias ONLY IF we don't have a platform ID.
-    # If we have a platform ID, we DO NOT want to blindly attach it to an existing player
-    # just because the display name matches (e.g. a random fan named 'Atow').
     if not full_platform_id:
         row = conn.execute("SELECT canonical_player_id FROM player_aliases WHERE alias = ?", (norm,)).fetchone()
         if row:
             cid = row["canonical_player_id"]
-            if own: conn.commit(); conn.close()
+            if own:
+                conn.commit()
+                conn.close()
             return cid
         
-    # 3. Create new canonical player for the unseen platform ID (or unseen alias)
     cid = norm
     if full_platform_id:
-        # Prevent PRIMARY KEY collision if the norm already exists as a canonical player
         row = conn.execute("SELECT canonical_player_id FROM canonical_players WHERE canonical_player_id = ?", (cid,)).fetchone()
-        if row:
-            cid = f"{norm}_{platform_player_id}"
+        if row: cid = f"{norm}_{platform_player_id}"
             
     canonical_name = display_name
     conn.execute("INSERT OR IGNORE INTO canonical_players (canonical_player_id, canonical_name, first_seen, last_seen) VALUES (?, ?, ?, ?)",
@@ -131,46 +160,61 @@ def auto_detect_aliases(display_name: str, platform_player_id: str, platform: st
     if full_platform_id:
         conn.execute("INSERT OR IGNORE INTO player_ids (canonical_player_id, platform_id) VALUES (?, ?)", (cid, full_platform_id))
         
-    if own: conn.commit(); conn.close()
+    if own:
+        conn.commit()
+        conn.close()
     return cid
 
+
 def merge_players(primary_id: str, duplicate_id: str, conn=None):
-    """Merge duplicate_id into primary_id."""
+    """
+    Description:
+        Merges a duplicate player profile ID into a primary player profile ID.
+    Arguments:
+        primary_id: Target canonical player ID.
+        duplicate_id: Source canonical player ID to merge from.
+        conn: Optional DB connection.
+    Returns:
+        None
+    """
     own = conn is None
-    if own: conn = get_connection()
+    if own: conn = database.get_connection()
     
-    # 1. Move aliases
     conn.execute("UPDATE player_aliases SET canonical_player_id = ? WHERE canonical_player_id = ?", (primary_id, duplicate_id))
     
-    # 2. Move platform IDs
     conn.execute("UPDATE OR IGNORE player_ids SET canonical_player_id = ? WHERE canonical_player_id = ?", (primary_id, duplicate_id))
     conn.execute("DELETE FROM player_ids WHERE canonical_player_id = ?", (duplicate_id,))
     
-    # 3. Update player stats
     conn.execute("UPDATE player_stats SET canonical_player_id = ?, canonical_name = (SELECT canonical_name FROM canonical_players WHERE canonical_player_id = ?) WHERE canonical_player_id = ?", (primary_id, primary_id, duplicate_id))
     
-    # 4. Remove duplicate canonical player
     conn.execute("DELETE FROM canonical_players WHERE canonical_player_id = ?", (duplicate_id,))
     
-    if own: conn.commit(); conn.close()
+    if own:
+        conn.commit()
+        conn.close()
+
 
 def find_possible_duplicates(conn=None) -> List[Dict]:
-    """Find players that might be the same person."""
+    """
+    Description:
+        Finds pairs of canonical players that could be duplicate profiles.
+    Arguments:
+        conn: Optional DB connection.
+    Returns:
+        List of duplicate candidate dictionaries.
+    """
     own = conn is None
-    if own: conn = get_connection()
+    if own: conn = database.get_connection()
     
     candidates = []
     players = conn.execute("SELECT canonical_player_id, canonical_name FROM canonical_players").fetchall()
-    
-    import difflib
     
     for i, p1 in enumerate(players):
         for p2 in players[i+1:]:
             n1 = normalize_player_name(p1["canonical_name"])
             n2 = normalize_player_name(p2["canonical_name"])
             
-            if not (n1 and n2) or len(n1) <= 3 or len(n2) <= 3:
-                continue
+            if not (n1 and n2) or len(n1) <= 3 or len(n2) <= 3: continue
                 
             ratio = difflib.SequenceMatcher(None, n1, n2).ratio()
             is_substring = n1 in n2 or n2 in n1

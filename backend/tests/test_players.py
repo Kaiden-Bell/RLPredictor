@@ -1,13 +1,29 @@
+"""
+Author: Kaiden Bell
+Date (Coded): (I'll update this part)
+File Function:
+- Description: Tests the player alias matching and duplicate profile detection processes.
+- Usage: Executed via command-line (python3 backend/tests/test_players.py) to check deduplication.
+"""
+
 import os
 import sys
 
-# Add the root directory to sys.path to allow importing utils
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.database import get_connection
 from utils.player_identity import get_available_players, find_possible_duplicates, merge_players
 
+
 def main():
+    """
+    Description:
+        Main entry point to execute available player counts and find duplicate candidate profiles.
+    Arguments:
+        None
+    Returns:
+        None
+    """
     conn = get_connection()
     players = get_available_players(conn)
     print(f"Total players found: {len(players)}")
@@ -23,6 +39,7 @@ def main():
             print(f"    Reason: {dup['reason']} | Action: {dup['recommended_action']}")
             
     conn.close()
+
 
 if __name__ == "__main__":
     main()

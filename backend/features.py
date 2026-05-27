@@ -1,19 +1,21 @@
 """
-features.py — Feature extraction for the RLPredictor neural network.
-
-Transforms raw replay data into a 13-dimensional feature vector and
-generates self-supervised training rows from cached replay history.
+Author: Kaiden Bell
+Date (Coded): (I'll update this part)
+File Function:
+- Description: Neural Network 13-dimensional feature extraction and training sample generator.
+- Usage: Imported by main.py, train.py, and chat.py to convert raw DB data to normalized tensors.
 """
 
 import json
-import numpy as np
-import pandas as pd
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
+import numpy as np
+import pandas as pd
+
 from utils.database import get_all_replay_details, initialize_database
 
-# Feature normalization caps
+
 MAX_GAMES_H2H = 30
 MAX_GAMES_GEN = 150
 MAX_GAMES_MOMENTUM = 50
@@ -28,8 +30,16 @@ THRESHOLDS = {
 }
 
 
-def _norm(val, cap):
-    """Normalize a value to [0, 1] using a cap."""
+def norm(val, cap):
+    """
+    Description:
+        Normalizes a value inside [0, 1] using a specified cap limit.
+    Arguments:
+        val: Numerical value to normalize.
+        cap: Maximum cap value.
+    Returns:
+        Float: Normalized value inside [0.0, 1.0].
+    """
     return min(float(val) / cap, 1.0) if cap else 0.0
 
 
@@ -45,54 +55,66 @@ def extract_features(
     playlist_type=1,
 ):
     """
-    Build the 13-dimensional feature vector for a single prediction query.
-
-    Returns: np.ndarray of shape (13,)
+    Description:
+        Constructs the 13-dimensional feature vector for a query.
+    Arguments:
+        player_name: String name of the player.
+        stat_name: target statistic.
+        threshold: Over/under threshold.
+        h2h_df: Head-to-head DataFrame.
+        gen_df: General statistics DataFrame.
+        momentum_data: Ranked momentum dictionary.
+        sentiment_data: Reddit sentiment dictionary.
+        confident_h2h: True if high confidence direct match.
+        playlist_type: playlist category float.
+    Returns:
+        1D Numpy float32 array representing the 13-dimensional feature vector.
     """
     stat_cap = STAT_CAPS.get(stat_name, 8)
     features = np.zeros(13, dtype=np.float32)
 
-    # --- H2H features (1-4) ---
     if h2h_df is not None and not h2h_df.empty and player_name in h2h_df["Player"].values:
         p = h2h_df[h2h_df["Player"] == player_name]
         n = len(p)
         if n > 0 and stat_name in p.columns:
             vals = p[stat_name].values
-            features[0] = _norm(vals.mean(), stat_cap)        # h2h_avg_stat
-            features[1] = (vals > threshold).mean()            # h2h_hit_rate
-            features[2] = _norm(n, MAX_GAMES_H2H)             # h2h_games
-    features[3] = 1.0 if confident_h2h else 0.0               # h2h_confident
+            features[0] = norm(vals.mean(), stat_cap)
+            features[1] = (vals > threshold).mean()
+            features[2] = norm(n, MAX_GAMES_H2H)
+    features[3] = 1.0 if confident_h2h else 0.0
 
-    # --- Generic form features (5-8) ---
     if gen_df is not None and not gen_df.empty and player_name in gen_df["Player"].values:
         p = gen_df[gen_df["Player"] == player_name]
         n = len(p)
         if n > 0 and stat_name in p.columns:
             vals = p[stat_name].values
-            features[4] = _norm(vals.mean(), stat_cap)         # gen_avg_stat
-            features[5] = (vals > threshold).mean()            # gen_hit_rate
-            features[6] = _norm(n, MAX_GAMES_GEN)              # gen_games
-            features[7] = _norm(vals.std(), stat_cap)           # gen_std_dev
+            features[4] = norm(vals.mean(), stat_cap)
+            features[5] = (vals > threshold).mean()
+            features[6] = norm(n, MAX_GAMES_GEN)
+            features[7] = norm(vals.std(), stat_cap)
 
-    # --- Momentum features (9-11) ---
     if momentum_data and isinstance(momentum_data, dict):
-        features[8] = _norm(momentum_data.get("games", 0), MAX_GAMES_MOMENTUM)
-        features[9] = _norm(momentum_data.get("avg_score", 0), MAX_SCORE)
+        features[8] = norm(momentum_data.get("games", 0), MAX_GAMES_MOMENTUM)
+        features[9] = norm(momentum_data.get("avg_score", 0), MAX_SCORE)
         features[10] = momentum_data.get("win_rate", 0) / 100.0
 
-    # --- Sentiment (12) ---
     if sentiment_data and isinstance(sentiment_data, dict):
-        # VADER score is -1 to +1, shift to 0–1
         features[11] = (sentiment_data.get("score", 0.0) + 1.0) / 2.0
 
-    # --- Playlist type (13) ---
     features[12] = float(playlist_type)
 
     return features
 
 
-def _extract_player_stats(detail):
-    """Extract per-player stats from a single replay detail dict."""
+def extract_player_stats(detail):
+    """
+    Description:
+        Extracts player stats from a single replay detail structure.
+    Arguments:
+        detail: Replay detail parsed JSON dictionary.
+    Returns:
+        List of dictionaries with stats.
+    """
     rows = []
     for side in ("blue", "orange"):
         team = detail.get(side) or {}
@@ -112,52 +134,61 @@ def _extract_player_stats(detail):
     return rows
 
 
-def _is_replay_detail(data):
-    """Check if a cached response looks like a replay detail (has blue/orange teams)."""
+def is_replay_detail(data):
+    """
+    Description:
+        Checks if cached object is a replay detail dictionary.
+    Arguments:
+        data: Cache entry value.
+    Returns:
+        Boolean: True if structured correctly, False otherwise.
+    """
     return isinstance(data, dict) and "blue" in data and "orange" in data
 
 
-def _is_replay_list(data):
-    """Check if a cached response looks like a replay list."""
+def is_replay_list(data):
+    """
+    Description:
+        Checks if cached object is a list of replays.
+    Arguments:
+        data: Cache entry value.
+    Returns:
+        Boolean: True if structured correctly, False otherwise.
+    """
     return isinstance(data, dict) and "list" in data and isinstance(data.get("list"), list)
 
 
-def _detect_playlist(data):
-    """Detect playlist type from a replay detail. Returns 0 for ranked-2s, 1 for private."""
+def detect_playlist(data):
+    """
+    Description:
+        Determines the category index of the playlist (ranked-2s vs private).
+    Arguments:
+        data: Replay detail dictionary.
+    Returns:
+        Float: 0.0 for doubles/2v2, 1.0 for private/scrims.
+    """
     playlist = data.get("playlist_id") or data.get("playlist_name") or ""
-    if isinstance(playlist, str) and "doubles" in playlist.lower():
-        return 0
-    if isinstance(playlist, str) and "private" in playlist.lower():
-        return 1
-    # playlist_id: ranked-doubles = specific IDs, private = "private"
+    if isinstance(playlist, str) and "doubles" in playlist.lower(): return 0
+    if isinstance(playlist, str) and "private" in playlist.lower(): return 1
     pid = data.get("playlist_id", "")
-    if pid == "ranked-doubles":
-        return 0
-    return 1  # default to private/scrims
+    if pid == "ranked-doubles": return 0
+    return 1
 
 
 def build_training_data(cache_path=".bc_cache.json", min_lookback=5):
     """
-    Generate self-supervised training rows from cached Ballchasing replays.
-
-    For each player found in the cache:
-      - Collect their game-by-game stats
-      - For each game N (where N >= min_lookback):
-        - Use games 0..N-1 as the "history" (features)
-        - Use game N as the "label" (did stat > threshold?)
-      - Try multiple stat/threshold combos for each game
-
-    Returns: (features_array, labels_array, metadata_list)
-      features_array: np.ndarray of shape (num_samples, 13)
-      labels_array:   np.ndarray of shape (num_samples,) — 0 or 1
-      metadata_list:  list of dicts with player/stat/threshold info
+    Description:
+        Generates chronological supervised training samples from cached database replays.
+    Arguments:
+        cache_path: Legacy JSON cache fallback path string.
+        min_lookback: History window required to build features.
+    Returns:
+        Tuple: (features array, labels array, metadata list of dictionaries).
     """
-    # Try the DB first; fall back to .bc_cache.json for backwards compat
     initialize_database()
     all_details = get_all_replay_details()
 
     if not all_details:
-        # Fallback: try the old JSON cache file
         cache_file = Path(cache_path)
         if not cache_file.exists():
             print(f"No replay data found in DB or {cache_path}!")
@@ -168,21 +199,20 @@ def build_training_data(cache_path=".bc_cache.json", min_lookback=5):
             cache = json.load(f)
         all_details = [
             data for data in cache.values()
-            if _is_replay_detail(data)
+            if is_replay_detail(data)
         ]
 
     if not all_details:
         print("No replay details found.")
         return np.zeros((0, 13)), np.zeros(0), []
 
-    # Step 1: Extract all player stats from replay details
     all_rows = []
     replay_playlists = {}
     for data in all_details:
         rid = data.get("id", "")
-        playlist_type = _detect_playlist(data)
+        playlist_type = detect_playlist(data)
         replay_playlists[rid] = playlist_type
-        player_rows = _extract_player_stats(data)
+        player_rows = extract_player_stats(data)
         for row in player_rows:
             row["replay_id"] = rid
             row["date"] = data.get("date", "")
@@ -192,7 +222,6 @@ def build_training_data(cache_path=".bc_cache.json", min_lookback=5):
     df = pd.DataFrame(all_rows)
     print(f"Found {len(df)} player-game records across {df['replay_id'].nunique()} replays")
 
-    # Step 2: Group by player and generate training rows
     features_list = []
     labels_list = []
     meta_list = []
@@ -201,10 +230,8 @@ def build_training_data(cache_path=".bc_cache.json", min_lookback=5):
     processed = 0
 
     for player_name, p_df in player_groups:
-        if len(p_df) < min_lookback + 1:
-            continue  # not enough history
+        if len(p_df) < min_lookback + 1: continue
 
-        # Sort by date (oldest first for chronological lookback)
         p_df = p_df.sort_values("date").reset_index(drop=True)
 
         for game_idx in range(min_lookback, len(p_df)):
@@ -212,13 +239,10 @@ def build_training_data(cache_path=".bc_cache.json", min_lookback=5):
             target_game = p_df.iloc[game_idx]
             playlist_type = target_game.get("playlist_type", 1)
 
-            # Try each stat/threshold combination
             for stat in STATS:
-                if stat not in lookback.columns:
-                    continue
+                if stat not in lookback.columns: continue
 
                 for thresh in THRESHOLDS.get(stat, []):
-                    # Build features from lookback
                     vals = lookback[stat].values
                     avg = vals.mean()
                     hit_rate = (vals > thresh).mean()
@@ -226,27 +250,21 @@ def build_training_data(cache_path=".bc_cache.json", min_lookback=5):
                     stat_cap = STAT_CAPS.get(stat, 8)
 
                     feat = np.zeros(13, dtype=np.float32)
-                    # H2H features — set to 0 (no H2H context in training)
                     feat[0] = 0.0
                     feat[1] = 0.0
                     feat[2] = 0.0
                     feat[3] = 0.0
-                    # Generic form features (from lookback)
-                    feat[4] = _norm(avg, stat_cap)
+                    feat[4] = norm(avg, stat_cap)
                     feat[5] = hit_rate
-                    feat[6] = _norm(len(lookback), MAX_GAMES_GEN)
-                    feat[7] = _norm(std_dev, stat_cap)
-                    # Momentum — approximate from recent lookback
+                    feat[6] = norm(len(lookback), MAX_GAMES_GEN)
+                    feat[7] = norm(std_dev, stat_cap)
                     recent = lookback.tail(min(14, len(lookback)))
-                    feat[8] = _norm(len(recent), MAX_GAMES_MOMENTUM)
-                    feat[9] = _norm(recent["Score"].mean() if "Score" in recent else 0, MAX_SCORE)
-                    feat[10] = 0.5  # no win/loss info in training rows
-                    # Sentiment — default neutral
+                    feat[8] = norm(len(recent), MAX_GAMES_MOMENTUM)
+                    feat[9] = norm(recent["Score"].mean() if "Score" in recent else 0, MAX_SCORE)
+                    feat[10] = 0.5
                     feat[11] = 0.5
-                    # Playlist type
                     feat[12] = float(playlist_type)
 
-                    # Label: did the player hit the over in the target game?
                     actual = target_game[stat]
                     label = 1.0 if actual > thresh else 0.0
 
