@@ -316,43 +316,34 @@ def run_chat(row, bc, id_map):
         confidence = "High" if pick_prob and abs(pick_prob - 0.5) > 0.2 else "Medium" if pick_prob and abs(pick_prob - 0.5) > 0.1 else "Low"
 
         print(f"\n{'=' * 50}")
-        print(f"  {matched_player_name} — {ou_label} {threshold} {stat}{games_str}")
+        print(f"  {matched_player_name} — Over/Under {threshold} {stat}{games_str}")
         print(f"{'=' * 50}")
 
         if pick_prob is not None:
-            print(f"\n  Pick:       {pick.upper()}")
-            print(f"  Chance:     {pick_prob:.1%}")
-            print(f"  Confidence: {confidence}")
+            print(f"  Pick: {pick.capitalize()}")
+            print(f"  Odds: {pick_prob:.1%}")
+            print(f"  Conf: {confidence}")
         else:
-            print(f"\n  Pick:       Insufficient data")
+            print(f"  Pick: Insufficient data")
 
-        print(f"\n  Why?")
-        reasons = []
+        print(f"\nOverview:")
 
         if per_game_avg_h2h is not None:
             avg_str = f"{per_game_avg_h2h:.1f}"
             if projected_total is not None:
-                reasons.append(f"    H2H avg: {avg_str} {stat.lower()}/game ({h2h_games} games) -> ~{projected_total:.1f} projected across {num_games}")
+                print(f"H2H Average: {avg_str} {stat.lower()}/game ({h2h_games} games) -> ~{projected_total:.1f} projected across {num_games} games")
             else:
-                reasons.append(f"    H2H avg: {avg_str} {stat.lower()}/game ({h2h_games} games)")
-            if confident_h2h: reasons.append(f"    H2H rosters match current lineups (high confidence)")
+                print(f"H2H Average: {avg_str} {stat.lower()}/game ({h2h_games} games)")
 
         if per_game_avg_gen is not None:
             avg_str = f"{per_game_avg_gen:.1f}"
             if projected_total is not None and per_game_avg_h2h is None:
-                reasons.append(f"    Recent avg: {avg_str} {stat.lower()}/game ({gen_games} games) -> ~{projected_total:.1f} projected across {num_games}")
+                print(f"Recent Averages: {avg_str} {stat.lower()}/game ({gen_games} games) -> ~{projected_total:.1f} projected across {num_games} games")
             else:
-                reasons.append(f"    Recent avg: {avg_str} {stat.lower()}/game ({gen_games} games)")
+                print(f"Recent Averages: {avg_str} {stat.lower()}/game ({gen_games} games)")
 
-        if prob_h2h is not None:
-            per_game_thresh = threshold / num_games if num_games and num_games > 1 else threshold
-            reasons.append(f"    H2H hit rate: {prob_h2h:.0f}% of games had >{per_game_thresh:.1f} {stat.lower()}")
-
-        reasons.append(f"    Ranked 2s momentum: {momentum_label}")
-        reasons.append(f"    Reddit sentiment: {s_score:+.2f} ({s_status})")
-
-        for r in reasons: print(r)
-        print(f"{'-' * 50}")
+        print(f"2s Momentum: {momentum_label}")
+        print(f"Sentiment: {s_score:+.2f} ({s_status})")
 
         if nn_model_used and feat_vec is not None and nn_prob is not None:
             nn_picks_over = nn_prob >= 0.5

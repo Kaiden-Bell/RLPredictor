@@ -119,7 +119,7 @@ def in_window(date_str, days=RECENT_DAYS):
     return dt >= datetime.now(timezone.utc) - timedelta(days=days)
 
 
-def pull_replays(bc, player_id, count=MAX_REPLAYS, playlist="private"):
+def pull_replays(bc, player_id, count=MAX_REPLAYS, playlist="private", pro_only=True):
     """
     Description:
         Pulls recent list of replays from Ballchasing API.
@@ -128,6 +128,7 @@ def pull_replays(bc, player_id, count=MAX_REPLAYS, playlist="private"):
         player_id: Platform ID to pull for.
         count: Max replay count.
         playlist: Target playlist category (scrims / public, etc.).
+        pro_only: Boolean flag to restrict results to lobbies with at least one pro player.
     Returns:
         List of replay dictionaries.
     """
@@ -138,6 +139,7 @@ def pull_replays(bc, player_id, count=MAX_REPLAYS, playlist="private"):
         "count": min(200, int(count)),
     }
     if playlist: params["playlist"] = playlist
+    if pro_only: params["pro"] = "true"
         
     data = bc.list_replays(**params)
     return data.get("list", []) or []
@@ -168,6 +170,7 @@ def ranked_activity(bc, player_ids, logs):
                 "sort-by": "replay-date",
                 "sort-dir": "desc",
                 "count": 50,
+                "pro": "true",
             }
             data = bc.list_replays(**params)
             reps = data.get("list", []) or []
