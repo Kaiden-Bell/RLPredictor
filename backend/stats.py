@@ -184,11 +184,17 @@ def ranked_activity(bc, player_ids, logs):
                 rid = rep.get("id")
                 if rid: valid_reps.append(rid)
 
-            for r_idx, rid in enumerate(valid_reps):
-                progress("Ranked replays", r_idx + 1, len(valid_reps), t0)
-                try:
-                    detail = bc.get_replay(rid)
-                except Exception:
+            if valid_reps:
+                details, _ = bc.get_replays_batch(
+                    valid_reps,
+                    progress_cb=lambda cur, tot, cc: progress("Ranked replays", cur, tot, t0, cc),
+                )
+            else:
+                details = {}
+
+            for rid in valid_reps:
+                detail = details.get(rid)
+                if not detail:
                     continue
 
                 for side in ("blue", "orange"):
@@ -255,21 +261,18 @@ def replay_stats(bc, player_ids, logs):
     print(f"  Fetching details for {total_replays} unique replays...")
     t0 = time.time()
 
+    replay_ids = [it.get("id") for it in unique_replays if it.get("id")]
+    details, cached_count = bc.get_replays_batch(
+        replay_ids,
+        progress_cb=lambda cur, tot, cc: progress("Generic stats", cur, tot, t0, cc),
+    )
+
     rows = []
-    cached_count = 0
-    for idx, it in enumerate(unique_replays):
-        rid = it.get("id")
-
-        call_start = time.time()
-        try:
-            detail = bc.get_replay(rid)
-        except Exception as e:
-            logs.append(f"getReplay {rid} failed: {e}")
-            progress("Generic stats", idx + 1, total_replays, t0, cached_count)
+    for rid in replay_ids:
+        detail = details.get(rid)
+        if not detail:
+            logs.append(f"getReplay {rid} failed: not available")
             continue
-        if time.time() - call_start < 0.01: cached_count += 1
-
-        progress("Generic stats", idx + 1, total_replays, t0, cached_count)
 
         date_s = iso_format(detail.get("date"))
         if not in_window(date_s): continue

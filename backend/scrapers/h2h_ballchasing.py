@@ -10,8 +10,10 @@ import hashlib
 import json
 import os
 import re
+import threading
 import time
 import unicodedata
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 from urllib.parse import quote_plus, urlencode
@@ -26,6 +28,7 @@ from utils.database import (
     get_cached_api_response,
     cache_api_response,
     cache_replay,
+    get_cached_replay,
     cache_player_stats,
     load_player_id_map_db,
     import_ids_json,
@@ -228,6 +231,8 @@ class Ballchasing:
         self.sess = requests.Session()
         self.sess.headers.update({"Authorization": self.key, "Accept": "application/json"})
         self.delay = delay
+        self._rate_lock = threading.Lock()
+        self._last_request_time = 0.0
         initialize_database()
 
     def cache_key(self, path, params=None):
@@ -278,12 +283,89 @@ class Ballchasing:
         """
         Description:
             Fetches parsed JSON details of a single replay.
+            Checks the SQLite replays table first for a direct primary key hit
+            before falling through to the slower MD5-keyed api_cache lookup.
         Arguments:
             replay_id: Ballchasing Replay ID string.
         Returns:
             Replay detail dictionary.
         """
+        cached = get_cached_replay(replay_id)
+        if cached is not None:
+            return cached
         return self.fetch_api(f"/replays/{replay_id}")
+
+    def get_replays_batch(self, replay_ids, max_workers=4, progress_cb=None):
+        """
+        Description:
+            Batch-fetches multiple replay details in parallel. Resolves cached replays
+            instantly from SQLite, then fetches remaining uncached replays using a
+            ThreadPoolExecutor with rate-limited network I/O.
+        Arguments:
+            replay_ids: List of Ballchasing replay ID strings.
+            max_workers: Max concurrent fetch threads for uncached replays.
+            progress_cb: Optional callback(current, total, cached_count) for progress reporting.
+        Returns:
+            Tuple of (results dict mapping replay_id to detail dict, cached_count int).
+        """
+        results = {}
+        uncached_ids = []
+
+        for rid in replay_ids:
+            cached = get_cached_replay(rid)
+            if cached is not None:
+                results[rid] = cached
+                continue
+            ckey = self.cache_key(f"/replays/{rid}")
+            api_cached = get_cached_api_response(ckey)
+            if api_cached is not None:
+                results[rid] = api_cached
+            else:
+                uncached_ids.append(rid)
+
+        cached_count = len(results)
+
+        if not uncached_ids:
+            return results, cached_count
+
+        def _fetch_one(rid):
+            with self._rate_lock:
+                elapsed = time.time() - self._last_request_time
+                wait = self.delay - elapsed
+                if wait > 0:
+                    time.sleep(wait)
+                self._last_request_time = time.time()
+
+            url = f"{BC_API}/replays/{rid}"
+            r = self.sess.get(url, timeout=30)
+            if r.status_code == 429:
+                time.sleep(1.25)
+                r = self.sess.get(url, timeout=30)
+            r.raise_for_status()
+
+            data = r.json()
+            raw = json.dumps(data)
+            ckey = self.cache_key(f"/replays/{rid}")
+            cache_api_response(ckey, f"/replays/{rid}", raw)
+            if isinstance(data, dict) and "blue" in data and "orange" in data:
+                persist_replay(data)
+            return data
+
+        effective_workers = min(max_workers, len(uncached_ids))
+        with ThreadPoolExecutor(max_workers=effective_workers) as executor:
+            futures = {executor.submit(_fetch_one, rid): rid for rid in uncached_ids}
+            fetched = 0
+            for future in as_completed(futures):
+                rid = futures[future]
+                try:
+                    results[rid] = future.result()
+                except Exception:
+                    pass
+                fetched += 1
+                if progress_cb:
+                    progress_cb(cached_count + fetched, len(replay_ids), cached_count)
+
+        return results, cached_count
 
     def get_group(self, group_id):
         """
