@@ -40,8 +40,8 @@ function getGeminiClient(): GoogleGenAI | null {
 
 // Default high-fidelity mockup data matching the reference image exactly
 const fallbackTournamentData = {
-  name: "RLPredictor - Rocket League Championship Series",
-  url: "https://liquipedia.net/rocketleague/Rocket_League_Championship_Series/2026/Major_1",
+  name: "RLCS Boston Major - NA Open 3",
+  url: "https://liquipedia.net/rocketleague/Rocket_League_Championship_Series/2026/Boston_Major/North_America/Open_3",
   game: "Rocket League",
   bracketMatches: [
     // Quarterfinals (roundIndex: 0)
@@ -181,35 +181,61 @@ const fallbackTournamentData = {
 
 // API Route for Tournament analysis
 app.post('/api/tournament/analyze', async (req, res) => {
-  const { url } = req.body;
+  const { url, sections } = req.body;
   if (!url) {
     return res.status(400).json({ error: 'URL is required' });
   }
 
+  const lowerUrl = url.toLowerCase();
+  if (!lowerUrl.startsWith('https://liquipedia.net/rocketleague/') && !lowerUrl.startsWith('http://liquipedia.net/rocketleague/')) {
+    return res.status(400).json({ error: 'URL Error: RLPredictor exclusively analyzes Rocket League on Liquipedia. Please provide a URL starting with https://liquipedia.net/rocketleague/' });
+  }
+
+  // Step 1: Try the real Python FastAPI scraper (port 8000)
+  try {
+    console.log(`[SCRAPE] Attempting real scrape via FastAPI backend for: ${url}`);
+    const backendRes = await fetch('http://localhost:8000/api/scrape/light', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, sections }),
+      signal: AbortSignal.timeout(30000), // 30s timeout
+    });
+    if (backendRes.ok) {
+      const scraped = await backendRes.json();
+      console.log(`[SCRAPE] Real scrape succeeded — ${scraped.matchCount} matches found.`);
+      return res.json({
+        data: scraped,
+        isMock: false,
+        message: 'Live scrape from Liquipedia via FastAPI backend.'
+      });
+    }
+    console.warn(`[SCRAPE] FastAPI returned status ${backendRes.status}, falling through...`);
+  } catch (proxyErr: any) {
+    console.warn(`[SCRAPE] FastAPI backend unavailable (${proxyErr.message}), falling through...`);
+  }
+
+  // Step 2: Try Gemini if API key is available
   const client = getGeminiClient();
   if (!client) {
-    // Graceful fallback if API key is missing
-    console.log('Using robust mockup data matching reference image.');
+    // Step 3: Final fallback to hardcoded mock data
+    console.log('[SCRAPE] No Gemini key and no FastAPI backend — using mock data.');
     return res.json({
       data: fallbackTournamentData,
       isMock: true,
-      message: 'Running in high-fidelity sandbox mode. Configure your GEMINI_API_KEY for dynamic real-time URL bracket Generation.'
+      message: 'Running in high-fidelity sandbox mode. Start the FastAPI backend (cd backend && uvicorn server:app --port 8000) for live scraping.'
     });
   }
 
   try {
     // Generate content using Gemini
     const prompt = `
-You are an expert esports data analyst and scraper. The user has provided an esports tournament URL: "${url}".
-Please analyze this URL. Based on the URL contents, paths, or names, reconstruct a highly realistic tournament representation for this event.
-
-If the tournament looks like a Rocket League event (e.g. "RLCS", "Rocket League", etc.), use genuine teams like G2 Esports, Team Vitality, Karmine Corp, Team BDS, Spacestation Gaming, Gen.G, Team Falcons, Gentle Mates, etc.
-If the tournament looks like League of Legends, Counter-Strike (CS2 or CS:GO), Valorant, or any other game, adapt the teams, names, ratings, and rosters perfectly to fit that specific game!
+You are an expert Rocket League esports data analyst and scraper. The user has provided an RL tournament URL: "${url}".
+Please analyze this URL. Based on the URL contents, paths, or names, reconstruct a highly realistic tournament representation for this event using genuine professional Rocket League teams (e.g. G2 Esports, Team Vitality, Karmine Corp, Team BDS, Spacestation Gaming, Gen.G, Team Falcons, Gentle Mates, etc.).
 
 Generate a comprehensive JSON response matching the following strict schema:
 {
-  "name": "The actual full tournament name (e.g. 'RLCS 24 Copenhagen Major' or 'PGL CS2 Major Copenhagen')",
-  "game": "The name of the competitive game (e.g. 'Rocket League', 'Counter-Strike 2', 'Valorant', 'League of Legends')",
+  "name": "The actual full tournament name (e.g. 'RLCS 2026 Copenhagen Major')",
+  "game": "The name of the competitive game (e.g. 'Rocket League')",
   "url": "${url}",
   "bracketMatches": [
     // Provide a bracket consisting of 4 Quarterfinals (roundIndex: 0, matchIndex: 0..3),
@@ -287,6 +313,29 @@ Respond ONLY with raw JSON. Excellent formatting is required. Must be directly p
       error: error.message || 'Error occurred during generation',
       message: 'Fell back to default high-fidelity tournament setup.'
     });
+  }
+});
+
+// Proxy roster lookups to the FastAPI backend
+app.post('/api/roster/lookup', async (req, res) => {
+  const { team1_name, team2_name } = req.body;
+  if (!team1_name || !team2_name) {
+    return res.status(400).json({ error: 'Both team1_name and team2_name are required' });
+  }
+  try {
+    const backendRes = await fetch('http://localhost:8000/api/roster/lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ team1_name, team2_name }),
+      signal: AbortSignal.timeout(20000),
+    });
+    if (backendRes.ok) {
+      const data = await backendRes.json();
+      return res.json(data);
+    }
+    return res.status(backendRes.status).json({ error: 'Backend lookup failed' });
+  } catch (err: any) {
+    return res.status(500).json({ error: `Roster lookup failed: ${err.message}` });
   }
 });
 

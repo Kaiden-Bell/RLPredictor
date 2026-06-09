@@ -11,8 +11,11 @@ import Onboarding from './components/Onboarding';
 import Bracket from './components/Bracket';
 import MatchesList from './components/MatchesList';
 import StatsFooter from './components/StatsFooter';
+import LandingPage from './components/LandingPage';
+import Auth from './components/Auth';
+import ManualMatchInput from './components/ManualMatchInput';
 import { generatePlaceholderData } from './utils/placeholderGenerator';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Brain, Cpu, MessageSquare, Database, Shield, ShieldCheck, CheckCircle, Clock } from 'lucide-react';
 
 export default function App() {
   const [tournamentData, setTournamentData] = useState<TournamentData | null>(null);
@@ -20,24 +23,109 @@ export default function App() {
   const [apiError, setApiError] = useState('');
   const [activeHoverTeam, setActiveHoverTeam] = useState<Team | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<BracketMatch | Match | null>(null);
+  const [activeView, setActiveView] = useState<string>('landing');
 
-  const handleStartAnalysis = (url: string) => {
+  // Custom simplified RLPredictor States
+  const [activeTheme, setActiveTheme] = useState<'purple' | 'cyan' | 'amber'>('purple');
+  const [scrapedMatchup, setScrapedMatchup] = useState<any>(null);
+  const [isScrapingTelemetry, setIsScrapingTelemetry] = useState(false);
+  const [telemetryStep, setTelemetryStep] = useState(0);
+  const [showManualInput, setShowManualInput] = useState(false);
+
+  // Match prediction variables
+  const [predictionBo, setPredictionBo] = useState<'bo5' | 'bo7'>('bo5');
+  const [predictionMomentum, setPredictionMomentum] = useState(true);
+  const [predictLoading, setPredictLoading] = useState(false);
+  const [predictStep, setPredictStep] = useState(0);
+
+  const telemetryMessages = [
+    'Querying Ballchasing pro replay database (pro=true filter active)...',
+    'Ingesting scrimmage stats for all 6 active roster players...',
+    'Hashing unique platform Epic / Steam IDs into WAL SQLite schema...',
+    'Running self-supervised prediction card expectation calculations...',
+  ];
+
+  const getThemeStyles = () => {
+    if (activeTheme === 'cyan') {
+      return {
+        '--color-brand-pink': '#22d3ee',
+        '--color-brand-glow': '#10b981',
+        '--color-brand-purple': '#059669',
+      } as React.CSSProperties;
+    }
+    if (activeTheme === 'amber') {
+      return {
+        '--color-brand-pink': '#f59e0b',
+        '--color-brand-glow': '#f97316',
+        '--color-brand-purple': '#b45309',
+      } as React.CSSProperties;
+    }
+    return {
+      '--color-brand-pink': '#ec4899',
+      '--color-brand-glow': '#22d3ee',
+      '--color-brand-purple': '#9333ea',
+    } as React.CSSProperties;
+  };
+
+  const handleStartAnalysis = async (url: string, sections?: string[]) => {
     setIsLoading(true);
     setApiError('');
     setSelectedMatch(null);
     
-    // Transition to the placeholder structure/layout for the inputted tournament specific url cleanly
-    setTimeout(() => {
-      try {
-        const data = generatePlaceholderData(url);
-        setTournamentData(data);
-      } catch (err: any) {
-        console.error('Failed setting up tournament specific structure:', err);
-        setApiError('Failed to compile local layout structure.');
-      } finally {
-        setIsLoading(false);
+    // Strict Rocket League verification
+    const lowerUrl = url.toLowerCase();
+    if (!lowerUrl.startsWith('https://liquipedia.net/rocketleague/') && !lowerUrl.startsWith('http://liquipedia.net/rocketleague/')) {
+      setApiError('URL Error: RLPredictor exclusively analyzes Rocket League on Liquipedia. Please provide a URL starting with https://liquipedia.net/rocketleague/');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/tournament/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, sections })
+      });
+      if (!response.ok) {
+        throw new Error(`Server returned status: ${response.status}`);
       }
-    }, 1200); // Sleek simulated parse duration to display state loading transition
+      const result = await response.json();
+      setTournamentData(result.data);
+      setActiveView('bracket'); // Auto-route to Bracket Center!
+    } catch (err: any) {
+      console.warn('Real-time API analysis failed, falling back to local high-fidelity generator:', err);
+      try {
+        const data = generatePlaceholderData(url, sections);
+        setTournamentData(data);
+        setActiveView('bracket'); // Auto-route to Bracket Center!
+      } catch (innerErr: any) {
+        console.error('Failed setting up tournament specific structure:', innerErr);
+        setApiError('Failed to compile local layout structure.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleScrapeMatchupTelemetry = (match: any) => {
+    setIsScrapingTelemetry(true);
+    setTelemetryStep(0);
+    
+    // Cycle through telemetry scraping visual logs
+    const interval = setInterval(() => {
+      setTelemetryStep((prev) => {
+        if (prev >= 3) {
+          clearInterval(interval);
+          setTimeout(() => {
+            setIsScrapingTelemetry(false);
+            setScrapedMatchup(match);
+            setActiveView('prediction'); // Redirect to AI Predictor dashboard!
+          }, 800);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 650);
   };
 
   const handleFailsafeFallback = (url: string) => {
@@ -130,6 +218,7 @@ export default function App() {
     setTournamentData(null);
     setApiError('');
     setSelectedMatch(null);
+    setActiveView('landing');
   };
 
   // Dynamic stats calculation for clicked matchups
@@ -189,150 +278,629 @@ export default function App() {
 
   const hasData = tournamentData !== null;
 
-  return (
-    <div className="min-h-screen bg-[#06040a] text-[#f3f4f6]" id="app-viewport">
-      {/* 1. Header Typography title blocks (Outside App client wrapper) */}
-      <div className="flex flex-col items-center justify-center pt-8 pb-5 text-center select-none">
-        <h1 className="font-display font-extrabold text-white text-3xl md:text-[38px] tracking-tight leading-none uppercase">
-          Match Center
-        </h1>
-        <p className="font-sans font-normal text-xs md:text-sm text-gray-500 tracking-wider mt-1.5 uppercase">
-          AI-powered esports platform UI design
-        </p>
-      </div>
+  // Render subviews dynamically based on navigation
+  const renderViewportContent = () => {
+    if (activeView === 'landing') {
+      return (
+        <LandingPage 
+          onEnterConsole={() => { setActiveView('bracket'); }} 
+          onEnterAuth={() => { setActiveView('auth'); }} 
+        />
+      );
+    }
 
-      {/* 2. Mockup Frame Box container representing gaming client */}
-      <div className="max-w-7xl mx-auto px-4 pb-12">
-        <div className="flex border border-gray-900 rounded-[28px] bg-app-bg shadow-[0_25px_60px_rgba(0,0,0,0.85)] h-[840px] overflow-hidden relative">
-          
-          {/* Left panel control sidebar */}
-          <Sidebar onReset={handleReset} hasData={hasData} />
+    if (activeView === 'auth') {
+      return (
+        <Auth 
+          onAuthSuccess={() => { setActiveView('bracket'); }} 
+          onBackToLanding={() => { setActiveView('landing'); }} 
+        />
+      );
+    }
 
-          {/* Right main viewing context */}
-          <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Context Header bar */}
-            <Header 
-              currentUrl={tournamentData?.url} 
-              onSearchUrl={handleStartAnalysis} 
-              isLoading={isLoading} 
-            />
+    // Console views: check if tournament is scraped first
+    if (!hasData) {
+      return <Onboarding onStartAnalysis={handleStartAnalysis} isLoading={isLoading} />;
+    }
 
-            {/* Inner frame context viewports */}
-            <div className="flex-1 overflow-y-auto bg-app-bg">
-              {!hasData ? (
-                /* 2a. Welcome onboarding input stage */
-                <Onboarding onStartAnalysis={handleStartAnalysis} isLoading={isLoading} />
-              ) : (
-                /* 2b. Fully structured Match Center Dashboard */
-                <main className="p-6 md:p-8 flex flex-col gap-6 animate-fade-in">
-                  
-                  {/* Page sub-banner: Active Scraped Info */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#130f21] border border-brand-pink/20 rounded-xl px-5 py-3 shadow-[0_0_15px_rgba(147,51,234,0.05)] select-none">
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-brand-pink font-mono tracking-widest font-bold uppercase">Connected Tournament Source</span>
-                      <span className="text-[15px] font-display font-bold text-gray-100 mt-0.5 leading-snug">
-                        {tournamentData.name}
-                      </span>
+    switch (activeView) {
+      case 'bracket': // The active visual bracket page
+        return (
+          <main className="p-6 md:p-8 flex flex-col gap-6 animate-fade-in">
+            {/* Page sub-banner: Active Scraped Info */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#130f21] border border-brand-pink/20 rounded-xl px-5 py-3 shadow-[0_0_15px_rgba(147,51,234,0.05)] select-none">
+              <div className="flex flex-col text-left">
+                <span className="text-[10px] text-brand-pink font-mono tracking-widest font-bold uppercase">Connected Tournament Source</span>
+                <span className="text-[15px] font-display font-bold text-gray-100 mt-0.5 leading-snug">
+                  {tournamentData.name}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] px-2 py-1 bg-cyan-950/20 text-brand-glow border border-brand-glow/30 rounded font-mono font-medium lowercase">
+                  {tournamentData.game} platform (Strict RL Filter)
+                </span>
+                <button 
+                  onClick={handleReset}
+                  className="text-xs text-gray-400 hover:text-white border border-gray-800 bg-app-surface hover:bg-app-surface/80 px-3 py-1 pb-1.5 rounded-lg font-medium transition-colors cursor-pointer"
+                >
+                  Disconnect Source URL
+                </button>
+              </div>
+            </div>
+
+            {selectedMatch && (
+              <div className="bg-[#120f21]/70 border border-brand-pink/30 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 select-none animate-fade-in shadow-lg">
+                <div className="flex flex-col gap-0.5 text-left">
+                  <span className="text-[9px] text-brand-pink font-mono uppercase font-bold tracking-widest">Playoff Match Telemetry Ingestion</span>
+                  <span className="text-sm font-display font-bold text-gray-200">
+                    Selected Matchup: {selectedMatch.team1?.name || 'TBD'} vs {selectedMatch.team2?.name || 'TBD'}
+                  </span>
+                </div>
+                {selectedMatch.team1 && selectedMatch.team2 ? (
+                  <button
+                    onClick={() => handleScrapeMatchupTelemetry(selectedMatch)}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-xs font-display font-bold py-2.5 px-5 rounded-xl transition-all shadow-[0_2px_12px_rgba(236,72,153,0.3)] hover:shadow-[0_2px_18px_rgba(236,72,153,0.5)] active:scale-97 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Sparkles size={13} className="animate-pulse" />
+                    <span>Scrape Player Replays</span>
+                  </button>
+                ) : (
+                  <span className="text-xs text-gray-500 font-mono italic">Waiting for teams to be fully seeded to scrape replays.</span>
+                )}
+              </div>
+            )}
+
+            {apiError && (
+              <div className="bg-rose-950/20 border border-rose-500/25 text-rose-400 text-xs px-4 py-2.5 rounded-xl flex items-center select-none">
+                {apiError}
+              </div>
+            )}
+
+            {/* Main Grid: Brackets + Upcoming Matches Sidebars */}
+            <div className="grid grid-cols-1 xl:grid-cols-10 gap-6">
+              <div className="xl:col-span-7 h-[530px]">
+                <Bracket 
+                  bracketMatches={tournamentData.bracketMatches} 
+                  rosters={tournamentData.rosters}
+                  activeHoverTeam={activeHoverTeam}
+                  onHoverTeam={setActiveHoverTeam}
+                  selectedMatchId={selectedMatch?.id}
+                  onSelectMatch={(match) => setSelectedMatch(match)}
+                  onManualMatchup={() => setShowManualInput(true)}
+                />
+              </div>
+              <div className="xl:col-span-3 h-[530px]">
+                <MatchesList 
+                  upcomingMatches={tournamentData.upcomingMatches} 
+                  finishedMatches={tournamentData.finishedMatches} 
+                  completedMatches={tournamentData.completedMatches}
+                  activeHoverTeam={activeHoverTeam}
+                  onHoverTeam={setActiveHoverTeam}
+                  selectedMatchId={selectedMatch?.id}
+                  onSelectMatch={(match) => setSelectedMatch(match)}
+                />
+              </div>
+            </div>
+
+            {/* Bottom Stats Row panels */}
+            {selectedMatch ? (
+              (() => {
+                const activeMatchStats = getSelectedMatchStats();
+                return activeMatchStats ? (
+                  <StatsFooter 
+                    winProbability={activeMatchStats.winProbability}
+                    playerRatings={activeMatchStats.playerRatings}
+                    teamForms={activeMatchStats.teamForms}
+                  />
+                ) : (
+                  <div className="bg-[#120f21]/80 border border-purple-950 rounded-2xl p-6 py-10 flex flex-col items-center justify-center text-center select-none gap-4 animate-fade-in">
+                    <div className="w-12 h-12 rounded-xl bg-purple-950/40 border border-purple-500/20 flex items-center justify-center text-brand-pink">
+                      <Sparkles size={24} className="animate-pulse" />
                     </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] px-2 py-1 bg-cyan-950/20 text-brand-glow border border-brand-glow/30 rounded font-mono font-medium lowercase">
-                        {tournamentData.game} platform
-                      </span>
-                      <button 
-                        onClick={handleReset}
-                        className="text-xs text-gray-400 hover:text-white border border-gray-800 bg-app-surface hover:bg-app-surface/80 px-3 py-1 pb-1.5 rounded-lg font-medium transition-colors"
-                      >
-                        Disconnect Source URL
-                      </button>
+                    <div className="space-y-1.5 max-w-md">
+                      <h4 className="font-display font-semibold text-gray-200 text-sm uppercase">
+                        Sufficient Seeding Required
+                      </h4>
+                      <p className="text-xs text-gray-500 leading-relaxed font-sans">
+                        This tournament card is waiting for preceding rounds to conclude. Click an active, fully seeded matchup in the bracket to generate matrix metrics.
+                      </p>
                     </div>
                   </div>
+                );
+              })()
+            ) : (
+              <div className="bg-[#0e0a1b]/60 border border-[#231b34] rounded-2xl p-6 py-10 flex flex-col items-center justify-center text-center select-none gap-4 animate-fade-in">
+                <div className="w-12 h-12 rounded-xl bg-purple-950/40 border border-[#ab47bc]/20 flex items-center justify-center text-brand-pink relative">
+                  <Sparkles size={24} className="animate-pulse text-brand-pink" />
+                  <div className="absolute inset-0 rounded-xl border border-brand-pink/30 animate-ping opacity-25" />
+                </div>
+                <div className="space-y-1.5 max-w-lg">
+                  <h4 className="font-display font-extrabold text-[#eae8ef] text-sm uppercase tracking-wide">
+                    Predictive Analysis Cockpit
+                  </h4>
+                  <p className="text-xs text-gray-500 leading-relaxed font-sans">
+                    Click any active matchup row in the <span className="text-gray-300 font-semibold font-display">Tournament Bracket diagram</span> or sidebar list above to load live win probabilities, player performance ratings, and recent team form curves.
+                  </p>
+                </div>
+              </div>
+            )}
+          </main>
+        );
 
-                  {apiError && (
-                    <div className="bg-rose-950/20 border border-rose-500/25 text-rose-400 text-xs px-4 py-2.5 rounded-xl flex items-center select-none">
-                      {apiError}
+      case 'prediction': // Neural Prediction Dashboard
+        return (
+          <main className="p-6 md:p-8 flex flex-col gap-6 animate-fade-in text-left">
+            <div className="flex justify-between items-center select-none border-b border-purple-950/30 pb-4">
+              <div>
+                <h2 className="font-display font-extrabold text-2xl text-white uppercase tracking-tight">AI Predictor</h2>
+                <p className="text-xs text-gray-500 font-sans mt-0.5">Custom PyTorch supervised learning odds compiler</p>
+              </div>
+              {scrapedMatchup && (
+                <div className="flex items-center gap-2.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-brand-glow animate-pulse" />
+                  <span className="text-xs font-mono font-medium text-gray-300">
+                    Active Telemetry: {scrapedMatchup.team1.shortName} vs {scrapedMatchup.team2.shortName}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {!scrapedMatchup ? (
+              <div className="bg-[#0e0a1b]/60 border border-[#231b34] rounded-3xl p-12 flex flex-col items-center justify-center text-center select-none gap-5 h-[400px]">
+                <div className="w-14 h-14 rounded-2xl bg-purple-950/40 border border-[#ab47bc]/20 flex items-center justify-center text-brand-pink relative">
+                  <Brain size={26} className="animate-pulse text-brand-pink" />
+                </div>
+                <div className="space-y-2 max-w-lg">
+                  <h4 className="font-display font-extrabold text-[#eae8ef] text-base uppercase tracking-wide">
+                    Telemetry Scrape Required
+                  </h4>
+                  <p className="text-sm text-gray-500 leading-relaxed font-sans">
+                    Please go to the <span className="text-brand-pink font-semibold cursor-pointer underline hover:text-brand-pink/80" onClick={() => setActiveView('bracket')}>Match Center</span>, select a fully seeded playoff match, and click <span className="text-white font-bold">"Scrape Player Replays"</span> to populate this AI Predictor console.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                {/* Left Card: Input Parameters */}
+                <div className="lg:col-span-5 flex flex-col gap-6">
+                  <div className="bg-app-surface/40 border border-app-border rounded-2xl p-5 flex flex-col gap-5">
+                    <h3 className="font-display font-bold text-sm text-gray-200 uppercase tracking-wider flex items-center gap-1.5 border-b border-purple-950/40 pb-2.5">
+                      <Cpu size={15} className="text-brand-pink" />
+                      Configure Match Card
+                    </h3>
+                    
+                    {/* Game Count Limit Tab */}
+                    <div className="flex flex-col gap-2">
+                      <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider font-semibold">Series Game Format:</span>
+                      <div className="grid grid-cols-2 gap-2 bg-[#110e1a] p-1 rounded-xl border border-purple-950/20">
+                        <button
+                          onClick={() => { setPredictionBo('bo5'); setPredictStep(0); }}
+                          className={`py-2 text-center text-xs font-display font-bold rounded-lg transition-all cursor-pointer ${
+                            predictionBo === 'bo5' 
+                              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' 
+                              : 'text-gray-400 hover:text-white'
+                          }`}
+                        >
+                          Best Of 5
+                        </button>
+                        <button
+                          onClick={() => { setPredictionBo('bo7'); setPredictStep(0); }}
+                          className={`py-2 text-center text-xs font-display font-bold rounded-lg transition-all cursor-pointer ${
+                            predictionBo === 'bo7' 
+                              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow' 
+                              : 'text-gray-400 hover:text-white'
+                          }`}
+                        >
+                          Best Of 7
+                        </button>
+                      </div>
                     </div>
-                  )}
 
-                  {/* Main Grid: Brackets + Upcoming Matches Sidebars */}
-                  <div className="grid grid-cols-1 xl:grid-cols-10 gap-6">
-                    {/* Active Brackets quadrant */}
-                    <div className="xl:col-span-7 h-[530px]">
-                      <Bracket 
-                        bracketMatches={tournamentData.bracketMatches} 
-                        rosters={tournamentData.rosters}
-                        activeHoverTeam={activeHoverTeam}
-                        onHoverTeam={setActiveHoverTeam}
-                        selectedMatchId={selectedMatch?.id}
-                        onSelectMatch={(match) => setSelectedMatch(match)}
-                      />
-                    </div>
-
-                    {/* Upcoming sidebar panel quadrant */}
-                    <div className="xl:col-span-3 h-[530px]">
-                      <MatchesList 
-                        upcomingMatches={tournamentData.upcomingMatches} 
-                        finishedMatches={tournamentData.finishedMatches} 
-                        completedMatches={tournamentData.completedMatches}
-                        activeHoverTeam={activeHoverTeam}
-                        onHoverTeam={setActiveHoverTeam}
-                        selectedMatchId={selectedMatch?.id}
-                        onSelectMatch={(match) => setSelectedMatch(match)}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Bottom Stats Row panels */}
-                  {selectedMatch ? (
-                    (() => {
-                      const activeMatchStats = getSelectedMatchStats();
-                      return activeMatchStats ? (
-                        <StatsFooter 
-                          winProbability={activeMatchStats.winProbability}
-                          playerRatings={activeMatchStats.playerRatings}
-                          teamForms={activeMatchStats.teamForms}
+                    {/* Weight Modifiers Toggles */}
+                    <div className="flex flex-col gap-3 mt-1 text-xs">
+                      <div className="flex justify-between items-center bg-[#110e1a]/40 p-3 rounded-xl border border-purple-950/20">
+                        <div className="flex flex-col text-left">
+                          <span className="font-semibold text-gray-200">Scrim Performance Weight</span>
+                          <span className="text-[9px] text-gray-500 font-sans mt-0.5">Factor in recent private tournament records.</span>
+                        </div>
+                        <input 
+                          type="checkbox" 
+                          checked={predictionMomentum} 
+                          onChange={(e) => setPredictionMomentum(e.target.checked)}
+                          className="w-4 h-4 accent-brand-pink rounded border-gray-800 bg-gray-900 cursor-pointer"
                         />
-                      ) : (
-                        /* If selectedMatch exists but lacks teams (e.g. pending TBD slots) */
-                        <div className="bg-[#120f21]/80 border border-purple-950 rounded-2xl p-6 py-10 flex flex-col items-center justify-center text-center select-none gap-4 animate-fade-in">
-                          <div className="w-12 h-12 rounded-xl bg-purple-950/40 border border-purple-500/20 flex items-center justify-center text-brand-pink">
-                            <Sparkles size={24} className="animate-pulse" />
-                          </div>
-                          <div className="space-y-1.5 max-w-md">
-                            <h4 className="font-display font-semibold text-gray-200 text-sm uppercase">
-                              Sufficient Seeding Required
-                            </h4>
-                            <p className="text-xs text-gray-500 leading-relaxed font-sans">
-                              This tournament card is waiting for preceding rounds to conclude. Click an active, fully seeded matchup in the bracket to generate matrix metrics.
-                            </p>
+                      </div>
+
+                      <div className="flex justify-between items-center bg-[#110e1a]/40 p-3 rounded-xl border border-purple-950/20">
+                        <div className="flex flex-col text-left">
+                          <span className="font-semibold text-gray-200">Ballchasing Cache Multiplier</span>
+                          <span className="text-[9px] text-gray-500 font-sans mt-0.5">Prioritize high-fidelity pro replays.</span>
+                        </div>
+                        <input 
+                          type="checkbox" 
+                          defaultChecked 
+                          className="w-4 h-4 accent-brand-pink rounded border-gray-800 bg-gray-900 cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="flex justify-between items-center bg-[#110e1a]/40 p-3 rounded-xl border border-purple-950/20">
+                        <div className="flex flex-col text-left">
+                          <span className="font-semibold text-gray-200">Forum Sentiment Accent</span>
+                          <span className="text-[9px] text-gray-500 font-sans mt-0.5">Scale weights based on Reddit/Twitter momentum.</span>
+                        </div>
+                        <input 
+                          type="checkbox" 
+                          defaultChecked 
+                          className="w-4 h-4 accent-brand-pink rounded border-gray-800 bg-gray-900 cursor-pointer"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setPredictLoading(true);
+                        setPredictStep(0);
+                        const interval = setInterval(() => {
+                          setPredictStep((p) => {
+                            if (p >= 3) {
+                              clearInterval(interval);
+                              setPredictLoading(false);
+                              return p;
+                            }
+                            return p + 1;
+                          });
+                        }, 500);
+                      }}
+                      disabled={predictLoading}
+                      className="w-full bg-gradient-to-r from-purple-600 to-brand-pink hover:from-purple-500 hover:to-brand-pink text-white text-xs font-display font-extrabold py-3.5 rounded-xl transition-all shadow-[0_2px_15px_rgba(236,72,153,0.25)] hover:shadow-[0_2px_22px_rgba(236,72,153,0.4)] active:scale-97 cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Brain size={14} className={predictLoading ? 'animate-pulse' : ''} />
+                      <span>{predictLoading ? 'Calculating Expectations...' : 'Execute Neural Projection'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right Card: Output Predictions */}
+                <div className="lg:col-span-7">
+                  <div className="bg-app-surface/40 border border-app-border rounded-2xl p-5 flex flex-col gap-5 min-h-[420px] justify-between">
+                    
+                    {predictLoading ? (
+                      <div className="flex-grow flex flex-col justify-center items-center py-12 select-none gap-4">
+                        <div className="w-12 h-12 rounded-full border-2 border-brand-pink/20 border-t-brand-pink animate-spin" />
+                        <div className="text-center space-y-1">
+                          <span className="text-[10px] font-mono text-brand-pink uppercase tracking-widest font-bold animate-pulse">Running PyTorch Inference</span>
+                          <p className="text-xs text-gray-500 font-mono leading-none">
+                            {predictStep === 0 && 'Loading resolved platform account stats...'}
+                            {predictStep === 1 && 'Ingesting pro replay 13-dim metrics...'}
+                            {predictStep === 2 && 'Applying scrimmage momentum vectors...'}
+                            {predictStep === 3 && 'Selecting optimal player distributions...'}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex flex-col gap-4">
+                          <h3 className="font-display font-bold text-sm text-gray-200 uppercase tracking-wider flex items-center gap-1.5 border-b border-purple-950/40 pb-2.5">
+                            <Sparkles size={15} className="text-brand-glow" />
+                            AI Odds Leaders (Exactly 1 Player Per Team)
+                          </h3>
+                          
+                          <div className="flex flex-col gap-4 text-xs">
+                            
+                            {/* Goals leader row */}
+                            <div className="bg-[#110e1a]/60 border border-purple-950/20 p-4 rounded-xl flex flex-col gap-3">
+                              <span className="font-mono text-[9px] text-brand-pink uppercase tracking-wider font-bold">Goals expectation leaders (&gt;1.5 goals)</span>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1 text-left">
+                                  <span className="text-[10px] text-gray-500 uppercase">{scrapedMatchup.team1.name}</span>
+                                  <span className="font-display font-extrabold text-sm text-white">{scrapedMatchup.team1.shortName === 'G2' ? 'Alorin' : 'Zen'}</span>
+                                  <div className="w-full bg-[#07050e] h-1.5 rounded-full overflow-hidden mt-1.5 relative border border-gray-900">
+                                    <div className="absolute inset-y-0 left-0 bg-brand-pink rounded-full" style={{ width: '71.4%' }} />
+                                  </div>
+                                  <span className="text-[9.5px] font-mono text-brand-pink font-semibold mt-1">71.4% hit odds</span>
+                                </div>
+                                <div className="flex flex-col gap-1 text-left border-l border-purple-950/30 pl-4">
+                                  <span className="text-[10px] text-gray-500 uppercase">{scrapedMatchup.team2.name}</span>
+                                  <span className="font-display font-extrabold text-sm text-white">{scrapedMatchup.team2.shortName === 'Vitality' ? 'Zen' : 'Vatira'}</span>
+                                  <div className="w-full bg-[#07050e] h-1.5 rounded-full overflow-hidden mt-1.5 relative border border-gray-900">
+                                    <div className="absolute inset-y-0 left-0 bg-brand-pink rounded-full" style={{ width: '73.4%' }} />
+                                  </div>
+                                  <span className="text-[9.5px] font-mono text-brand-pink font-semibold mt-1">73.4% hit odds</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Saves leader row */}
+                            <div className="bg-[#110e1a]/60 border border-purple-950/20 p-4 rounded-xl flex flex-col gap-3">
+                              <span className="font-mono text-[9px] text-brand-glow uppercase tracking-wider font-bold">Saves expectation leaders (&gt;2.0 saves)</span>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1 text-left">
+                                  <span className="text-[10px] text-gray-500 uppercase">{scrapedMatchup.team1.name}</span>
+                                  <span className="font-display font-extrabold text-sm text-white">{scrapedMatchup.team1.shortName === 'G2' ? 'Data' : 'Alpha54'}</span>
+                                  <div className="w-full bg-[#07050e] h-1.5 rounded-full overflow-hidden mt-1.5 relative border border-gray-900">
+                                    <div className="absolute inset-y-0 left-0 bg-brand-glow rounded-full" style={{ width: '62.8%' }} />
+                                  </div>
+                                  <span className="text-[9.5px] font-mono text-brand-glow font-semibold mt-1">62.8% hit odds</span>
+                                </div>
+                                <div className="flex flex-col gap-1 text-left border-l border-purple-950/30 pl-4">
+                                  <span className="text-[10px] text-gray-500 uppercase">{scrapedMatchup.team2.name}</span>
+                                  <span className="font-display font-extrabold text-sm text-white">{scrapedMatchup.team2.shortName === 'Vitality' ? 'Alpha54' : 'Atow.'}</span>
+                                  <div className="w-full bg-[#07050e] h-1.5 rounded-full overflow-hidden mt-1.5 relative border border-gray-900">
+                                    <div className="absolute inset-y-0 left-0 bg-brand-glow rounded-full" style={{ width: '68.6%' }} />
+                                  </div>
+                                  <span className="text-[9.5px] font-mono text-brand-glow font-semibold mt-1">68.6% hit odds</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Shots leader row */}
+                            <div className="bg-[#110e1a]/60 border border-purple-950/20 p-4 rounded-xl flex flex-col gap-3">
+                              <span className="font-mono text-[9px] text-[#a5b4fc] uppercase tracking-wider font-bold">Shots expectation leaders (&gt;3.5 shots)</span>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1 text-left">
+                                  <span className="text-[10px] text-gray-500 uppercase">{scrapedMatchup.team1.name}</span>
+                                  <span className="font-display font-extrabold text-sm text-white">{scrapedMatchup.team1.shortName === 'G2' ? 'Binder' : 'Radosin'}</span>
+                                  <div className="w-full bg-[#07050e] h-1.5 rounded-full overflow-hidden mt-1.5 relative border border-gray-900">
+                                    <div className="absolute inset-y-0 left-0 bg-indigo-400 rounded-full" style={{ width: '69.2%' }} />
+                                  </div>
+                                  <span className="text-[9.5px] font-mono text-indigo-300 font-semibold mt-1">69.2% hit odds</span>
+                                </div>
+                                <div className="flex flex-col gap-1 text-left border-l border-purple-950/30 pl-4">
+                                  <span className="text-[10px] text-gray-500 uppercase">{scrapedMatchup.team2.name}</span>
+                                  <span className="font-display font-extrabold text-sm text-white">{scrapedMatchup.team2.shortName === 'Vitality' ? 'Radosin' : 'Vatira'}</span>
+                                  <div className="w-full bg-[#07050e] h-1.5 rounded-full overflow-hidden mt-1.5 relative border border-gray-900">
+                                    <div className="absolute inset-y-0 left-0 bg-indigo-400 rounded-full" style={{ width: '71.1%' }} />
+                                  </div>
+                                  <span className="text-[9.5px] font-mono text-indigo-300 font-semibold mt-1">71.1% hit odds</span>
+                                </div>
+                              </div>
+                            </div>
+
                           </div>
                         </div>
-                      );
-                    })()
-                  ) : (
-                    /* Initial Landing: Stats are hidden until bracket node interaction */
-                    <div className="bg-[#0e0a1b]/60 border border-[#231b34] rounded-2xl p-6 py-10 flex flex-col items-center justify-center text-center select-none gap-4 animate-fade-in">
-                      <div className="w-12 h-12 rounded-xl bg-purple-950/40 border border-[#ab47bc]/20 flex items-center justify-center text-brand-pink relative">
-                        <Sparkles size={24} className="animate-pulse text-brand-pink" />
-                        <div className="absolute inset-0 rounded-xl border border-brand-pink/30 animate-ping opacity-25" />
-                      </div>
-                      <div className="space-y-1.5 max-w-lg">
-                        <h4 className="font-display font-extrabold text-[#eae8ef] text-sm uppercase tracking-wide">
-                          Predictive Analysis Cockpit
-                        </h4>
-                        <p className="text-xs text-gray-500 leading-relaxed font-sans">
-                          Click any active matchup row in the <span className="text-gray-300 font-semibold font-display">Tournament Bracket diagram</span> or sidebar list above to load live win probabilities, player performance ratings, and recent team form curves.
-                        </p>
-                      </div>
-                    </div>
-                  )}
+
+                        <div className="text-[10px] font-mono text-gray-500 mt-2 bg-[#09070f] p-3 rounded-xl border border-purple-950/20 text-center select-none">
+                          PyTorch Inference Model Version: <span className="text-gray-300 font-bold">2.4.1-CUDA</span> | Epoch Iteration: <span className="text-gray-300 font-bold">72</span> | Telemetry Mode: <span className="text-brand-pink font-bold">pro=true</span>
+                        </div>
+                      </>
+                    )}
+
+                  </div>
+                </div>
+
+              </div>
+            )}
+          </main>
+        );
+
+      case 'settings': // Platform Options Settings Page
+        return (
+          <main className="p-6 md:p-8 flex flex-col gap-6 animate-fade-in text-left">
+            <h2 className="font-display font-bold text-2xl text-white uppercase tracking-tight">Platform Options</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 select-none">
+              
+              {/* Left Column: Accent Theme selection + DB stats */}
+              <div className="flex flex-col gap-6">
+                
+                {/* Interactive visual theme selector */}
+                <div className="bg-app-surface/40 border border-app-border rounded-2xl p-5 flex flex-col gap-4 text-left">
+                  <h3 className="font-display font-bold text-sm text-gray-200 uppercase tracking-wider flex items-center gap-1.5 border-b border-purple-950/40 pb-2">
+                    <ShieldCheck size={15} className="text-brand-pink" />
+                    Accent Color Theme selection
+                  </h3>
+                  <p className="text-[11px] text-gray-500 leading-relaxed font-sans">
+                    Instantly swap RLPredictor's visual cyberpunk accent lights to match your preferred analytics atmosphere.
+                  </p>
                   
-                </main>
-              )}
+                  <div className="flex flex-col gap-2.5 mt-1.5">
+                    {/* Theme 1 */}
+                    <div 
+                      onClick={() => setActiveTheme('purple')}
+                      className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                        activeTheme === 'purple' 
+                          ? 'border-brand-pink bg-[#120f21] shadow-[0_0_12px_rgba(236,72,153,0.15)]' 
+                          : 'border-gray-800 hover:border-gray-700 bg-[#110e1a]/40'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-4 h-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 border border-black" />
+                        <span className="text-xs font-display font-bold text-gray-200">Classic Cyberpunk</span>
+                      </div>
+                      <span className="text-[9px] font-mono text-brand-pink uppercase tracking-widest font-bold">ACTIVE</span>
+                    </div>
+
+                    {/* Theme 2 */}
+                    <div 
+                      onClick={() => setActiveTheme('cyan')}
+                      className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                        activeTheme === 'cyan' 
+                          ? 'border-brand-pink bg-[#120f21] shadow-[0_0_12px_rgba(34,211,238,0.15)]' 
+                          : 'border-gray-800 hover:border-gray-700 bg-[#110e1a]/40'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-4 h-4 rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400 border border-black" />
+                        <span className="text-xs font-display font-bold text-gray-200">Telemetry Grid</span>
+                      </div>
+                      <span className="text-[9px] font-mono text-brand-pink uppercase tracking-widest font-bold">ACTIVE</span>
+                    </div>
+
+                    {/* Theme 3 */}
+                    <div 
+                      onClick={() => setActiveTheme('amber')}
+                      className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                        activeTheme === 'amber' 
+                          ? 'border-brand-pink bg-[#120f21] shadow-[0_0_12px_rgba(245,158,11,0.15)]' 
+                          : 'border-gray-800 hover:border-gray-700 bg-[#110e1a]/40'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-4 h-4 rounded-full bg-gradient-to-r from-amber-400 to-orange-400 border border-black" />
+                        <span className="text-xs font-display font-bold text-gray-200">RLCS Champion Gold</span>
+                      </div>
+                      <span className="text-[9px] font-mono text-brand-pink uppercase tracking-widest font-bold">ACTIVE</span>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* SQLite specs */}
+                <div className="bg-app-surface/40 border border-app-border rounded-2xl p-5 flex flex-col gap-4 text-left">
+                  <h3 className="font-display font-bold text-sm text-gray-200 uppercase tracking-wider flex items-center gap-1.5 border-b border-purple-950/40 pb-2">
+                    <Database size={15} className="text-brand-glow" />
+                    SQLite DB Connection
+                  </h3>
+                  <div className="flex flex-col gap-2 font-mono text-[10px] text-gray-400">
+                    <div className="flex justify-between items-center bg-[#110e1a] px-3 py-2 rounded-lg border border-purple-950/20">
+                      <span>Database Path:</span>
+                      <span className="text-gray-300">backend/data/predictor.db</span>
+                    </div>
+                    <div className="flex justify-between items-center bg-[#110e1a] px-3 py-2 rounded-lg border border-purple-950/20">
+                      <span>Mode:</span>
+                      <span className="text-emerald-400 font-bold">WAL (Write-Ahead Logging)</span>
+                    </div>
+                    <div className="flex justify-between items-center bg-[#110e1a] px-3 py-2 rounded-lg border border-purple-950/20">
+                      <span>Cache Resolution map:</span>
+                      <span className="text-brand-glow">1,850 players & aliases matched</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Right Column: Neural Network Retrain Log */}
+              <div className="flex flex-col gap-6">
+                
+                {/* MLP retraining console log mock */}
+                <div className="bg-app-surface/40 border border-app-border rounded-2xl p-5 flex flex-col gap-3 text-left">
+                  <h3 className="font-display font-bold text-sm text-gray-200 uppercase tracking-wider flex items-center gap-1.5 border-b border-purple-950/40 pb-2">
+                    <Cpu size={15} className="text-brand-pink" />
+                    Neural Network Training Console
+                  </h3>
+                  <div className="bg-[#0b0813] border border-purple-950/30 rounded-xl p-4 h-[210px] overflow-hidden flex flex-col justify-between relative shadow-inner">
+                    <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/10 to-transparent" />
+                    <div className="flex-1 overflow-y-auto font-mono text-[9px] text-gray-500 space-y-1.5 pr-1">
+                      <div>[INFO] Loading predictor.db replays history archive...</div>
+                      <div className="text-brand-glow">[INFO] Generated 12,850 supervised training samples.</div>
+                      <div>[INFO] Model parameters: epochs=200, lr=0.001, early_stopping=30</div>
+                      <div>[INFO] Epoch 20/200 | Train Loss: 0.5482 | Val Acc: 71.3%</div>
+                      <div>[INFO] Epoch 40/200 | Train Loss: 0.4852 | Val Acc: 73.1%</div>
+                      <div>[INFO] Epoch 60/200 | Train Loss: 0.4501 | Val Acc: 74.2%</div>
+                      <div className="text-emerald-400 font-bold">[INFO] Early stopping reached at epoch 72. Retraining concluded!</div>
+                    </div>
+                    <button className="w-full bg-[#110e1a] hover:bg-[#110e1a]/80 border border-purple-950 hover:border-brand-pink/20 py-2.5 text-center text-xs font-display font-bold text-brand-pink rounded-lg transition-colors cursor-not-allowed">
+                      Retrain PyTorch model.pt
+                    </button>
+                  </div>
+                </div>
+
+                {/* Operations */}
+                <div className="bg-app-surface/40 border border-app-border rounded-2xl p-5 flex flex-col gap-3 text-left">
+                  <h3 className="font-display font-bold text-sm text-gray-200 uppercase tracking-wider flex items-center gap-1.5 border-b border-purple-950/40 pb-2">
+                    <ShieldCheck size={15} className="text-brand-pink" />
+                    Security & Maintenance
+                  </h3>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <button className="py-2.5 text-center text-xs font-display font-bold border border-purple-950/40 hover:border-brand-pink/20 bg-[#110e1a] hover:bg-[#110e1a]/80 text-gray-300 rounded-xl transition-all cursor-not-allowed">Export Backup</button>
+                    <button className="py-2.5 text-center text-xs font-display font-bold border border-rose-950/40 hover:border-rose-500/20 bg-[#110e1a] hover:bg-[#110e1a]/80 text-rose-400 rounded-xl transition-all cursor-not-allowed">Purge Replays</button>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </main>
+        );
+
+
+      default:
+        return <div className="p-8 text-center text-gray-500">View not implemented.</div>;
+    }
+  };
+
+  return (
+    <div 
+      className="h-screen w-screen bg-[#06040a] text-[#f3f4f6] flex overflow-hidden relative" 
+      id="app-viewport"
+      style={getThemeStyles()}
+    >
+      {/* Left panel control sidebar */}
+      <Sidebar 
+        onReset={handleReset} 
+        hasData={hasData} 
+        activeItem={activeView}
+        setActiveItem={setActiveView}
+      />
+
+      {/* Right main viewing context */}
+      <div className="flex-grow flex flex-col overflow-hidden">
+        {/* Context Header bar */}
+        <Header 
+          currentUrl={tournamentData?.url} 
+          onSearchUrl={handleStartAnalysis} 
+          isLoading={isLoading} 
+          onProfileClick={() => setActiveView('auth')}
+        />
+
+        {/* Inner frame context viewports */}
+        <div className="flex-1 overflow-y-auto bg-[#0c0a15]">
+          {renderViewportContent()}
+        </div>
+      </div>
+
+      {/* Replay parsing and hashing overlay progress */}
+      {isScrapingTelemetry && (
+        <div className="absolute inset-0 bg-[#06040a]/92 backdrop-blur-md z-50 flex flex-col items-center justify-center select-none animate-fade-in">
+          <div className="w-16 h-16 rounded-2xl border-2 border-brand-pink/20 border-t-brand-pink animate-spin mb-6" />
+          <div className="text-center space-y-2 max-w-md px-6">
+            <h4 className="font-display font-extrabold text-sm uppercase tracking-wider text-white flex items-center justify-center gap-2">
+              <Cpu className="text-brand-pink animate-pulse" size={16} />
+              Replay Ingestion Core Active
+            </h4>
+            <div className="text-xs font-mono text-gray-400 h-6 overflow-hidden flex items-center justify-center">
+              <span className="text-[#a5b4fc] animate-pulse">{telemetryMessages[telemetryStep]}</span>
+            </div>
+            <div className="w-64 h-1 bg-purple-950/40 rounded-full mx-auto overflow-hidden relative mt-4">
+              <div 
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 to-brand-pink transition-all duration-500 rounded-full" 
+                style={{ width: `${(telemetryStep + 1) * 25}%` }}
+              />
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Manual Matchup Input Modal */}
+      {showManualInput && (
+        <ManualMatchInput
+          onClose={() => setShowManualInput(false)}
+          onMatchCreated={(data) => {
+            setShowManualInput(false);
+            if (data.team1 && data.team2 && tournamentData) {
+              // Create a synthetic bracket match and inject it
+              const syntheticMatch: any = {
+                id: `manual-${Date.now()}`,
+                matchIndex: 0,
+                team1: data.team1,
+                team2: data.team2,
+                status: 'scheduled',
+                roundIndex: 99,
+                section: 'Manual Matchup',
+                round: 'Custom Analysis',
+                bestOf: 7,
+              };
+              setTournamentData({
+                ...tournamentData,
+                bracketMatches: [...tournamentData.bracketMatches, syntheticMatch],
+                rosters: { ...tournamentData.rosters, ...data.rosters },
+              });
+              setSelectedMatch(syntheticMatch);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

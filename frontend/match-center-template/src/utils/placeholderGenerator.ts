@@ -5,69 +5,27 @@
 
 import { TournamentData, BracketMatch, Match, PlayerRating, TeamForm, TeamRoster } from '../types';
 
-export function generatePlaceholderData(url: string): TournamentData {
+export function generatePlaceholderData(url: string, sections?: string[]): TournamentData {
   const lowerUrl = url.toLowerCase();
 
-  // 1. Identify context
-  let game = 'Rocket League';
-  let tournamentName = 'RLCS Major Championship';
-  
-  let teamPresets: { id: string; name: string; shortName: string; logo: string; color: string }[] = [];
-
-  if (lowerUrl.includes('valorant') || lowerUrl.includes('vct') || lowerUrl.includes('champions')) {
-    game = 'Valorant';
-    tournamentName = 'VCT Champions - Berlin Stage';
-    teamPresets = [
-      { id: 'sen', name: 'Sentinels', shortName: 'SEN', logo: 'G2', color: '#ef4444' }, // map G2 logo style
-      { id: 'fnc', name: 'Fnatic', shortName: 'FNC', logo: 'Vitality', color: '#ff5500' }, // map Vitality logo style
-      { id: 'prx', name: 'Paper Rex', shortName: 'PRX', logo: 'Swnder', color: '#ec4899' },
-      { id: 'geng', name: 'Gen.G Esports', shortName: 'GEN', logo: 'Karmine', color: '#eab308' },
-      { id: 'th', name: 'Team Heretics', shortName: 'TH', logo: 'Noppes', color: '#15803d' },
-      { id: 'edg', name: 'EDward Gaming', shortName: 'EDG', logo: 'Sinzline', color: '#111827' },
-      { id: 'loud', name: 'LOUD Esports', shortName: 'LOUD', logo: 'Team 5WS', color: '#22c55e' },
-      { id: 'drx', name: 'DRX Vision', shortName: 'DRX', logo: 'Audacity', color: '#2563eb' }
-    ];
-  } else if (lowerUrl.includes('cs') || lowerUrl.includes('counterstrike') || lowerUrl.includes('pgl') || lowerUrl.includes('iem')) {
-    game = 'Counter-Strike 2';
-    tournamentName = 'IEM Katowice - Championship Bracket';
-    teamPresets = [
-      { id: 'faze', name: 'FaZe Clan', shortName: 'FaZe', logo: 'G2', color: '#ef4444' },
-      { id: 'navic', name: 'Natus Vincere', shortName: 'NaVi', logo: 'Vitality', color: '#eab308' },
-      { id: 'g2cs', name: 'G2 Esports', shortName: 'G2', logo: 'G2', color: '#111827' },
-      { id: 'vitcs', name: 'Team Vitality', shortName: 'Vitality', logo: 'Vitality', color: '#f59e0b' },
-      { id: 'spirit', name: 'Team Spirit', shortName: 'Spirit', logo: 'Swnder', color: '#3b82f6' },
-      { id: 'mouz', name: 'MOUZ Esports', shortName: 'MOUZ', logo: 'Noppes', color: '#ef4444' },
-      { id: 'ast', name: 'Astralis', shortName: 'Astralis', logo: 'Team 5WS', color: '#ef4444' },
-      { id: 'vp', name: 'Virtus.pro', shortName: 'VP', logo: 'Audacity', color: '#f97316' }
-    ];
-  } else if (lowerUrl.includes('lol') || lowerUrl.includes('league') || lowerUrl.includes('lck') || lowerUrl.includes('lcs') || lowerUrl.includes('lec') || lowerUrl.includes('worlds')) {
-    game = 'League of Legends';
-    tournamentName = 'League of Legends Worlds Cup';
-    teamPresets = [
-      { id: 't1', name: 'T1 Esports', shortName: 'T1', logo: 'G2', color: '#e11d48' },
-      { id: 'geng', name: 'Gen.G LoL', shortName: 'GEN', logo: 'Karmine', color: '#eab308' },
-      { id: 'wbg', name: 'Weibo Gaming', shortName: 'WBG', logo: 'Swnder', color: '#f97316' },
-      { id: 'blg', name: 'Bilibili Gaming', shortName: 'BLG', logo: 'Audacity', color: '#06b6d4' },
-      { id: 'fncl', name: 'Fnatic LoL', shortName: 'FNC', logo: 'Vitality', color: '#ff5500' },
-      { id: 'g2l', name: 'G2 League', shortName: 'G2', logo: 'G2', color: '#111827' },
-      { id: 'hle', name: 'Hanwha Life', shortName: 'HLE', logo: 'Noppes', color: '#f97316' },
-      { id: 'fly', name: 'FlyQuest', shortName: 'FLY', logo: 'Team 5WS', color: '#15803d' }
-    ];
-  } else {
-    // Default Rocket League mapping
-    game = 'Rocket League';
-    tournamentName = 'RLCS Major 1 - Copenhagen Playoffs';
-    teamPresets = [
-      { id: 'g2', name: 'G2 Esports', shortName: 'G2', logo: 'G2', color: '#111827' },
-      { id: 'vit', name: 'Team Vitality', shortName: 'Vitality', logo: 'Vitality', color: '#eab308' },
-      { id: 'kc', name: 'Karmine Corp', shortName: 'Karmine', logo: 'Karmine', color: '#3b82f6' },
-      { id: 'swn', name: 'Swnder Esports', shortName: 'Swnder', logo: 'Swnder', color: '#f97316' },
-      { id: 'nop', name: 'Noppes Esports', shortName: 'Noppes', logo: 'Noppes', color: '#a855f7' },
-      { id: 'sin', name: 'Sinzline Gaming', shortName: 'Sinzline', logo: 'Sinzline', color: '#ef4444' },
-      { id: 't5w', name: 'Team 5WS', shortName: 'Team 5WS', logo: 'Team 5WS', color: '#22c55e' },
-      { id: 'aud', name: 'Audacity Team', shortName: 'Audacity', logo: 'Audacity', color: '#f59e0b' }
-    ];
+  // Strict Rocket League validation
+  if (!lowerUrl.startsWith('https://liquipedia.net/rocketleague/') && !lowerUrl.startsWith('http://liquipedia.net/rocketleague/')) {
+    throw new Error('URL Error: RLPredictor exclusively analyzes Rocket League on Liquipedia. Please provide a URL starting with https://liquipedia.net/rocketleague/');
   }
+
+  // Default Rocket League mapping
+  const game = 'Rocket League';
+  let tournamentName = 'RLCS Major 1 - Copenhagen Playoffs';
+  const teamPresets = [
+    { id: 'g2', name: 'G2 Esports', shortName: 'G2', logo: 'G2', color: '#111827' },
+    { id: 'vit', name: 'Team Vitality', shortName: 'Vitality', logo: 'Vitality', color: '#eab308' },
+    { id: 'kc', name: 'Karmine Corp', shortName: 'Karmine', logo: 'Karmine', color: '#3b82f6' },
+    { id: 'swn', name: 'Swnder Esports', shortName: 'Swnder', logo: 'Swnder', color: '#f97316' },
+    { id: 'nop', name: 'Noppes Esports', shortName: 'Noppes', logo: 'Noppes', color: '#a855f7' },
+    { id: 'sin', name: 'Sinzline Gaming', shortName: 'Sinzline', logo: 'Sinzline', color: '#ef4444' },
+    { id: 't5w', name: 'Team 5WS', shortName: 'Team 5WS', logo: 'Team 5WS', color: '#22c55e' },
+    { id: 'aud', name: 'Audacity Team', shortName: 'Audacity', logo: 'Audacity', color: '#f59e0b' }
+  ];
 
   // Extract tournament slug name from link if possible
   try {
@@ -137,8 +95,8 @@ export function generatePlaceholderData(url: string): TournamentData {
 
   // Standout Player performance ratings based on rosters
   const playerRatings: PlayerRating[] = [
-    { name: game === 'Valorant' ? 'TenZ' : game === 'Counter-Strike 2' ? 'm0NESY' : game === 'League of Legends' ? 'Faker' : 'Alorin', rating: 7.94 },
-    { name: game === 'Valorant' ? 'Boaster' : game === 'Counter-Strike 2' ? 'ZyWOo' : game === 'League of Legends' ? 'Chovy' : 'Kamerian', rating: 6.85 }
+    { name: 'Alorin', rating: 7.94 },
+    { name: 'Kamerian', rating: 6.85 }
   ];
 
   // Standout Recent Team streaks
@@ -162,34 +120,7 @@ export function generatePlaceholderData(url: string): TournamentData {
     ['Five', 'Wave', 'Storm', 'Tide', 'Gale', 'Breeze']
   ];
 
-  const genericRosterNames = game === 'Valorant' ? [
-    ['TenZ', 'zekken', 'johnqt', 'Sacy', 'Zellsis', 'Kaplan'],
-    ['Boaster', 'Derke', 'Alfajer', 'Chronicle', 'Leo', 'Elmapuddy'],
-    ['something', 'f0rsakeN', 'mindfreak', 'd4v41', 'Jinggg', 'alecks'],
-    ['Chovy', 'Kiin', 'Canyon', 'Peyz', 'Lehends', 'Kim'],
-    ['Boo', 'benjyfishy', 'MiniBoo', 'RieNs', 'Wo0t', 'neilzinho'],
-    ['Nobody', 'Smoggy', 'Haodong', 'CHICHOO', 'ZmjKK', 'Muggle'],
-    ['saadhak', 'Less', 'tuyz', 'cauanzin', 'Quick', 'pe固定'],
-    ['stax', 'BuZz', 'MaKo', 'Foxy9', 'BeYN', 'terry']
-  ] : game === 'Counter-Strike 2' ? [
-    ['karrigan', 'rain', 'Broky', 'ropz', 'frozen', 'NEO'],
-    ['Aleksib', 'iM', 'b1t', 'jL', 'w0nd3rful', 'B1ad3'],
-    ['Snax', 'Hunter', 'Niko', 'm0NESY', 'malbsMd', 'TaZ'],
-    ['apEX', 'ZyWOo', 'spinx', 'flameZ', 'mezii', 'XTQZZZ'],
-    ['donk', 'sh1ro', 'chopper', 'magixx', 'zoner', 'hally'],
-    ['siuhy', 'torzsi', 'Jimpphat', 'xertioN', 'Brollan', 'sycrone'],
-    ['dev1ce', 'Staehr', 'jabbi', 'stavn', 'br0', 'ruggi'],
-    ['Jame', 'FL1T', 'electroNic', 'fame', 'n0rb3r7', 'dastan']
-  ] : game === 'League of Legends' ? [
-    ['Zeus', 'Oner', 'Faker', 'Gumayusi', 'Keria', 'kkOma'],
-    ['Kiin', 'Canyon', 'Chovy', 'Peyz', 'Lehends', 'Mata'],
-    ['TheShy', 'Weiwei', 'Xiaohu', 'Light', 'Crisp', 'Daeny'],
-    ['Bin', 'Xun', 'knight', 'Elk', 'ON', 'Easyhoon'],
-    ['Oscarinin', 'Razork', 'Humanoid', 'Noah', 'Jun', 'Nightshare'],
-    ['BrokenBlade', 'Yike', 'Caps', 'Hans Sama', 'Mikyx', 'Dylan'],
-    ['Doran', 'Peanut', 'Zeka', 'Viper', 'Delight', 'DanDy'],
-    ['Bwipo', 'Inspired', 'Jensen', 'Massu', 'Busio', 'Nukeduck']
-  ] : rlPlayers;
+  const genericRosterNames = rlPlayers;
 
   teamPresets.forEach((team, idx) => {
     const list = genericRosterNames[idx] || genericRosterNames[0];

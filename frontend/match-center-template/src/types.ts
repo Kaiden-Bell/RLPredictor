@@ -47,6 +47,9 @@ export interface BracketMatch {
   winnerId?: string;
   status: 'scheduled' | 'live' | 'completed';
   roundIndex: number; // 0: Quarterfinals, 1: Semifinals, 2: Finals
+  section?: string;   // e.g. "Playoffs", "Group A", "Group B"
+  round?: string;     // e.g. "Upper Bracket Quarter-Finals", "Round 1"
+  bestOf?: number;    // e.g. 5 or 7
 }
 
 export interface PlayerRating {

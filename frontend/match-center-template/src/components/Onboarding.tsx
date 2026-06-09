@@ -4,10 +4,10 @@
  */
 
 import React, { useState } from 'react';
-import { Sparkles, Trophy, ArrowRight, Compass, ShieldAlert, Cpu } from 'lucide-react';
+import { Sparkles, Trophy, ArrowRight, Compass, ShieldAlert, Cpu, Layers, Grid3X3 } from 'lucide-react';
 
 interface OnboardingProps {
-  onStartAnalysis: (url: string) => void;
+  onStartAnalysis: (url: string, sections?: string[]) => void;
   isLoading: boolean;
 }
 
@@ -16,25 +16,14 @@ export default function Onboarding({ onStartAnalysis, isLoading }: OnboardingPro
   const [urlInput, setUrlInput] = useState('');
   const [errorText, setErrorText] = useState('');
   const [loadingStep, setLoadingStep] = useState(0);
+  const [scrapeMode, setScrapeMode] = useState<'playoffs' | 'group'>('playoffs');
 
   const quickExamples = [
     {
-      title: 'RLCS 2026 Copenhagen Major',
+      title: 'RLCS 2026 Boston Major (NA Open 3)',
       game: 'Rocket League (Default)',
-      url: 'https://liquipedia.net/rocketleague/Rocket_League_Championship_Series/2026/Major_1',
+      url: 'https://liquipedia.net/rocketleague/Rocket_League_Championship_Series/2026/Boston_Major/North_America/Open_3',
       badgeColor: 'border-yellow-500/30 text-yellow-400 bg-yellow-950/10'
-    },
-    {
-      title: 'PGL CS2 Major Copenhagen',
-      game: 'Counter-Strike 2',
-      url: 'https://liquipedia.net/counterstrike/PGL/2222/Copenhagen',
-      badgeColor: 'border-cyan-500/30 text-cyan-400 bg-cyan-950/10'
-    },
-    {
-      title: 'Valorant Champions Tour 2026',
-      game: 'Valorant',
-      url: 'https://liquipedia.net/valorant/VCT/2026/Champions',
-      badgeColor: 'border-purple-500/30 text-purple-400 bg-purple-950/10'
     }
   ];
 
@@ -52,7 +41,7 @@ export default function Onboarding({ onStartAnalysis, isLoading }: OnboardingPro
 
   const loadingMessages = [
     'Initializing server-side Gemini live session...',
-    'Scraping and analyzing Liquipedia tournament structural bracket nodes...',
+    `Scraping ${scrapeMode === 'playoffs' ? 'Playoff bracket' : 'Group Stage bracket'} nodes from Liquipedia...`,
     'Parsing team rosters, calculating individual player power ratings...',
     'Composing match win probabilities and form multipliers...',
   ];
@@ -68,13 +57,15 @@ export default function Onboarding({ onStartAnalysis, isLoading }: OnboardingPro
       return;
     }
     setErrorText('');
-    onStartAnalysis(urlInput.trim());
+    const sections = scrapeMode === 'playoffs' ? ['Playoffs'] : ['Group'];
+    onStartAnalysis(urlInput.trim(), sections);
   };
 
   const handleQuickClick = (url: string) => {
     setUrlInput(url);
     setErrorText('');
-    onStartAnalysis(url);
+    const sections = scrapeMode === 'playoffs' ? ['Playoffs'] : ['Group'];
+    onStartAnalysis(url, sections);
   };
 
   return (
@@ -155,6 +146,44 @@ export default function Onboarding({ onStartAnalysis, isLoading }: OnboardingPro
               </div>
             </div>
 
+            {/* ── Bracket Type Toggle ── */}
+            <div className="flex flex-col gap-2.5">
+              <span className="text-[10px] font-mono text-gray-500 uppercase tracking-widest font-semibold text-left">
+                Bracket Section to Scrape
+              </span>
+              <div className="grid grid-cols-2 gap-2 bg-[#110e1a] p-1.5 rounded-xl border border-purple-950/30">
+                <button
+                  type="button"
+                  onClick={() => setScrapeMode('playoffs')}
+                  className={`flex items-center justify-center gap-2 py-2.5 px-3 text-xs font-display font-bold rounded-lg transition-all cursor-pointer ${
+                    scrapeMode === 'playoffs'
+                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-[0_2px_12px_rgba(236,72,153,0.25)]'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Trophy size={14} />
+                  <span>Playoffs</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setScrapeMode('group')}
+                  className={`flex items-center justify-center gap-2 py-2.5 px-3 text-xs font-display font-bold rounded-lg transition-all cursor-pointer ${
+                    scrapeMode === 'group'
+                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-[0_2px_12px_rgba(236,72,153,0.25)]'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <Grid3X3 size={14} />
+                  <span>Group Stage</span>
+                </button>
+              </div>
+              <p className="text-[10px] text-gray-600 font-sans text-left leading-relaxed">
+                {scrapeMode === 'playoffs'
+                  ? 'Scrapes the elimination bracket (Quarterfinals → Semifinals → Grand Final). Best for predicting late-stage matchups.'
+                  : 'Scrapes group stage brackets (GSL double-elimination pools). Best for round-robin and early-stage analysis.'}
+              </p>
+            </div>
+
             {/* URL Input Form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
               <div className="relative">
@@ -163,7 +192,7 @@ export default function Onboarding({ onStartAnalysis, isLoading }: OnboardingPro
                   type="text"
                   value={urlInput}
                   onChange={(e) => { setUrlInput(e.target.value); setErrorText(''); }}
-                  placeholder="Paste Liquipedia, Battlefy, or any tournament bracket URL..."
+                  placeholder="Paste Liquipedia tournament URL..."
                   className="w-full bg-[#110e1a] border border-gray-800 focus:border-brand-pink focus:ring-1 focus:ring-brand-pink/50 text-sm text-gray-200 px-4 py-3.5 rounded-2xl outline-none transition-all placeholder-gray-500 shadow-inner"
                 />
               </div>
@@ -179,7 +208,7 @@ export default function Onboarding({ onStartAnalysis, isLoading }: OnboardingPro
                 type="submit"
                 className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-display font-bold py-3.5 px-6 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2 group cursor-pointer shadow-[0_4px_20px_rgba(236,72,153,0.3)] active:scale-98"
               >
-                <span>Scrape & Analyze URL</span>
+                <span>Scrape {scrapeMode === 'playoffs' ? 'Playoffs' : 'Group Stage'}</span>
                 <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
               </button>
             </form>

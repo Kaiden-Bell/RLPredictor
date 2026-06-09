@@ -4,23 +4,21 @@
  */
 
 import React, { useState } from 'react';
-import { Home, BarChart2, Users, Trophy, Calendar, Shield, Settings, LogOut } from 'lucide-react';
+import { Home, Trophy, Sparkles, Settings, LogOut } from 'lucide-react';
 
 interface SidebarProps {
   onReset?: () => void;
   hasData?: boolean;
+  activeItem: string;
+  setActiveItem: (item: string) => void;
 }
 
-export default function Sidebar({ onReset, hasData = false }: SidebarProps) {
-  const [activeItem, setActiveItem] = useState('trophy');
+export default function Sidebar({ onReset, hasData = false, activeItem, setActiveItem }: SidebarProps) {
 
   const navItems = [
-    { id: 'home', icon: Home, label: 'Dashboard' },
-    { id: 'analytics', icon: BarChart2, label: 'AI Insights' },
-    { id: 'rosters', icon: Users, label: 'Team Squads' },
-    { id: 'trophy', icon: Trophy, label: 'Bracket Centers' },
-    { id: 'schedule', icon: Calendar, label: 'Schedules' },
-    { id: 'security', icon: Shield, label: 'Security' },
+    { id: 'landing', icon: Home, label: 'Landing Home' },
+    { id: 'bracket', icon: Trophy, label: 'Match Center' },
+    { id: 'prediction', icon: Sparkles, label: 'AI Predictor' },
     { id: 'settings', icon: Settings, label: 'Platform Options' },
   ];
 

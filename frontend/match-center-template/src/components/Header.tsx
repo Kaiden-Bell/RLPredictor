@@ -10,9 +10,10 @@ interface HeaderProps {
   currentUrl?: string;
   onSearchUrl: (url: string) => void;
   isLoading?: boolean;
+  onProfileClick: () => void;
 }
 
-export default function Header({ currentUrl = '', onSearchUrl, isLoading = false }: HeaderProps) {
+export default function Header({ currentUrl = '', onSearchUrl, isLoading = false, onProfileClick }: HeaderProps) {
   const [inputValue, setInputValue] = useState(currentUrl);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -43,7 +44,7 @@ export default function Header({ currentUrl = '', onSearchUrl, isLoading = false
             onChange={(e) => setInputValue(e.target.value)}
             disabled={isLoading}
             type="text"
-            placeholder="Search for tournaments or scrap Liquipedia brackets."
+            placeholder="Search for Rocket League tournaments on Liquipedia..."
             className="w-full bg-app-surface border border-gray-800 focus:border-brand-pink text-sm text-gray-200 pl-11 pr-4 py-2 rounded-lg outline-none transition-all placeholder-gray-500 group-hover:border-gray-700 focus:group-hover:border-brand-pink"
           />
           {inputValue && (
@@ -74,7 +75,10 @@ export default function Header({ currentUrl = '', onSearchUrl, isLoading = false
         <div className="h-6 w-px bg-app-border mx-1 hidden sm:block" />
 
         {/* Profile Avatar Trigger dropdown */}
-        <div className="flex items-center gap-2 cursor-pointer group hover:bg-app-surface p-1 rounded-lg transition-colors select-none">
+        <div 
+          onClick={onProfileClick}
+          className="flex items-center gap-2 cursor-pointer group hover:bg-app-surface p-1 rounded-lg transition-colors select-none"
+        >
           <div className="w-8 h-8 rounded-full border border-purple-500/30 overflow-hidden bg-brand-purple">
             <img 
               src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&auto=format&fit=crop" 

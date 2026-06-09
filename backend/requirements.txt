@@ -7,6 +7,10 @@ requests==2.32.5
 # Env config
 python-dotenv==1.0.1
 
+# API server
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+
 # Sentiment analysis
 nltk>=3.8
 

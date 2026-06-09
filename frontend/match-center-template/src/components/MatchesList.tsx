@@ -19,9 +19,9 @@ interface MatchesListProps {
 }
 
 export default function MatchesList({
-  upcomingMatches,
-  finishedMatches,
-  completedMatches,
+  upcomingMatches = [],
+  finishedMatches = [],
+  completedMatches = [],
   onHoverTeam,
   activeHoverTeam,
   onSelectMatch,
