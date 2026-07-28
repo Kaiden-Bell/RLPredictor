@@ -1,6 +1,0 @@
-{
-  "name": "Match Center",
-  "description": "An interactive AI-powered esports platform UI design including live tournament brackets, roster views, ratings, and stats prediction.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
