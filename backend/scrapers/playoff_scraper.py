@@ -6,6 +6,7 @@ File Function:
 - Usage: Imported by main.py to fetch and cache matchup and roster data.
 """
 
+import asyncio
 import re
 import time
 from urllib.parse import urljoin, quote
@@ -13,8 +14,7 @@ from urllib.parse import urljoin, quote
 from bs4 import BeautifulSoup
 import pandas as pd
 import requests
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from playwright.async_api import async_playwright
 
 from utils.database import (
     initialize_database,
@@ -230,26 +230,47 @@ def nearest_sect(n):
     return (hl.get_text(strip=True) if hl else hd.get_text(strip=True)) or "Unknown"
 
 
-def scrape_playoffs(url, sections=None):
+async def scrape_playoffs(url, sections=None, browser=None):
     """
     Description:
         Scrapes brackets, tournament structure, and rosters from a Liquipedia page.
     Arguments:
         url: target URL string.
         sections: Optional list of specific sections to include.
+        browser: Optional Playwright Browser instance (created if not provided).
     Returns:
         Pandas DataFrame containing matchups and rosters.
     """
     initialize_database()
 
-    opts = Options()
-    opts.add_argument("--headless=new")
-    driver = webdriver.Chrome(options=opts)
-    driver.get(url)
-    time.sleep(5)
+    # If no browser was passed (e.g. CLI usage), spin up a temporary one
+    own_browser = browser is None
+    pw = None
+    if own_browser:
+        pw = await async_playwright().start()
+        browser = await pw.chromium.launch(headless=True)
 
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
-    driver.quit()
+    try:
+        page = await browser.new_page()
+
+        # Block images, stylesheets, fonts, and media for speed
+        await page.route("**/*", lambda route: (
+            route.abort() if route.request.resource_type in ("image", "stylesheet", "font", "media")
+            else route.continue_()
+        ))
+
+        await page.goto(url, wait_until="domcontentloaded")
+        await page.wait_for_selector(".brkts-bracket", timeout=15000)
+
+        html = await page.content()
+        await page.close()
+    finally:
+        if own_browser:
+            await browser.close()
+            if pw:
+                await pw.stop()
+
+    soup = BeautifulSoup(html, 'html.parser')
 
     rows = []
     for b in soup.find_all('div', class_='brkts-bracket'):
@@ -331,6 +352,6 @@ def scrape_playoffs(url, sections=None):
 
 if __name__ == "__main__":
     url_input = input("Enter the Tournament you wish to scrape: ")
-    df = scrape_playoffs(url_input)
+    df = asyncio.run(scrape_playoffs(url_input))
     print(df[['section', 'round', 'team1', 'team2', 'team1_players', 'team2_players']].head(20))
     df.to_csv("playoffs-scraped.csv", index=False)

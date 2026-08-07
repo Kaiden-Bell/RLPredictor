@@ -11,11 +11,13 @@ import os
 import sys
 import hashlib
 import traceback
+from contextlib import asynccontextmanager
 from typing import Optional
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from playwright.async_api import async_playwright
 from pydantic import BaseModel
 
 import pandas as pd
@@ -28,10 +30,30 @@ from utils.database import initialize_database
 
 load_dotenv()
 
+
+# ──────────────────────────────────────────────────────────────────────
+# Playwright Lifespan (Phase 1)
+# ──────────────────────────────────────────────────────────────────────
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage a persistent headless Chromium instance across the app lifetime."""
+    pw = await async_playwright().start()
+    browser = await pw.chromium.launch(headless=True)
+    app.state.playwright = pw
+    app.state.browser = browser
+    print("[STARTUP] Playwright browser launched")
+    yield
+    await browser.close()
+    await pw.stop()
+    print("[SHUTDOWN] Playwright browser closed")
+
+
 app = FastAPI(
     title="RLPredictor API",
     description="Backend API for the RLPredictor Rocket League esports analytics platform.",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # Allow the Vite/Express frontend dev server to call us
