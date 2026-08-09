@@ -351,7 +351,7 @@ async def scrape_tournament(req: ScrapeRequest):
 
     try:
         initialize_database()
-        df = scrape_playoffs(url, sections=req.sections)
+        df = await scrape_playoffs(url, sections=req.sections, browser=app.state.browser)
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(
@@ -391,7 +391,7 @@ async def scrape_tournament_light(req: ScrapeRequest):
         soup = fetch_html(url)
         brackets = soup.find_all("div", class_="brkts-bracket")
         if not brackets:
-            raise ValueError("No brackets found via light scrape, falling back to Selenium.")
+            raise ValueError("No brackets found via light scrape, falling back to Playwright.")
 
         rows = []
         for b in brackets:
@@ -429,11 +429,11 @@ async def scrape_tournament_light(req: ScrapeRequest):
         return _build_tournament_data(url, df)
 
     except Exception as light_err:
-        print(f"[LIGHT SCRAPE] Failed: {light_err} — falling back to full Selenium scrape.")
+        print(f"[LIGHT SCRAPE] Failed: {light_err} — falling back to full Playwright scrape.")
         # Fall through to full scrape
         try:
             initialize_database()
-            df = scrape_playoffs(url, sections=req.sections)
+            df = await scrape_playoffs(url, sections=req.sections, browser=app.state.browser)
         except Exception as e:
             traceback.print_exc()
             raise HTTPException(status_code=500, detail=f"Scraping failed: {str(e)}")

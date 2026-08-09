@@ -3,7 +3,7 @@
 ## Overview
 This document outlines the phased approach for migrating the RLPredictor web scraping pipeline from a synchronous Selenium and Beautiful Soup (BS4) stack to an entirely asynchronous Playwright architecture. 
 
-By migrating in phases, we can ensure stability, test each individual component, and gather the necessary B-roll for your video content (including moments where things might break as we refactor!).
+By migrating in phases, we can ensure stability, test each individual component, and gather the necessary B-roll for video content.
 
 ## Core Objectives
 1. **Speed & Efficiency:** Use Playwright's network interception to block images, fonts, and CSS, prioritizing raw data extraction speed for brackets.

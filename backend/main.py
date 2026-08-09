@@ -7,6 +7,7 @@ File Function:
 """
 
 import argparse
+import asyncio
 import os
 import time
 
@@ -167,7 +168,7 @@ def run_features(row: pd.Series, bc: Ballchasing):
         for l in logs[:12]: print("-", l)
 
 
-def main():
+async def main():
     """
     Description:
         Main pipeline orchestrator parsing choices and routing matching tasks.
@@ -213,7 +214,7 @@ def main():
     if sections: print(f"Sections: {', '.join(sections)}")
     else: print(f"Sections: all")
     print()
-    df = scrape_playoffs(args.url, sections=sections)
+    df = await scrape_playoffs(args.url, sections=sections)
     print(df.head())
 
     matches = list_matches(df)
@@ -239,4 +240,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

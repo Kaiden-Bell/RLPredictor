@@ -253,13 +253,13 @@ async def scrape_playoffs(url, sections=None, browser=None):
     try:
         page = await browser.new_page()
 
-        # Block images, stylesheets, fonts, and media for speed
+        # Block images, fonts, and media for speed (keep stylesheets — bracket JS may depend on CSS)
         await page.route("**/*", lambda route: (
-            route.abort() if route.request.resource_type in ("image", "stylesheet", "font", "media")
+            route.abort() if route.request.resource_type in ("image", "font", "media")
             else route.continue_()
         ))
 
-        await page.goto(url, wait_until="domcontentloaded")
+        await page.goto(url, wait_until="networkidle")
         await page.wait_for_selector(".brkts-bracket", timeout=15000)
 
         html = await page.content()
