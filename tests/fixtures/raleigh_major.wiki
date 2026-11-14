@@ -1,0 +1,2297 @@
+{{DISPLAYTITLE:Rocket League Championship Series 2025 - Raleigh Major}}
+{{Rocket League Championship Series Navbox Top}}
+{{RLCS 2025 Tabs|MJR=4}}
+{{Infobox league
+|liquipediatier=1
+|series=Rocket League Championship Series
+|name=RLCS 2025 - Raleigh Major
+|tickername=RLCS 2025 - Raleigh Major
+|shortname=Season 2025 - Raleigh Major
+|image=RLCS 2020 lightmode.png
+|imagedark=RLCS 2020 darkmode.png
+|icon=RLCS 2020 lightmode icon.png
+|icondark=RLCS 2020 darkmode icon.png
+|organizer=Epic Games
+|organizer2=BLAST (Organizer)
+|organizer2-name=BLAST
+|sponsor=[https://www.progressive.com Progressive]
+|sponsor2=[https://blacklyte.com Blacklyte]
+|sponsor3=[https://www.visitraleigh.com/media/press-release/post/visit-raleigh-joins-rlcs-raleigh-major-as-official-destination-partner-to-elevate-esports-ahead-of-l/ visitRaleigh]
+|sponsor4=[https://www.visitnc.com/ Visit North Carolina]
+|mode=3v3
+|type=Offline
+|country=United States
+|city=Raleigh
+|venue=Lenovo Center |venuelink=https://www.lenovocenter.com/
+|rulebook=https://media.graphassets.com/s94O5s7wSbWDllHf76Zf
+|prizepoolusd=351,000
+|twitch=rocketleague
+|youtube=@rlesports
+|youtube2=@Highlights-RLCS
+|twitch2=rlesports
+|twitter=RLEsports
+|tiktok=rocketleague
+|tiktok2=rlesports
+|shift=
+|sdate=2025-06-26
+|edate=2025-06-29
+|website=https://www.rocketleague.com/competitive
+|blasttv=rl/tournaments/raleigh-major-2-2025
+|team_number=16
+|previous=Rocket_League_Championship_Series/2024{{!}}2024
+|next=Rocket_League_Championship_Series/2026{{!}}2026
+}}
+
+==About==
+{{#section:Rocket_League_Championship_Series/2025|Intro}}
+
+The '''RLCS 2025 Raleigh Major''' {{IsTournamentFinished|took|will take|is taking}} place in Raleigh, United States at the [https://www.lenovocenter.com/ Lenovo Center] arena.
+
+===Format===
+[[File:RLCS Swiss Format.jpg|thumbnail|335px|A graphical explanation of the Swiss System format]]
+*'''Swiss Stage''' - ''June 26th - 27th, 2025''
+** 16 Team Swiss System Format.
+*** All matches are {{Abbr/Bo5}}.
+** <span class="bg-up">Top 8</span> Teams proceed to the [[Rocket_League_Championship_Series/2025/Raleigh_Major#Playoffs|Playoffs]].
+<br>
+*'''Playoffs''' - ''June 28th - 29th, 2025''
+**AFL Final Eight system.
+**Top 4 of the [[Rocket_League_Championship_Series/2025/Raleigh_Major#Swiss Stage|Swiss Stage]] start with two chances before the Final Four, whereas teams ranked 5th-8th start with one chance.
+***All matches are {{Abbr/Bo7}}.
+<br>
+''Crowd Days: June 28th - 29th''
+
+===Prize Pool===
+$351,000 {{Abbr/USD}} and [[Rocket League Championship Series/2025/Rankings|RLCS Circuit Ranking Points]] are spread among the teams as seen below:
+{{TeamPrizePool|points1=rlcs2025|prizesummary=false|placementsToSkip=1
+|tournament1=#Swiss_Stage|tournament2=#Playoffs
+|{{Slot|usdprize=102,000|points=36|place=1}}
+|{{Slot|usdprize=51,000|points=24|place=2}}
+|{{Slot|usdprize=36,000|points=16|place=3-4}}
+|{{Slot|usdprize=22,500|points=12|place=5-6}}
+|{{Slot|usdprize=15,000|points=8|place=7-8}}
+|{{Slot|usdprize=9,000|points=6|place=9-11}}
+|{{Slot|usdprize=6,000|points=5|place=12-14}}
+|{{Slot|usdprize=3,000|points=4|place=15-16}}
+}}
+
+===Schedule===
+{{Toggle bracket start|tournament=Rocket_League_Championship_Series/2025/Raleigh Major|sdate=|button2Text=Hide schedule|sortround=true|countdown=true}}
+{{Toggle bracket end}}
+
+==Participants==
+{{TeamParticipants|showplayerinfo=true
+|{{Opponent|Karmine Corp
+  |players={{Persons
+    |{{Person|Vatira}}
+    |{{Person|Atow.}}
+    |{{Person|dralii}}
+    |{{Person|Ferra|role=coach|type=staff}}
+    |{{Person|Jordi|link=Jordi (French Coach)|role=performance Coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/Europe/Raleigh_Major|text=Europe Points Ranking|placement=1}}
+}}
+|{{Opponent|Dignitas
+  |players={{Persons
+    |{{Person|stizzy}}
+    |{{Person|ApparentlyJack}}
+    |{{Person|Joreuz}}
+    |{{Person|ViolentPanda|role=coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/Europe/Raleigh_Major|text=Europe Points Ranking|placement=2}}
+}}
+|{{Opponent|Team Vitality
+  |players={{Persons
+    |{{Person|zen}}
+    |{{Person|M0nkey M00n}}
+    |{{Person|ExoTiiK}}
+    |{{Person|Kassio|role=coach|type=staff}}
+    |{{Person|Hugo|role=performance Coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/Europe/Raleigh_Major|text=Europe Points Ranking|placement=3}}
+}}
+|{{Opponent|Gentle Mates Alpine
+  |players={{Persons
+    |{{Person|Seikoo}}
+    |{{Person|juicy|link=Juicy (French Player)}}
+    |{{Person|yujin}}
+    |{{Person|Eversax|role=coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/Europe/Raleigh_Major|text=Europe Points Ranking|placement=4}}
+}}
+|{{Opponent|NRG
+  |players={{Persons
+    |{{Person|Atomic}}
+    |{{Person|BeastMode}}
+    |{{Person|Daniel}}
+    |{{Person|Satthew|role=coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/North America/Raleigh_Major|text=North America Points Ranking|placement=1}}
+}}
+|{{Opponent|Spacestation Gaming
+  |players={{Persons
+    |{{Person|Scrzbbles}}
+    |{{Person|reveal}}
+    |{{Person|kofyr}}
+    |{{Person|Xpére|role=coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/North America/Raleigh_Major|text=North America Points Ranking|placement=2}}
+}}
+|{{Opponent|Gen.G Mobil1 Racing
+  |players={{Persons
+    |{{Person|MaJicBear}}
+    |{{Person|CHEESE.}}
+    |{{Person|justin.}}
+    |{{Person|Thundah|status=sub|played=false}}
+    |{{Person|RawGreg|role=coach|type=staff}}
+    |{{Person|Kevpert|role=performance Coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/North America/Raleigh_Major|text=North America Points Ranking|placement=3}}
+}}
+|{{Opponent|The Ultimates
+  |players={{Persons
+    |{{Person|Firstkiller}}
+    |{{Person|Lj}}
+    |{{Person|Chronic}}
+    |{{Person|ElOmarMaton|status=sub|played=false}}
+    |{{Person|Sadjunior|role=coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/North America/Raleigh_Major|text=North America Points Ranking|placement=4}}
+}}
+|{{Opponent|Wildcard
+  |players={{Persons
+    |{{Person|Fever}}
+    |{{Person|Torsos}}
+    |{{Person|bananahead}}
+    |{{Person|Jimmah|role=coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/Oceania/Raleigh_Major|text=Oceania Points Ranking|placement=1}}
+}}
+|{{Opponent|TSM
+  |players={{Persons
+    |{{Person|Superlachie}}
+    |{{Person|Amphis}}
+    |{{Person|kaka}}
+    |{{Person|mock|role=coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/Oceania/Raleigh_Major|text=Oceania Points Ranking|placement=2}}
+}}
+|{{Opponent|FURIA
+  |players={{Persons
+    |{{Person|yANXNZ}}
+    |{{Person|Lostt}}
+    |{{Person|DRUFINHO}}
+    |{{Person|STL|role=coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/South America/Raleigh_Major|text=South America Points Ranking|placement=1}}
+}}
+|{{Opponent|Team Secret
+  |players={{Persons
+    |{{Person|kv1}}
+    |{{Person|Motta}}
+    |{{Person|swiftt}}
+    |{{Person|brunovisqui|role=coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/South America/Raleigh_Major|text=South America Points Ranking|placement=2}}
+}}
+|{{Opponent|Team Falcons
+  |players={{Persons
+    |{{Person|Trk511}}
+    |{{Person|Rw9}}
+    |{{Person|Kiileerrz}}
+    |{{Person|d7oom-24|role=coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/Middle East and North Africa/Raleigh_Major|text=Middle East and North Africa Points Ranking|placement=1}}
+}}
+|{{Opponent|Twisted Minds
+  |players={{Persons
+    |{{Person|Nwpo}}
+    |{{Person|rise.}}
+    |{{Person|LTK_AtomiK}}
+    |{{Person|Hisoka|status=sub|played=false}}
+    |{{Person|blau|role=coach|type=staff}}
+    |{{Person|Senzo|role=assistant Coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/Middle East and North Africa/Raleigh_Major|text=Middle East and North Africa Points Ranking|placement=2}}
+  |notes={{Notes|{{Notes|'''[[blau]]''' joins as coach prior to the start of the major.<ref>{{cite web|url=https://x.com/TwisMinds/status/1936130144084566506|title=Our coach for Raleigh is here, welcome @blau_rl|date=2025-06-20|author='''[[Twisted Minds]]'''}}</ref>}}}}
+}}
+|{{Opponent|Virtus.pro
+  |players={{Persons
+    |{{Person|Catalysm}}
+    |{{Person|sosa}}
+    |{{Person|Sphinx}}
+    |{{Person|mectos|role=coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/Asia-Pacific/Raleigh_Major|text=Asia-Pacific Points Ranking|placement=1}}
+}}
+|{{Opponent|FUT Esports
+  |players={{Persons
+    |{{Person|VKSailen}}
+    |{{Person|Leoro}}
+    |{{Person|TORRES8232}}
+    |{{Person|armonik|role=coach|type=staff}}
+  }}
+  |qualification={{Qualification|method=qual|page=Rocket League Championship Series/2025/Rankings/Sub-Saharan Africa/Raleigh_Major|text=Sub-Saharan Africa Points Ranking|placement=1}}
+}}
+}}
+
+==Results==
+==={{Stage|Swiss Stage}}===
+{{legend|up=x|stayup=y|down=z
+|uptitle=Advance to the [[#Playoffs|Playoffs]] - Upper Quarterfinals
+|stayuptitle=Advance to the [[#Playoffs|Playoffs]] - Lower Round 1
+|downtitle=Eliminated
+}}
+<section begin="Swiss" />
+{{SwissStandings
+|tiebreakers={{Json|matchdiff|buchholz}}
+|bg=1-4=up,5-8=stayup,9-16=down
+|placements=1-2;3-5;6-8;9-11;12-14;15-16
+|title=Swiss Stage
+|round1={{Round|started=true|finished=true|matchgroups=gWSUMaunon}}
+|round2={{Round|started=true|finished=true|matchgroups=NNcrAjTjWg,1Erm27qvrL}}
+|round3={{Round|started=true|finished=true|matchgroups=5c54H3pjKh,gzX9hEwbGH,a606mF9s9Q}}
+|round4={{Round|started=true|finished=true|matchgroups=aYe3BiOGQV,K1ZBR91gAb}}
+|round5={{Round|started=true|finished=true|matchgroups=diQzPQbFtd}}
+}}
+<section end="Swiss" />
+
+===Detailed Results===
+====Round 1====
+{{MatchSection|Round 1}}
+{{matchlist|id=gWSUMaunon|title=Round 1 Matches|matchWidth=350|matchsection=Round 1
+
+|M1header=
+|M1={{Match
+  |opponent1={{TeamOpponent|Karmine Corp|score=3}}
+  |opponent2={{TeamOpponent|Twisted Minds|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=3|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=00h48m45s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=3|score2=0
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=01h02m31s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=01h010m03s
+  }}
+  |finished=t
+  |ballchasing=kc-vs-twis-hxxdbc25jy
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/f95cf7e7/kc-twistedminds
+  |caster1=Dazerin|caster2=Jorby
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 26, 2025 - 10:00 {{Abbr/EDT}}
+}}
+
+|M2header=
+|M2={{Match
+  |opponent1={{TeamOpponent|Gentle Mates Alpine|score=3}}
+  |opponent2={{TeamOpponent|FUT Esports|score=1}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=3|score2=1
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=0h33m32s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=0|score2=1
+    |ot=t|otlength=+0:24
+    |vod=https://youtu.be/9EoqchfFgR0?t=0h41m38s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=4|score2=3
+    |ot=t|otlength=+0:44
+    |vod=https://youtu.be/9EoqchfFgR0?t=0h48m45s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=4|score2=0
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=0h58m18s
+  }}
+  |finished=t
+  |ballchasing=m8-vs-fut-ce7ou8204d
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/67cb4a39/m8-alpine-fut
+  |caster1=BassFromThePast|caster2=Turtle
+  |twitch=RLEsports
+  |date=June 26, 2025 - 10:00 {{Abbr/EDT}}
+}}
+
+|M3header=
+|M3={{Match
+  |opponent1={{TeamOpponent|FURIA|score=3}}
+  |opponent2={{TeamOpponent|Wildcard|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=0
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=01h41m25s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=5|score2=2
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=01h48m23s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=3|score2=2
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=01h57m22s
+  }}
+  |finished=true
+  |ballchasing=fur-vs-wc-5b986kla3z
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/b9de08b1/furia-wildcard
+  |caster1=Jamesbot|caster2=Stax
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 26, 2025 - 10:55 {{Abbr/EDT}}
+}}
+
+|M4header=
+|M4={{Match
+  |opponent1={{TeamOpponent|Dignitas|score=3}}
+  |opponent2={{TeamOpponent|Virtus.pro|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=0
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=1h30m29s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=4|score2=2
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=1h37m24s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=5|score2=1
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=1h45m49s
+  }}
+  |finished=true
+  |ballchasing=dig-vs-vp-1b16p90gpz
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/fca7b9e9/dignitas-vp
+  |caster1=BassFromThePast|caster2=LemonKiwi
+  |twitch=RLEsports
+  |date=June 26, 2025 - 11:00 {{Abbr/EDT}}
+}}
+
+|M5header=
+|M5={{Match
+  |opponent1={{TeamOpponent|Spacestation Gaming|score=1}}
+  |opponent2={{TeamOpponent|The Ultimates|score=3}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=2
+    |ot=true|otlength=+0:23
+    |vod=https://www.twitch.tv/videos/2496387712?t=02h28m29s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=0|score2=2
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=02h36m27s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=4|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=02h43m43s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=3|score2=5
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=02h51m58s
+  }}
+  |finished=true
+  |ballchasing=ssg-vs-tu-u1c3vs1m6o
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/040108d3/spacestation-ultimates
+  |caster1=CJCJ|caster2=Herculyse
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 26, 2025 - 11:40 {{Abbr/EDT}}
+}}
+
+|M6header=
+|M6={{Match
+  |opponent1={{TeamOpponent|Team Falcons|score=3}}
+  |opponent2={{TeamOpponent|Team Secret|score=1}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=0|score2=1
+    |ot=true|otlength=+0:26
+    |vod=https://youtu.be/9EoqchfFgR0?t=2h18m24s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=1|score2=0
+    |ot=true|otlength=+0:14
+    |vod=https://youtu.be/9EoqchfFgR0?t=2h28m37s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=2h36m16s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=3|score2=1
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=2h43m41s
+  }}
+  |finished=true
+  |ballchasing=flcn-vs-ts-n0h0jsr9hp
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/1a0dca33/falcons-teamsecret
+  |caster1=Achieves|caster2=Turtle
+  |twitch=RLEsports
+  |date=June 26, 2025 - 11:45 {{Abbr/EDT}}
+}}
+
+|M7header=
+|M7={{Match
+  |opponent1={{TeamOpponent|NRG|score=3}}
+  |opponent2={{TeamOpponent|Gen.G Mobil1 Racing|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=3|score2=0
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=03h25m25s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=03h36m31s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=03h44m05s
+  }}
+  |finished=t
+  |ballchasing=nrg-vs-ggm1-fvey5pxq8o
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/ad660292/nrg-gen-g
+  |caster1=Jorby|caster2=Jamesbot
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 26, 2025 - 12:35 {{Abbr/EDT}}
+}}
+
+|M8header=
+|M8={{Match
+  |opponent1={{TeamOpponent|Team Vitality|score=3}}
+  |opponent2={{TeamOpponent|TSM|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=3|score2=1
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=3h14m33s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=3h22m33s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=1
+    |ot=t|otlength=+3:29
+    |vod=https://youtu.be/9EoqchfFgR0?t=3h30m02s
+  }}
+  |finished=t
+  |ballchasing=vit-vs-tsm-p4icywvt11
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/e5a152bc/vitality-tsm
+  |caster1=Achieves|caster2=LemonKiwi
+  |twitch=RLEsports
+  |date=June 26, 2025 - 12:40 {{Abbr/EDT}}
+}}
+
+}}
+
+====Round 2====
+{{MatchSection|Round 2}}
+{{Toggle group start|state=hide}}
+{{box|start|padding=2em}}
+=====High=====
+{{matchlist|id=NNcrAjTjWg|title=Round 2 High Matches|matchWidth=350|matchsection=Round 2
+
+|M1header=
+|M1={{Match
+  |opponent1={{TeamOpponent|Karmine Corp|score=1}}
+  |opponent2={{TeamOpponent|The Ultimates|score=3}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=3|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=04h27m11s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=2|score2=3
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=04h35m02s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=1|score2=3
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=04h43m11s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=2|score2=3
+    |ot=t|otlength=+0:55
+    |vod=https://www.twitch.tv/videos/2496387712?t=04h51m03s
+  }}
+  |finished=t
+  |ballchasing=kc-vs-tu-v6wo51g09p
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/bed55bca/kc-ultimates
+  |caster1=Herculyse|caster2=CJCJ
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 26, 2025 - 13:40 {{Abbr/EDT}}
+}}
+
+|M2header=
+|M2={{Match
+  |opponent1={{TeamOpponent|NRG|score=3}}
+  |opponent2={{TeamOpponent|Gentle Mates Alpine|score=1}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=1
+    |ot=t|otlength=+3:16
+    |vod=https://www.twitch.tv/videos/2496387712?t=05h23m11s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=3|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=05h34m00s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=1|score2=2
+    |ot=t|otlength=+2:31
+    |vod=https://www.twitch.tv/videos/2496387712?t=05h50m30s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=2|score2=1
+    |ot=t|otlength=+3:43
+    |vod=https://www.twitch.tv/videos/2496387712?t=06h00m58s
+  }}
+  |finished=t
+  |ballchasing=nrg-vs-m8-scjb7801ck
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/6bbdaeae/m8-alpine-nrg
+  |caster1=Stax|caster2=Dazerin
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 26, 2025 - 14:35 {{Abbr/EDT}}
+}}
+
+|M3header=
+|M3={{Match
+  |opponent1={{TeamOpponent|Team Falcons|score=3}}
+  |opponent2={{TeamOpponent|Dignitas|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=3|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=06h36m11s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=5|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=06h44m24s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=06h53m53s
+  }}
+  |finished=true
+  |ballchasing=flcn-vs-dig-5pavs9uzbt
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/8d045e71/dignitas-falcons
+  |caster1=Herculyse|caster2=Jorby
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 26, 2025 - 15:50 {{Abbr/EDT}}
+}}
+
+|M4header=
+|M4={{Match
+  |opponent1={{TeamOpponent|FURIA|score=1}}
+  |opponent2={{TeamOpponent|Team Vitality|score=3}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=3
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=07h22m42s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=1|score2=0
+    |ot=true|otlength=+0:04
+    |vod=https://www.twitch.tv/videos/2496387712?t=07h31m01s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=1|score2=3
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=07h38m04s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=1|score2=3
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2496387712?t=07h45m57s
+  }}
+  |finished=true
+  |ballchasing=fur-vs-vit-y7zmn4cz3e
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/f844df72/furia-vitality
+  |caster1=CJCJ|caster2=Dazerin
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 26, 2025 - 16:35 {{Abbr/EDT}}
+}}
+
+}}
+{{box|break|padding=2em}}
+
+=====Low=====
+{{matchlist|id=1Erm27qvrL|title=Round 2 Low Matches|matchWidth=350|matchsection=Round 2
+
+|M1header=
+|M1={{Match
+  |opponent1={{TeamOpponent|Spacestation Gaming|score=3}}
+  |opponent2={{TeamOpponent|FUT Esports|score=2}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=1
+    |ot=true|otlength=+0:26
+    |vod=https://youtu.be/9EoqchfFgR0?t=4h09m36s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=2|score2=3
+    |ot=true|otlength=+2:30
+    |vod=https://youtu.be/9EoqchfFgR0?t=4h17m26s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=1
+    |ot=true|otlength=+0:58
+    |vod=https://youtu.be/9EoqchfFgR0?t=4h27m58s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=2|score2=3
+    |ot=true|otlength=+2:33
+    |vod=https://youtu.be/9EoqchfFgR0?t=4h36m37s
+  }}
+  |map5={{Map
+    |map=Champions Field
+    |score1=7|score2=1
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=4h47m17s
+  }}
+  |finished=true
+  |ballchasing=ssg-vs-fut-rstsedheke
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/3b60f823/fut-spacestation
+  |caster1=LemonKiwi|caster2=Turtle
+  |twitch=RLEsports
+  |date=June 26, 2025 - 13:35 {{Abbr/EDT}}
+}}
+
+|M2header=
+|M2={{Match
+  |opponent1={{TeamOpponent|Gen.G Mobil1 Racing|score=3}}
+  |opponent2={{TeamOpponent|Virtus.pro|score=1}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=4|score2=1
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=5h18m17s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=2|score2=3
+    |ot=true|otlength=+1:02
+    |vod=https://youtu.be/9EoqchfFgR0?t=5h26m33s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=5h35m44s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=3|score2=1
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=5h43m25s
+  }}
+  |finished=true
+  |ballchasing=ggm1-vs-vp-fohzbdbfsp
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/47bd49b4/gen-g-vp
+  |caster1=Achieves|caster2=BassFromThePast
+  |twitch=RLEsports
+  |date=June 26, 2025 - 14:45 {{Abbr/EDT}}
+}}
+
+|M3header=
+|M3={{Match
+  |opponent1={{TeamOpponent|Twisted Minds|score=3}}
+  |opponent2={{TeamOpponent|TSM|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=6|score2=4
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=6h08m59s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=6|score2=2
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=6h18m48s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=5|score2=3
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=6h27m56s
+  }}
+  |finished=t
+  |ballchasing=twis-vs-tsm-50k5vdazq6
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/9a184f35/twistedminds-tsm
+  |caster1=LemonKiwi|caster2=BassFromThePast
+  |twitch=RLEsports
+  |date=June 26, 2025 - 15:35 {{Abbr/EDT}}
+}}
+
+|M4header=
+|M4={{Match
+  |opponent1={{TeamOpponent|Wildcard|score=1}}
+  |opponent2={{TeamOpponent|Team Secret|score=3}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=3
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=6h56m05s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=0|score2=3
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=7h04m14s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=0
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=7h11m40s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=2|score2=8
+    |ot=|otlength=
+    |vod=https://youtu.be/9EoqchfFgR0?t=7h18m44s
+  }}
+  |finished=true
+  |ballchasing=group/wc-vs-ts-vxsswtqrts
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/25802ebf/wildcard-teamsecret
+  |caster1=Achieves|caster2=Turtle
+  |twitch=RLEsports
+  |date=June 26, 2025 - 16:25 {{Abbr/EDT}}
+}}
+
+}}
+{{box|end}}
+
+====Round 3====
+{{MatchSection|Round 3}}
+{{Toggle group start|state=hide}}
+{{box|start|padding=2em}}
+=====High=====
+{{matchlist|id=5c54H3pjKh|title=Round 3 High Matches|matchWidth=350|matchsection=Round 3
+
+|M1header=
+|M1={{Match
+  |opponent1={{TeamOpponent|NRG|score=1}}
+  |opponent2={{TeamOpponent|Team Vitality|score=3}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=0|score2=3
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=02h51m06s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=4|score2=2
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=03h02m06s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=0|score2=3
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=03h10m34s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=3|score2=4
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=03h18m11s
+  }}
+  |finished=t
+  |ballchasing=nrg-vs-vit-cias4xebdi
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/55aca072/vitality-nrg
+  |caster1=Dazerin|caster2=Herculyse
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 27, 2025 - 12:00 {{Abbr/EDT}}
+}}
+
+|M2header=
+|M2={{Match
+  |opponent1={{TeamOpponent|Team Falcons|score=3}}
+  |opponent2={{TeamOpponent|The Ultimates|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=4|score2=3
+    |ot=true|otlength=+3:31
+    |vod=https://www.twitch.tv/videos/2497289936?t=03h51m49s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=3|score2=2
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=04h10m22s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=04h18m40s
+  }}
+  |finished=true
+  |ballchasing=flcn-vs-tu-c2xb6mepvw
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/ed5e2b55/falcons-ultimates
+  |caster1=CJCJ|caster2=Jorby
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 27, 2025 - 13:00 {{Abbr/EDT}}
+}}
+
+}}
+{{box|break|padding=2em}}
+
+=====Mid=====
+{{matchlist|id=gzX9hEwbGH|title=Round 3 Mid Matches|matchWidth=350|matchsection=Round 3
+
+|M1header=
+|M1={{Match
+  |opponent1={{TeamOpponent|Dignitas|score=3}}
+  |opponent2={{TeamOpponent|Gen.G Mobil1 Racing|score=1}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=3|score2=4
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=00h49m46s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=00h58m37s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=1
+    |ot=true|otlength=+1:04
+    |vod=https://www.twitch.tv/videos/2497289936?t=01h06m09s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=01h15m08s
+  }}
+  |finished=true
+  |ballchasing=dig-vs-ggm1-u8luuw9aur
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/58ebeee9/dignitas-gen-g
+  |caster1=Jamesbot|caster2=Jorby
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 27, 2025 - 10:00 {{Abbr/EDT}}
+}}
+
+|M2header=
+|M2={{Match
+  |opponent1={{TeamOpponent|Karmine Corp|score=3}}
+  |opponent2={{TeamOpponent|Team Secret|score=2}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=2
+    |ot=true|otlength=+0:16
+    |vod=https://youtu.be/aGPcBQtCBj0?t=0h47m38s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=1|score2=0
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=0h55m22s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=4|score2=0
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=1h02m41s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=0|score2=1
+    |ot=true|otlength=+0:24
+    |vod=https://youtu.be/aGPcBQtCBj0?t=1h10m35s
+  }}
+  |map5={{Map
+    |map=Champions Field
+    |score1=1|score2=0
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=1h17m59s
+  }}
+  |finished=true
+  |ballchasing=kc-vs-ts-7kw7qfpswx
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/4d4a5916/kc-teamsecret
+  |caster1=BassFromThePast|caster2=LemonKiwi
+  |twitch=RLEsports
+  |date=June 27, 2025 - 10:00 {{Abbr/EDT}}
+}}
+
+|M3header=
+|M3={{Match
+  |opponent1={{TeamOpponent|Spacestation Gaming|score=1}}
+  |opponent2={{TeamOpponent|Gentle Mates Alpine|score=3}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=3
+    |ot=|otlength=+2:05
+    |vod=https://www.twitch.tv/videos/2497289936?t=01h45m01s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=0|score2=4
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=01h55m22s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=3|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=02h03m15s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=1|score2=2
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=02h19m22s
+  }}
+  |finished=t
+  |ballchasing=ssg-vs-m8-ru9xxovuf0
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/f2297bd6/m8-alpine-spacestation
+  |caster1=Stax|caster2=CJCJ
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 27, 2025 - 10:55 {{Abbr/EDT}}
+}}
+
+|M4header=
+|M4={{Match
+  |opponent1={{TeamOpponent|FURIA|score=2}}
+  |opponent2={{TeamOpponent|Twisted Minds|score=3}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=5|score2=3
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=1h45m02s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=0|score2=1
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=1h54m09s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=0
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=2h01m08s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=0|score2=3
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=2h08m17s
+  }}
+  |map5={{Map
+    |map=Champions Field
+    |score1=0|score2=2
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=2h15m38s
+  }}
+  |finished=t
+  |ballchasing=fur-vs-twis-1foy5zdpva
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/8557e7d9/twistedminds-furia
+  |caster1=Achieves|caster2=Turtle
+  |twitch=RLEsports
+  |date=June 27, 2025 - 10:55 {{Abbr/EDT}}
+}}
+
+}}
+{{box|break|padding=2em}}
+
+=====Low=====
+{{matchlist|id=a606mF9s9Q|title=Round 3 Low Matches|matchWidth=350|matchsection=Round 3
+
+|M1header=
+|M1={{Match
+  |opponent1={{TeamOpponent|Wildcard|score=0}}
+  |opponent2={{TeamOpponent|Virtus.pro|score=3}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=3
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=2h40m45s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=3|score2=4
+    |ot=true|otlength=+0:11
+    |vod=https://youtu.be/aGPcBQtCBj0?t=2h48m31s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=4
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=2h57m19s
+  }}
+  |finished=true
+  |ballchasing=wc-vs-vp-o0ffq1kdsa
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/80903253/wildcard-vp
+  |caster1=Achieves|caster2=LemonKiwi
+  |twitch=RLEsports
+  |date=June 27, 2025 - 11:50 {{Abbr/EDT}}
+}}
+
+|M2header=
+|M2={{Match
+  |opponent1={{TeamOpponent|TSM|score=3}}
+  |opponent2={{TeamOpponent|FUT Esports|score=1}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=3|score2=2
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=3h25m13s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=3|score2=2
+    |ot=t|otlength=+3:56
+    |vod=https://youtu.be/aGPcBQtCBj0?t=3h33m22s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=0|score2=1
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=3h45m23s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=1|score2=0
+    |ot=t|otlength=+0:52
+    |vod=https://youtu.be/aGPcBQtCBj0?t=3h52m09s
+  }}
+  |finished=t
+  |ballchasing=tsm-vs-fut-02dq4oihet
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/87e6da23/tsm-fut
+  |caster1=BassFromThePast|caster2=Turtle
+  |twitch=RLEsports
+  |date=June 27, 2025 - 12:35 {{Abbr/EDT}}
+}}
+
+}}
+{{box|end}}
+
+====Round 4====
+{{MatchSection|Round 4}}
+{{Toggle group start|state=hide}}
+{{box|start|padding=2em}}
+=====High=====
+{{matchlist|id=aYe3BiOGQV|title=Round 4 High Matches|matchWidth=350|matchsection=Round 4
+
+|M1header=
+|M1={{Match
+  |opponent1={{TeamOpponent|Karmine Corp|score=2}}
+  |opponent2={{TeamOpponent|Dignitas|score=3}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=2
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=04h58m55s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=4|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=05h06m32s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=05h14m44s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=1|score2=2
+    |ot=t|otlength=+2:55
+    |vod=https://www.twitch.tv/videos/2497289936?t=05h22m19s
+  }}
+  |map5={{Map
+    |map=Champions Field
+    |score1=0|score2=1
+    |ot=t|otlength=+2:00
+    |vod=https://www.twitch.tv/videos/2497289936?t=05h32m45s
+  }}
+  |finished=t
+  |ballchasing=kc-vs-dig-b88gloldt1
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/8654f456/kc-dignitas
+  |caster1=Stax|caster2=Dazerin
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 27, 2025 - 14:10 {{Abbr/EDT}}
+}}
+
+|M2header=
+|M2={{Match
+  |opponent1={{TeamOpponent|NRG|score=3}}
+  |opponent2={{TeamOpponent|Twisted Minds|score=2}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=3
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=4h54m02s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=1|score2=0
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=5h02m14s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=0|score2=3
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=5h09m03s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=1|score2=0
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=5h16m26s
+  }}
+  |map5={{Map
+    |map=Champions Field
+    |score1=4|score2=3
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=5h23m09s
+  }}
+  |finished=t
+  |ballchasing=nrg-vs-twis-a9ceuc9hqg
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/5afefb5a/twistedminds-nrg
+  |caster1=Achieves|caster2=BassFromThePast
+  |twitch=RLEsports
+  |date=June 27, 2025 - 14:05 {{Abbr/EDT}}
+}}
+
+|M3header=
+|M3={{Match
+  |opponent1={{TeamOpponent|The Ultimates|score=1}}
+  |opponent2={{TeamOpponent|Gentle Mates Alpine|score=3}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=0|score2=3
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=06h02m37s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=2|score2=0
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=06h10m15s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=3
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=06h17m27s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=3|score2=4
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=06h25m37s
+  }}
+  |finished=t
+  |ballchasing=tu-vs-m8-etaivicczi
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/ecaa2c73/m8-alpine-ultimates
+  |caster1=Herculyse|caster2=Jamesbot
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 27, 2025 - 15:10 {{Abbr/EDT}}
+}}
+
+}}
+{{box|break|padding=2em}}
+
+=====Low=====
+{{matchlist|id=K1ZBR91gAb|title=Round 4 Low Matches|matchWidth=350|matchsection=Round 4
+
+|M1header=
+|M1={{Match
+  |opponent1={{TeamOpponent|Team Secret|score=3}}
+  |opponent2={{TeamOpponent|TSM|score=1}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=0|score2=4
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=5h50m28s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=4|score2=0
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=5h58m10s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=6h06m04s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=2|score2=0
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=6h13m41s
+  }}
+  |finished=true
+  |ballchasing=ts-vs-tsm-mmzn0vmlg9
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/2ad0f24f/teamsecret-tsm
+  |caster1=LemonKiwi|caster2=Turtle
+  |twitch=RLEsports
+  |date=June 27, 2025 - 15:00 {{Abbr/EDT}}
+}}
+
+|M2header=
+|M2={{Match
+  |opponent1={{TeamOpponent|Gen.G Mobil1 Racing|score=3}}
+  |opponent2={{TeamOpponent|Spacestation Gaming|score=1}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=3
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=06h54m25s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=3|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=07h02m17s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=3|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=07h10m18s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=3|score2=0
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=07h18m15s
+  }}
+  |finished=true
+  |ballchasing=ggm1-vs-ssg-i2epjub72x
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/d32e57a9/gen-g-spacestation
+  |caster1=Dazerin|caster2=Jorby
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 27, 2025 - 16:05 {{Abbr/EDT}}
+}}
+
+|M3header=
+|M3={{Match
+  |opponent1={{TeamOpponent|FURIA|score=3}}
+  |opponent2={{TeamOpponent|Virtus.pro|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=4|score2=0
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=6h38m37s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=4|score2=2
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=6h46m25s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://youtu.be/aGPcBQtCBj0?t=6h54m55s
+  }}
+  |finished=true
+  |ballchasing=fur-vs-vp-82a545syu8
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/cfcb52d3/furia-vp
+  |caster1=Achieves|caster2=Turtle
+  |twitch=RLEsports
+  |date=June 27, 2025 - 15:50 {{Abbr/EDT}}
+}}
+
+}}
+{{box|end}}
+
+====Round 5====
+{{MatchSection|Round 5}}
+{{matchlist|id=diQzPQbFtd|title=Round 5 Matches|matchWidth=350|matchsection=Round 5
+
+|M1header=
+|M1={{Match
+  |opponent1={{TeamOpponent|The Ultimates|score=2}}
+  |opponent2={{TeamOpponent|Team Secret|score=3}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=07h49m05s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=3|score2=4
+    |ot=true|otlength=+1:33
+    |vod=https://www.twitch.tv/videos/2497289936?t=07h56m38s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=3
+    |ot=true|otlength=+0:08
+    |vod=https://www.twitch.tv/videos/2497289936?t=08h07m02s
+  }}
+  |map4={{Map
+    |map=Utopia Coliseum (Dusk)
+    |score1=2|score2=1
+    |ot=true|otlength=+2:10
+    |vod=https://www.twitch.tv/videos/2497289936?t=08h15m16s
+  }}
+  |map5={{Map
+    |map=Champions Field
+    |score1=1|score2=2
+    |ot=true|otlength=+0:08
+    |vod=https://www.twitch.tv/videos/2497289936?t=08h24m39s
+  }}
+  |finished=true
+  |ballchasing=tu-vs-ts-0577f5jwbc
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/b59fb2eb/teamsecret-ultimates
+  |caster1=CJCJ|caster2=Herculyse
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 27, 2025 - 17:00 {{Abbr/EDT}}
+}}
+
+|M2header=
+|M2={{Match
+  |opponent1={{TeamOpponent|Twisted Minds|score=3}}
+  |opponent2={{TeamOpponent|Gen.G Mobil1 Racing|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=5|score2=3
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=08h42m48s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=2|score2=0
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=08h51m54s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=6|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=08h58m42s
+  }}
+  |finished=true
+  |ballchasing=twis-vs-ggm1-8pipa87v14
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/8c175795/gen-g-twistedminds
+  |caster1=Jamesbot|caster2=Stax
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 27, 2025 - 17:55 {{Abbr/EDT}}
+}}
+
+|M3header=
+|M3={{Match
+  |opponent1={{TeamOpponent|Karmine Corp|score=3}}
+  |opponent2={{TeamOpponent|FURIA|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=1
+    |ot=true|otlength=+2:38
+    |vod=https://www.twitch.tv/videos/2497289936?t=09h19m22s
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=2|score2=0
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=09h31m49s
+  }}
+  |map3={{Map
+    |map=DFH Stadium (10th Anniversary)
+    |score1=2|score2=1
+    |ot=|otlength=
+    |vod=https://www.twitch.tv/videos/2497289936?t=09h38m44s
+  }}
+  |finished=true
+  |ballchasing=kc-vs-fur-dk3hgpy0u8
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/6ab4c44e/kc-furia
+  |caster1=Dazerin|caster2=Jorby
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 27, 2025 - 18:30 {{Abbr/EDT}}
+}}
+
+}}
+
+==={{Stage|Playoffs}}===
+{{MatchSection|Playoffs}}
+{{Bracket|Bracket/2-2-U-4L4DS|id=Pke14cOtmZ|matchWidth=200
+
+<!-- Upper Bracket Quarterfinals -->
+|R2M1={{Match
+    |opponent1={{TeamOpponent|Team Falcons|score=4}}
+    |opponent2={{TeamOpponent|Dignitas|score=0}}
+    |map1={{Map
+        |map=Mannfield (Night)
+        |score1=2|score2=0
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=05h02m56s
+    }}
+    |map2={{Map
+        |map=Forbidden Temple
+        |score1=5|score2=0|timeout=2
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=05h10m17s
+    }}
+    |map3={{Map
+        |map=DFH Stadium (10th Anniversary)
+        |score1=3|score2=1
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=05h19m43s
+    }}
+    |map4={{Map
+        |map=Utopia Coliseum (Dusk)
+        |score1=2|score2=1
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=05h27m51s
+    }}
+  |finished=true
+  |ballchasing=flcn-vs-dig-5bp3if3ji7
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/e67be277/dignitas-falcons
+  |caster1=Jamesbot|caster2=Jorby
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 28, 2025 - 15:10 {{Abbr/EDT}}
+}}
+
+|R2M2={{Match
+    |opponent1={{TeamOpponent|Team Vitality|score=4}}
+    |opponent2={{TeamOpponent|NRG|score=0}}
+    |map1={{Map
+        |map=Mannfield (Night)
+        |score1=2|score2=1
+        |ot=t|otlength=+0:24
+        |vod=https://www.twitch.tv/videos/2498237274?t=06h07m19s
+    }}
+    |map2={{Map
+        |map=Forbidden Temple
+        |score1=2|score2=0|timeout=2
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=06h15m15s
+    }}
+    |map3={{Map
+        |map=DFH Stadium (10th Anniversary)
+        |score1=3|score2=1
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=06h23m39s
+    }}
+    |map4={{Map
+        |map=Utopia Coliseum (Dusk)
+        |score1=4|score2=1
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=06h31m30s
+    }}
+  |finished=t
+  |ballchasing=vit-vs-nrg-m94afte45d
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/749d5793/vitality-nrg
+  |caster1=Dazerin|caster2=Stax
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 28, 2025 - 16:15 {{Abbr/EDT}}
+}}
+
+
+<!-- Lower Bracket Round 1 -->
+|R1M1={{Match
+    |opponent1={{TeamOpponent|Gentle Mates Alpine|score=2}}
+    |opponent2={{TeamOpponent|Team Secret|score=4}}
+    |map1={{Map
+        |map=Mannfield (Night)
+        |score1=2|score2=1
+        |ot=true|otlength=+1:13
+        |vod=https://www.twitch.tv/videos/2498237274?t=02h23m48s
+    }}
+    |map2={{Map
+        |map=Forbidden Temple
+        |score1=2|score2=3
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=02h36m05s
+    }}
+    |map3={{Map
+        |map=DFH Stadium (10th Anniversary)
+        |score1=2|score2=4|timeout=1
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=02h44m17s
+    }}
+    |map4={{Map
+        |map=Utopia Coliseum (Dusk)
+        |score1=1|score2=2
+        |ot=true|otlength=+1:35
+        |vod=https://www.twitch.tv/videos/2498237274?t=02h54m00s
+    }}
+    |map5={{Map
+        |map=AquaDome (Salty Shallows)
+        |score1=2|score2=1
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=03h03m10s
+    }}
+    |map6={{Map
+        |map=Neo Tokyo
+        |score1=1|score2=2
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=03h10m53s
+    }}
+  |finished=true
+  |ballchasing=m8-vs-ts-mdtt9tfzzu
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/44fbaf72/m8-alpine-teamsecret
+  |caster1=Dazerin|caster2=Stax
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 28, 2025 - 12:35 {{Abbr/EDT}}
+}}
+
+|R1M2={{Match
+    |opponent1={{TeamOpponent|Karmine Corp|score=3}}
+    |opponent2={{TeamOpponent|Twisted Minds|score=4}}
+    |map1={{Map
+        |map=Mannfield (Night)
+        |score1=1|score2=0
+        |ot=true|otlength=+4:41
+        |vod=https://www.twitch.tv/videos/2498237274?t=00h50m49s
+    }}
+    |map2={{Map
+        |map=Forbidden Temple
+        |score1=2|score2=1|timeout=2
+        |ot=true|otlength=+1:59
+        |vod=https://www.twitch.tv/videos/2498237274?t=01h02m29s
+    }}
+    |map3={{Map
+        |map=DFH Stadium (10th Anniversary)
+        |score1=5|score2=0
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=01h13m09s
+    }}
+    |map4={{Map
+        |map=Utopia Coliseum (Dusk)
+        |score1=0|score2=1
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=01h21m24s
+    }}
+    |map5={{Map
+        |map=AquaDome (Salty Shallows)
+        |score1=1|score2=2|timeout=1
+        |ot=true|otlength=+0:05
+        |vod=https://www.twitch.tv/videos/2498237274?t=01h28m15s
+    }}
+    |map6={{Map
+        |map=Neo Tokyo
+        |score1=1|score2=2
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=01h37m07s
+    }}
+    |map7={{Map
+        |map=Champions Field
+        |score1=2|score2=3
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2498237274?t=01h45m01s
+    }}
+  |finished=true
+  |ballchasing=kc-vs-twis-puzxtfwwwe
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/152e3dc2/kc-twistedminds
+  |caster1=Jamesbot|caster2=Jorby
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 28, 2025 - 11:00 {{Abbr/EDT}}
+}}
+
+
+<!-- Lower Bracket Quarterfinals -->
+|R2M3={{Match
+    |opponent1={{TeamOpponent|Dignitas|score=4}}
+    |opponent2={{TeamOpponent|Team Secret|score=0}}
+    |map1={{Map
+        |map=Mannfield (Night)
+        |score1=2|score2=1
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=00h49m22s
+    }}
+    |map2={{Map
+        |map=Forbidden Temple
+        |score1=3|score2=1|timeout=2
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=00h56m56s
+    }}
+    |map3={{Map
+        |map=DFH Stadium (10th Anniversary)
+        |score1=2|score2=1
+        |ot=t|otlength=+1:18
+        |vod=https://www.twitch.tv/videos/2499131882?t=01h05m58s
+    }}
+    |map4={{Map
+        |map=Utopia Coliseum (Dusk)
+        |score1=1|score2=0
+        |ot=t|otlength=+0:36
+        |vod=https://www.twitch.tv/videos/2499131882?t=01h14m52s
+    }}
+  |finished=t
+  |ballchasing=dig-vs-ts-nsjsgfvj7j
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/a0e1ef3f/dignitas-teamsecret
+  |caster1=CJCJ|caster2=Herculyse
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 29, 2025 - 11:00 {{Abbr/EDT}}
+}}
+
+|R2M4={{Match
+    |opponent1={{TeamOpponent|NRG|score=4}}
+    |opponent2={{TeamOpponent|Twisted Minds|score=3}}
+    |map1={{Map
+        |map=Mannfield (Night)
+        |score1=1|score2=3
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=01h49m42s
+    }}
+    |map2={{Map
+        |map=Forbidden Temple
+        |score1=2|score2=3|timeout=1
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=01h57m41s
+    }}
+    |map3={{Map
+        |map=DFH Stadium (10th Anniversary)
+        |score1=3|score2=1
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=02h07m05s
+    }}
+    |map4={{Map
+        |map=Utopia Coliseum (Dusk)
+        |score1=0|score2=1
+        |ot=t|otlength=+0:17
+        |vod=https://www.twitch.tv/videos/2499131882?t=02h14m54s
+    }}
+    |map5={{Map
+        |map=AquaDome (Salty Shallows)
+        |score1=1|score2=0|timeout=2
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=02h22m02s
+    }}
+    |map6={{Map
+        |map=Neo Tokyo
+        |score1=3|score2=2
+        |ot=t|otlength=+1:51
+        |vod=https://www.twitch.tv/videos/2499131882?t=02h30m06s
+    }}
+    |map7={{Map
+        |map=Champions Field
+        |score1=2|score2=1
+        |ot=t|otlength=+0:51
+        |vod=https://www.twitch.tv/videos/2499131882?t=02h40m04s
+    }}
+  |finished=t
+  |ballchasing=nrg-vs-twis-vk0ey7woqc
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/442a51a5/nrg-twistedminds
+  |caster1=Stax|caster2=Dazerin
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 29, 2025 - 12:00 {{Abbr/EDT}}
+}}
+
+<!-- Semifinals -->
+|R3M1={{Match
+    |opponent1={{TeamOpponent|Team Vitality|score=1}}
+    |opponent2={{TeamOpponent|Dignitas|score=4}}
+    |map1={{Map
+        |map=Mannfield (Night)
+        |score1=1|score2=3
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=04h04m49s
+    }}
+    |map2={{Map
+        |map=Forbidden Temple
+        |score1=2|score2=3|timeout=1
+        |ot=true|otlength=+0:14
+        |vod=https://www.twitch.tv/videos/2499131882?t=04h15m22s
+    }}
+    |map3={{Map
+        |map=DFH Stadium (10th Anniversary)
+        |score1=1|score2=3
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=04h25m06s
+    }}
+    |map4={{Map
+        |map=Utopia Coliseum (Dusk)
+        |score1=2|score2=1
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=04h32m58s
+    }}
+    |map5={{Map
+        |map=AquaDome (Salty Shallows)
+        |score1=1|score2=2
+        |ot=true|otlength=+0:37
+        |vod=https://www.twitch.tv/videos/2499131882?t=04h40m35s
+    }}
+  |finished=true
+  |ballchasing=vit-vs-dig-b7jp5fn2hw
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/b0254e2c/vitality-dignitas
+  |caster1=CJCJ|caster2=Herculyse
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 29, 2025 - 14:15 {{Abbr/EDT}}
+}}
+
+|R3M2={{Match
+    |opponent1={{TeamOpponent|Team Falcons|score=4}}
+    |opponent2={{TeamOpponent|NRG|score=2}}
+    |map1={{Map
+        |map=Mannfield (Night)
+        |score1=0|score2=1
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=05h20m38s
+    }}
+    |map2={{Map
+        |map=Forbidden Temple
+        |score1=2|score2=0
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=05h27m32s
+    }}
+    |map3={{Map
+        |map=DFH Stadium (10th Anniversary)
+        |score1=3|score2=2
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=05h34m52s
+    }}
+    |map4={{Map
+        |map=Utopia Coliseum (Dusk)
+        |score1=0|score2=1
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=05h43m09s
+    }}
+    |map5={{Map
+        |map=AquaDome (Salty Shallows)
+        |score1=2|score2=1|timeout=2
+        |ot=t|otlength=+3:38
+        |vod=https://www.twitch.tv/videos/2499131882?t=05h50m06s
+    }}
+    |map6={{Map
+        |map=Neo Tokyo
+        |score1=1|score2=0
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=06h02m34s
+    }}
+  |finished=t
+  |ballchasing=flcn-vs-nrg-5sfdi5vc2i
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/a1377c5e/falcons-nrg
+  |caster1=Dazerin|caster2=Stax
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 29, 2025 - 15:30 {{Abbr/EDT}}
+}}
+
+<!-- Grand Final -->
+|R4M1={{Match
+    |opponent1={{TeamOpponent|Dignitas|score=1}}
+    |opponent2={{TeamOpponent|Team Falcons|score=4}}
+    |map1={{Map
+        |map=Mannfield (Night)
+        |score1=4|score2=2
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=06h47m24s
+    }}
+    |map2={{Map
+        |map=Forbidden Temple
+        |score1=1|score2=3
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=06h55m58s
+    }}
+    |map3={{Map
+        |map=DFH Stadium (10th Anniversary)
+        |score1=1|score2=2|timeout=1
+        |ot=t|otlength=+3:44
+        |vod=https://www.twitch.tv/videos/2499131882?t=07h03m51s
+    }}
+    |map4={{Map
+        |map=Utopia Coliseum (Dusk)
+        |score1=0|score2=2
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=07h17m18s
+    }}
+    |map5={{Map
+        |map=AquaDome (Salty Shallows)
+        |score1=3|score2=4
+        |ot=t|otlength=+1:48
+        |vod=https://www.twitch.tv/videos/2499131882?t=07h24m33s
+    }}
+  |finished=t
+  |ballchasing=dig-vs-flcn-p3b4opuh2x
+  |blasttv=rl/tournaments/raleigh-major-2-2025/series/4800149d/dignitas-falcons
+  |caster1=Jorby|caster2=Jamesbot
+  |twitch=rocketleague|youtube=Rocket League
+  |date=June 29, 2025 - 17:00 {{Abbr/EDT}}
+}}
+
+}}
+
+{{LPDB storage|false}}
+
+==Showmatch==
+===Participants===
+{{show match|date=2025-06-29|prizepoolusd=0}}
+{{#vardefine:tournament_teamplayers_extra|0}}
+{{TeamCard columns start|cols=4}}
+{{TeamCard
+|team=First Touch
+|p1=Roll Dizz
+|p2=Tbates
+|p3=Dazerin
+}}
+{{TeamCard
+|team=Chalked Cast
+|p1=CJCJ
+|p2=GarrettG
+|p3=Gibbs
+}}
+{{TeamCard columns end}}
+{{box|end}}
+
+===Format===
+* '''Showmatch''' - ''June 29, 2025''
+** Single {{Abbr/Bo3}} match.
+
+===Rocket Rivalry===
+{{MatchSection|Showmatch}}
+{{SingleMatch|id=vecXuFPhfw
+|{{Match
+    |opponent1={{TeamOpponent|first touch|score=0}}
+    |opponent2={{TeamOpponent|chalked cast|score=2}}
+    |map1={{Map
+        |map=Mannfield (Night)
+        |score1=2|score2=3
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=03h18m25s
+    }}
+    |map2={{Map
+        |map=DFH Stadium (10th Anniversary)
+        |score1=1|score2=3
+        |ot=|otlength=
+        |vod=https://www.twitch.tv/videos/2499131882?t=03h27m17s
+    }}
+    |finished=true
+    |ballchasing=chalked-cast-vs-first-touch-xb6ih5v5jo
+    |twitch=Rocket League|youtube=Rocket League
+    |caster1=Jamesbot|caster2=Jorby
+    |date=June 29, 2025 - 13:30 {{Abbr/EDT}}
+}}
+}}
+{{LPDB storage|true}}
+
+==Player Accolades==
+Determined by a panel of RLCS analysts and administrators:
+{{AwardPrizePool
+|{{Slot|award=Raleigh Major MVP|{{Opponent|Kiileerrz|team=Team Falcons}}}}
+}}
+
+==Additional Content==
+===Streams===
+{{box|start|padding=2em}}
+{{Streams|title=
+|lang1=usuk |twitch1=rocketleague|2twitch1=RLEsports  |youtube1=@rlesports|tiktok1=@rocketleague
+|lang2=fr |twitch2=rocketbaguette|youtube2=@RocketBaguette|tiktok2=@rocketbaguette
+|lang3=esmx |twitch3=rocketstreetlive
+|lang4=es |twitch4=rosdri_twitch
+|lang5=pl |twitch5=polsatgames
+|lang6=hu |twitch6=hungarianrltournaments|youtube6=@HungarianRLTournaments|tiktok6=@HungarianRLTournaments
+|lang7=pt |twitch7=dudsmelow
+}}
+{{box|end}}
+
+===Broadcast Talent===
+{{Tabs dynamic
+|name1=Primary/Alternate Broadcast
+|name2=Language Broadcasts
+|This=1
+}}
+{{tabs dynamic/tab|1}}
+====Primary Broadcast====
+{{box|start|padding=1em}}
+{{BroadcasterCard
+|position=Stage Host
+|b1=Stax
+}}
+{{BroadcasterCard
+|position=Desk Host
+|b1=WavePunk
+}}
+{{BroadcasterCard
+|position=Reporter
+|b1=Liefx
+}}
+{{BroadcasterCard
+|position=Analyst
+|b1=Gibbs
+|b2=Tbates
+}}
+{{box|break|padding=1em}}
+{{BroadcasterCard
+|position=Commentator/Analyst
+|b1=CJCJ
+|b2=Dazerin
+|b3=Herculyse
+|b4=Jamesbot
+|b5=Jorby
+|b6=Stax
+}}
+{{box|break|padding=1em}}
+{{BroadcasterCard
+|position=Observer
+|b1=Lem0naZ
+|b2=GumerProd
+}}
+{{BroadcasterCard
+|position=Translator
+|b1=Snipes|b1flag=fr|b1name=Francois Depalle
+}}
+{{BroadcasterCard
+|position=Guest
+|b1=B0ston
+|b2=Chief Beef
+|b3=diaz|b3link=diaz (Brazilian Player)
+|b4=Feer
+|b5=JamaicanCoconut
+|b6=Lethamyr
+}}
+{{box|end}}
+
+====Alternate Broadcast====
+{{box|start|padding=1em}}
+{{BroadcasterCard
+|position=Commentator/Analyst
+|b1=Achieves
+|b2=BassFromThePast
+|b3=LemonKiwi
+|b4=Turtle
+}}
+{{BroadcasterCard
+|position=Producer
+|b1=Paul Shepherd
+}}
+{{box|end}}
+{{tabs dynamic/tab|2}}
+{{box|start|padding=2em}}
+
+====French Broadcast====
+{{BroadcasterCard
+|position=Commentator/Analyst|lang=fr
+|b1=Bachi
+|b2=Boyan
+|b3=Finish
+|b4=ImaginaXion
+|b5=LifeIsCool
+|b6=Razorback
+}}
+{{BroadcasterCard
+|position=Observer
+|b1=Limbo|b1link=Limbo (French Producer)
+}}
+{{BroadcasterCard
+|position=Producer|lang=fr
+|b1=
+}}
+{{box|break|padding=1em}}
+
+====Latin American Broadcast====
+{{BroadcasterCard
+|position=Host|lang=es
+|b1=Pavonnator
+|b2=MasterPatriot
+}}
+{{BroadcasterCard
+|position=Commentator/Analyst|lang=es
+|b1=Cardenews
+|b2=HDX
+|b3=Mitchmozey
+|b4=OzcarCaster
+|b5=Hylax
+|b6=DrProfesorKoala
+|b7=Orijan
+|b8=Pavonnator
+|b9=MasterPatriot
+}}
+{{BroadcasterCard
+|position=Producer|lang=es
+|b1=Pavonnator
+|b2=
+}}
+{{box|break|padding=1em}}
+
+====Spanish Broadcast====
+{{BroadcasterCard
+|position=Host/Commentator|lang=es
+|b1=Rosdri
+}}
+{{BroadcasterCard
+|position=Commentator/Analyst|lang=es
+|b1=Solounturnomas
+|b2=Craxe
+}}
+{{BroadcasterCard
+|position=Commentator/Reporter|lang=es
+|b1=Chamako09
+}}
+{{box|break|padding=1em}}
+
+====Polish Broadcast====
+{{BroadcasterCard
+|position=Commentator/Analyst|lang=pl
+|b1=
+|b2=
+|b3=
+|b4=
+|b5=
+|b6=
+|b7=
+|b8=
+|b9=
+}}
+{{box|break|padding=1em}}
+
+====Hungarian Broadcast====
+{{BroadcasterCard
+|position=Host|lang=hu
+|b1=Berci
+}}
+{{BroadcasterCard
+|position=Commentator/Analyst|lang=hu
+|b1=Berci
+|b2=fizzymate
+|b3=Grizzly|b3link=Grizzly (Hungarian Caster)
+|b4=MatthewLD
+|b5=racsni28
+|b6=Taki
+}}
+{{BroadcasterCard
+|position=Producer|lang=hu
+|b1=Giton
+|b2=racsni28
+}}
+{{BroadcasterCard
+|position=Translator|lang=hu
+|b1=Berci
+|b2=fizzymate
+}}
+
+{{box|break|padding=1em}}
+
+====Portuguese Broadcast====
+{{BroadcasterCard
+|position=Host|lang=pt
+|b1=Duds
+}}
+{{BroadcasterCard
+|position=Commentator/Analyst|lang=pt
+
+|b1=SaltbanG
+|b2=Rick Cintra
+|b3=Voltor
+|b4=Duds
+|b5=Menexca
+|b6=Thiagobfm
+|b7=Royales
+|b8=Raf
+|b9=Litt
+}}
+{{BroadcasterCard
+|position=Producer|lang=pt
+
+|b1=UFelixx
+}}
+{{box|end}}
+{{Tabs dynamic/end}}
+
+===Interregional Matchups===
+{{Interregional Matchups|section_Swiss Stage=Round *|skipsections=Rocket Rivalry}}
+
+===Country Representation===
+{{Country representation|tournament1=Rocket_League_Championship_Series/2025/Raleigh_Major|tournament2=Rocket_League_Championship_Series/2025/1v1/Raleigh_Major|noCountry=false}}
+
+===Replays===
+* {{Ballchasing|1-raleigh-major-wmlkztl7ej}}
+
+===Previews===
+*{{ExternalMediaLink
+|date=2025-06-17
+|link=https://www.rocketleague.com/en/news/rlcs-2025-raleigh-major-primer
+|title=Raleigh Major Primer
+|by=RLCS
+|type=preview
+}}
+
+===Videos and Photos===
+====Photos====
+<!--
+*{{ExternalMediaLink
+|date=2025-06-26
+|link=
+|title=Day 1
+|by=RLCS
+|type=gallery
+}}
+*{{ExternalMediaLink
+|date=2025-06-27
+|link=
+|title=Day 2
+|by=RLCS
+|type=gallery
+}}
+*{{ExternalMediaLink
+|date=2025-06-28
+|link=
+|title=Day 3
+|by=RLCS
+|type=gallery
+}}
+{{HiddenSort|Separator}}
+*{{ExternalMediaLink
+|date=2025-06-29
+|link=
+|title='''Championship Sunday'''
+|by=RLCS
+|type=gallery
+}}
+-->
+
+====Videos====
+{{#ev:youtube|Cil7yRYlCAw|356}}
+{{#ev:youtube|JEOnrbRIb1c|356}}
+{{#ev:youtube|lzuBhZ2xeNw|356}}
+
+====Highlights====
+*<span class="mw-customtoggle-round1 wds-button wds-is-secondary">Swiss Stage - Round 1 <i class="fa fa-chevron-down"></i></span>
+<div class="mw-collapsible mw-collapsed" id="mw-customcollapsible-round1">
+	{{#ev:youtube|qihSfdgaKSA|356}}
+	{{#ev:youtube|haqz9dxi4mo|356}}
+	{{#ev:youtube|cRA-b0bjEMg|356}}
+	{{#ev:youtube|zT_1Xm5kq4Y|356}}
+	{{#ev:youtube|swnH71RXqXk|356}}
+	{{#ev:youtube|Qm9OEQFDEEQ|356}}
+	{{#ev:youtube|9r0fMrswB-A|356}}
+	{{#ev:youtube|WWEL9eOtE2U|356}}
+</div>
+*<span class="mw-customtoggle-round2 wds-button wds-is-secondary">Swiss Stage - Round 2 <i class="fa fa-chevron-down"></i></span>
+<div class="mw-collapsible mw-collapsed" id="mw-customcollapsible-round2">
+	<!-- High Matches -->
+	{{#ev:youtube|bOMPvelqS1o|356}}
+	{{#ev:youtube|xFXengtqglg|356}}
+	{{#ev:youtube|nq1thz571Uw|356}}
+	{{#ev:youtube|JiZBOhknEWI|356}}
+	<!-- Low Matches -->
+	{{#ev:youtube|lyYOIoLRYbU|356}}
+	{{#ev:youtube|pGpdIqTKCHk|356}}
+	{{#ev:youtube|XXVyE96XF5I|356}}
+	{{#ev:youtube|0g-4NUm03-Q|356}}
+</div>
+*<span class="mw-customtoggle-round3 wds-button wds-is-secondary">Swiss Stage - Round 3 <i class="fa fa-chevron-down"></i></span>
+<div class="mw-collapsible mw-collapsed" id="mw-customcollapsible-round3">
+	<!-- High Matches -->
+	{{#ev:youtube|W5GrVUHp6WA|356}}
+	{{#ev:youtube|zDq8F98Hd5Q|356}}
+	<!-- Mid Matches -->
+	{{#ev:youtube|rw7B9yOmXas|356}}
+	{{#ev:youtube|5yxf07FfS1E|356}}
+	{{#ev:youtube|sPNd2-WaGPg|356}}
+	{{#ev:youtube|_qR1Kk_-U28|356}}
+	<!-- Low Matches -->
+	{{#ev:youtube|3JDCmcvzQRM|356}}
+	{{#ev:youtube|Y983iQgZxdw|356}}
+</div>
+*<span class="mw-customtoggle-round4 wds-button wds-is-secondary">Swiss Stage - Round 4 <i class="fa fa-chevron-down"></i></span>
+<div class="mw-collapsible mw-collapsed" id="mw-customcollapsible-round4">
+	<!-- High Matches -->
+	{{#ev:youtube|qRVGhP6fi90|356}}
+	{{#ev:youtube|M90IK8Juv4c|356}}
+	{{#ev:youtube|u2h9QXR3Pw8|356}}
+	<!-- Low Matches -->
+	{{#ev:youtube|5tqqj7k7yzw|356}}
+	{{#ev:youtube|4QovVAl23Gs|356}}
+	{{#ev:youtube|XMCPjklatFU|356}}
+</div>
+*<span class="mw-customtoggle-round5 wds-button wds-is-secondary">Swiss Stage - Round 5 <i class="fa fa-chevron-down"></i></span>
+<div class="mw-collapsible mw-collapsed" id="mw-customcollapsible-round5">
+	{{#ev:youtube|gdgHYDoXPvA|356}}
+	{{#ev:youtube|RJxcv6pGibM|356}}
+	{{#ev:youtube|-uiCVqSNQYY|356}}
+</div>
+*<span class="mw-customtoggle-playoff1 wds-button wds-is-secondary">Playoffs - Lower R1 & Upper Quarterfinals <i class="fa fa-chevron-down"></i></span>
+<div class="mw-collapsible mw-collapsed" id="mw-customcollapsible-playoff1">
+	{{#ev:youtube|xnyaga3oZrs|356}}
+	{{#ev:youtube|VEjFzlsazyM|356}}
+	{{#ev:youtube|WQL9yBHjxyM|356}}
+	{{#ev:youtube|fnCFyGvF1Nc|356}}
+</div>
+*<span class="mw-customtoggle-playoff2 wds-button wds-is-secondary">Playoffs - Lower Quarterfinals <i class="fa fa-chevron-down"></i></span>
+<div class="mw-collapsible mw-collapsed" id="mw-customcollapsible-playoff2">
+	{{#ev:youtube|Vu_mA13J1qc|356}}
+	{{#ev:youtube|pnn6s0jLe_U|356}}
+</div>
+*<span class="mw-customtoggle-playoff3 wds-button wds-is-secondary">Playoffs - Semifinals <i class="fa fa-chevron-down"></i></span>
+<div class="mw-collapsible mw-collapsed" id="mw-customcollapsible-playoff3">
+	{{#ev:youtube|942G9ECi9Vs|356}}
+	{{#ev:youtube|yVXI1r9_QPk|356}}
+</div>
+*<span class="mw-customtoggle-playoff4 wds-button wds-is-secondary">Playoffs - '''Grand Final''' <i class="fa fa-chevron-down"></i></span>
+<div class="mw-collapsible mw-collapsed" id="mw-customcollapsible-playoff4">
+	{{#ev:youtube|zjOpmetVZpc|356}}
+</div>
+
+===Interviews===
+
+===External links===
+<!--*[https://esports.rocketleague.com/news/the-rlcs-returns-for-2024/ Announcement Post]
+*[https://esports.rocketleague.com/rlcs-rules/ Rules]-->
+
+==References==
+{{Reflist}}
+{{Rocket League Championship Series 2025 Navbox}}

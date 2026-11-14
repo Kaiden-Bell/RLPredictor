@@ -1,0 +1,545 @@
+{{DISPLAYTITLE:RLCS 2025 - Raleigh Major: Europe Open 4 - Swiss Group A}}
+{{HiddenDataBox
+|series=Rocket League Championship Series
+|name=RLCS 2025 - Raleigh Major: EU Open 4 - Swiss Group A
+|tickername=RLCS 2025 - EU Open 4 - Swiss Group A
+|shortname=Season 2025 - EU Open 4 - Swiss Group A
+|image=RLCS 2022 lightmode.png
+|imagedark=RLCS 2022 darkmode.png
+|icon=RLCS 2022 lightmode icon.png
+|icondark=RLCS 2022 darkmode icon.png
+|liquipediatier=2
+|type=Online
+|date=2025-04-27
+}}
+{{Rocket League Championship Series Navbox Top}}
+{{RLCS 2025 Tabs|MJR=4|MAJOR2=3|OPEN2=4}}
+==Format==
+*'''Swiss Stage''' - ''April 27th, 2025''
+**32 Teams split into 2 Groups.
+**16 Team Swiss System Format.
+*** All matches are {{Abbr/Bo5}}.
+** <span class="bg-up">Top 8</span> Teams per group - 16 in total - proceed to the [[Rocket_League_Championship_Series/2025/Raleigh Major/Europe/Open_4#Group Stage|Group Stage]].
+
+==Results==
+===Swiss Group A===
+{{SwissStandings
+|title=Swiss Group A
+|import=true
+|importopponents=false
+|tiebreakers={{Json|matchwins|matchlosses|buchholz|manual}}
+|placements=1-2;3-5;6-8;9-11;12-14;15-16
+|bg=1-8=up, 9-16=down
+|round1={{Round|title=Round 1|started=true|finished=true|matchgroups=cUgVCfgq1X}}
+|round2={{Round|title=Round 2|started=true|finished=true|matchgroups=xJJxDCaQf2,2trzUXqUt1}}
+|round3={{Round|title=Round 3|started=true|finished=true|matchgroups=XeBhm3qh13,IHdvAKve4L,fpwRITTos1}}
+|round4={{Round|title=Round 4|started=true|finished=true|matchgroups=qVYSuz45yO,nWFG7rOQO1}}
+|round5={{Round|title=Round 5|started=true|finished=true|matchgroups=1lgMxp5K95}}
+|{{TeamOpponent|karmine corp|tiebreaker=16}}
+|{{TeamOpponent|geekay esports|tiebreaker=15}}
+|{{TeamOpponent|gentle mates alpine|tiebreaker=14}}
+|{{TeamOpponent|synergy eu|tiebreaker=13}}
+|{{TeamOpponent|f4wd|tiebreaker=12}}
+|{{TeamOpponent|dopamine|tiebreaker=11}}
+|{{TeamOpponent|cloud esport|tiebreaker=10}}
+|{{TeamOpponent|bobrito bandito|tiebreaker=9}}
+|{{TeamOpponent|ninjas in pyjamas|tiebreaker=8}}
+|{{TeamOpponent|nomster|tiebreaker=7}}
+|{{TeamOpponent|tokyo tigers|tiebreaker=6}}
+|{{TeamOpponent|bill's balls|tiebreaker=5}}
+|{{TeamOpponent|chippy chips|tiebreaker=4}}
+|{{TeamOpponent|mælkedrengene|tiebreaker=3}}
+|{{TeamOpponent|evoza esport|tiebreaker=2}}
+|{{TeamOpponent|esbirros del psoe|tiebreaker=1}}
+}}
+
+===Detailed Results===
+====Round 1====
+{{MatchSection|Round 1}}
+{{matchlist|id=cUgVCfgq1X|title=Round 1 Matches|matchWidth=350|matchsection=Round 1
+
+|M1={{Match
+  |opponent1={{TeamOpponent|Karmine Corp|score=1}}
+  |opponent2={{TeamOpponent|Ninjas in Pyjamas|score=3}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=3
+  }}
+  |map2={{Map
+    |map=Mannfield (Night)
+    |score1=6|score2=0
+  }}
+  |map3={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=3
+    |ot=true|otlength=+1:51
+  }}
+  |map4={{Map
+    |map=Mannfield (Night)
+    |score1=3|score2=4
+  }}
+  |finished=true
+  |date=April 27, 2025 - 18:00 {{Abbr/CEST}}
+}}
+
+|M2={{Match
+  |opponent1={{TeamOpponent|Geekay Esports|score=3}}
+  |opponent2={{TeamOpponent|NOMSTER|score=0}}
+  |finished=true
+  |date=April 27, 2025 - 18:00 {{Abbr/CEST}}
+}}
+
+|M3={{Match
+  |opponent1={{TeamOpponent|Gentle Mates Alpine|score=3}}
+  |opponent2={{TeamOpponent|Tokyo Tigers|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=0
+  }}
+  |map2={{Map
+    |map=Mannfield (Night)
+    |score1=7|score2=0
+  }}
+  |map3={{Map
+    |map=Mannfield (Night)
+    |score1=4|score2=1
+  }}
+  |finished=true
+  |date=April 27, 2025 - 18:00 {{Abbr/CEST}}
+}}
+
+|M4={{Match
+  |opponent1={{TeamOpponent|synergy eu|score=3}}
+  |opponent2={{TeamOpponent|Bill's Balls|score=1}}
+  |finished=true
+  |date=April 27, 2025 - 18:00 {{Abbr/CEST}}
+}}
+
+|M5={{Match
+  |opponent1={{TeamOpponent|F4WD|score=3}}
+  |opponent2={{TeamOpponent|Chippy Chips|score=1}}
+  |finished=true
+  |date=April 27, 2025 - 18:00 {{Abbr/CEST}}
+}}
+
+|M6={{Match
+  |opponent1={{TeamOpponent|Dopamine|score=3}}
+  |opponent2={{TeamOpponent|Mælkedrengene|score=0}}
+  |finished=true
+  |date=April 27, 2025 - 18:00 {{Abbr/CEST}}
+}}
+
+|M7={{Match
+  |opponent1={{TeamOpponent|cloud esport|score=3}}
+  |opponent2={{TeamOpponent|evoza esport|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=1
+  }}
+  |map2={{Map
+    |map=Mannfield (Night)
+    |score1=4|score2=3
+  }}
+  |map3={{Map
+    |map=Mannfield (Night)
+    |score1=6|score2=2
+  }}
+  |finished=true
+  |date=April 27, 2025 - 18:00 {{Abbr/CEST}}
+}}
+
+|M8={{Match
+  |opponent1={{TeamOpponent|bobrito bandito|score=3}}
+  |opponent2={{TeamOpponent|Esbirros del PSOE|score=1}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=2
+  }}
+  |map2={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=0
+  }}
+  |map3={{Map
+    |map=Mannfield (Night)
+    |score1=4|score2=1
+  }}
+  |map4={{Map
+    |map=Mannfield (Night)
+    |score1=4|score2=1
+  }}
+  |finished=true
+  |date=April 27, 2025 - 18:00 {{Abbr/CEST}}
+}}
+
+}}
+
+====Round 2====
+{{MatchSection|Round 2}}
+{{Toggle group start|state=hide}}
+{{box|start|padding=2em}}
+=====High=====
+{{matchlist|id=xJJxDCaQf2|title=Round 2 High Matches|matchWidth=350|matchsection=Round 2
+
+|M1={{Match
+  |opponent1={{TeamOpponent|geekay esports|score=0}}
+  |opponent2={{TeamOpponent|ninjas in pyjamas|score=3}}
+  |finished=true
+  |date=April 27, 2025 - 18:45 {{Abbr/CEST}}
+}}
+
+|M2={{Match
+  |opponent1={{TeamOpponent|gentle mates alpine|score=3}}
+  |opponent2={{TeamOpponent|bobrito bandito|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=4|score2=3
+  }}
+  |map2={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=0
+  }}
+  |map3={{Map
+    |map=Mannfield (Night)
+    |score1=5|score2=1
+  }}
+  |finished=true
+  |date=April 27, 2025 - 18:45 {{Abbr/CEST}}
+}}
+
+|M3={{Match
+  |opponent1={{TeamOpponent|synergy eu|score=3}}
+  |opponent2={{TeamOpponent|cloud esport|score=0}}
+  |finished=true
+  |date=April 27, 2025 - 18:45 {{Abbr/CEST}}
+}}
+
+|M4={{Match
+  |opponent1={{TeamOpponent|f4wd|score=3}}
+  |opponent2={{TeamOpponent|dopamine|score=2}}
+  |finished=true
+  |date=April 27, 2025 - 18:45 {{Abbr/CEST}}
+}}
+
+}}
+{{box|break|padding=2em}}
+
+=====Low=====
+{{matchlist|id=2trzUXqUt1|title=Round 2 Low Matches|matchWidth=350|matchsection=Round 2
+
+|M1header=
+|M1={{Match
+  |opponent1={{TeamOpponent|karmine corp|score=3}}
+  |opponent2={{TeamOpponent|esbirros del psoe|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=7|score2=2
+    |ot=|otlength=
+    |vod=
+  }}
+  |map2={{Map
+    |map=Mannfield (Night)
+    |score1=6|score2=2
+    |ot=|otlength=
+    |vod=
+  }}
+  |map3={{Map
+    |map=Mannfield (Night)
+    |score1=5|score2=2
+    |ot=|otlength=
+    |vod=
+  }}
+  |map4={{Map
+    |map=
+    |score1=|score2=
+    |ot=|otlength=
+    |vod=
+  }}
+  |map5={{Map
+    |map=
+    |score1=|score2=
+    |ot=|otlength=
+    |vod=
+  }}
+  |finished=true
+  |twitch=|twitch2=
+  |date=April 27, 2025 - 18:45 {{Abbr/CEST}}
+}}
+
+|M2={{Match
+  |opponent1={{TeamOpponent|nomster|score=3}}
+  |opponent2={{TeamOpponent|evoza esport|score=1}}
+  |finished=true
+  |date=April 27, 2025 - 18:45 {{Abbr/CEST}}
+}}
+
+|M3={{Match
+  |opponent1={{TeamOpponent|tokyo tigers|score=1}}
+  |opponent2={{TeamOpponent|mælkedrengene|score=3}}
+  |finished=true
+  |date=April 27, 2025 - 18:45 {{Abbr/CEST}}
+}}
+
+|M4={{Match
+  |opponent1={{TeamOpponent|bill's balls|score=3}}
+  |opponent2={{TeamOpponent|chippy chips|score=1}}
+  |finished=true
+  |date=April 27, 2025 - 18:45 {{Abbr/CEST}}
+}}
+
+}}
+{{box|end}}
+
+====Round 3====
+{{MatchSection|Round 3}}
+{{Toggle group start|state=hide}}
+{{box|start|padding=2em}}
+=====High=====
+{{matchlist|id=XeBhm3qh13|title=Round 3 High Matches|matchWidth=350|matchsection=Round 3
+
+|M1={{Match
+  |opponent1={{TeamOpponent|synergy eu|score=3}}
+  |opponent2={{TeamOpponent|f4wd|score=2}}
+  |finished=true
+  |date=April 27, 2025 - 19:45 {{Abbr/CEST}}
+}}
+
+|M2={{Match
+  |opponent1={{TeamOpponent|ninjas in pyjamas|score=3}}
+  |opponent2={{TeamOpponent|gentle mates alpine|score=1}}
+  |finished=true
+  |date=April 27, 2025 - 19:45 {{Abbr/CEST}}
+}}
+
+}}
+{{box|break|padding=2em}}
+
+=====Mid=====
+{{matchlist|id=IHdvAKve4L|title=Round 3 Mid Matches|matchWidth=350|matchsection=Round 3
+
+|M1={{Match
+  |opponent1={{TeamOpponent|geekay esports|score=3}}
+  |opponent2={{TeamOpponent|mælkedrengene|score=0}}
+  |finished=true
+  |date=April 27, 2025 - 19:45 {{Abbr/CEST}}
+}}
+
+|M2={{Match
+  |opponent1={{TeamOpponent|dopamine|score=3}}
+  |opponent2={{TeamOpponent|nomster|score=0}}
+  |finished=true
+  |date=April 27, 2025 - 19:45 {{Abbr/CEST}}
+}}
+
+|M3={{Match
+  |opponent1={{TeamOpponent|karmine corp|score=3}}
+  |opponent2={{TeamOpponent|bill's balls|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=4|score2=1
+  }}
+  |map2={{Map
+    |map=Mannfield (Night)
+    |score1=4|score2=1
+  }}
+  |map3={{Map
+    |map=Mannfield (Night)
+    |score1=5|score2=0
+  }}
+  |finished=true
+  |date=April 27, 2025 - 19:45 {{Abbr/CEST}}
+}}
+
+|M4={{Match
+  |opponent1={{TeamOpponent|cloud esport|score=3}}
+  |opponent2={{TeamOpponent|bobrito bandito|score=1}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=4|score2=2
+  }}
+  |map2={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=2
+  }}
+  |map3={{Map
+    |map=Mannfield (Night)
+    |score1=3|score2=1
+  }}
+  |map4={{Map
+    |map=Mannfield (Night)
+    |score1=4|score2=3
+  }}
+  |finished=true
+  |date=April 27, 2025 - 19:45 {{Abbr/CEST}}
+}}
+
+}}
+{{box|break|padding=2em}}
+
+=====Low=====
+{{matchlist|id=fpwRITTos1|title=Round 3 Low Matches|matchWidth=350|matchsection=Round 3
+
+|M1={{Match
+  |opponent1={{TeamOpponent|tokyo tigers|score=3}}
+  |opponent2={{TeamOpponent|esbirros del psoe|score=1}}
+  |finished=true
+  |date=April 27, 2025 - 19:45 {{Abbr/CEST}}
+}}
+
+|M2={{Match
+  |opponent1={{TeamOpponent|chippy chips|score=3}}
+  |opponent2={{TeamOpponent|evoza esport|score=0}}
+  |finished=true
+  |date=April 27, 2025 - 19:45 {{Abbr/CEST}}
+}}
+
+}}
+{{box|end}}
+
+====Round 4====
+{{MatchSection|Round 4}}
+{{Toggle group start|state=hide}}
+{{box|start|padding=2em}}
+=====High=====
+{{matchlist|id=qVYSuz45yO|title=Round 4 High Matches|matchWidth=350|matchsection=Round 4
+
+|M1={{Match
+  |opponent1={{TeamOpponent|f4wd|score=3}}
+  |opponent2={{TeamOpponent|cloud esport|score=0}}
+  |finished=true
+  |date=April 27, 2025 - 20:30 {{Abbr/CEST}}
+}}
+
+|M2={{Match
+  |opponent1={{TeamOpponent|geekay esports|score=3}}
+  |opponent2={{TeamOpponent|dopamine|score=1}}
+  |finished=true
+  |date=April 27, 2025 - 20:30 {{Abbr/CEST}}
+}}
+
+|M3={{Match
+  |opponent1={{TeamOpponent|gentle mates alpine|score=0}}
+  |opponent2={{TeamOpponent|karmine corp|score=3}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=7
+  }}
+  |map2={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=3
+  }}
+  |map3={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=3
+  }}
+  |finished=true
+  |date=April 27, 2025 - 20:30 {{Abbr/CEST}}
+}}
+
+}}
+{{box|break|padding=2em}}
+
+=====Low=====
+{{matchlist|id=nWFG7rOQO1|title=Round 4 Low Matches|matchWidth=350|matchsection=Round 4
+
+|M1={{Match
+  |opponent1={{TeamOpponent|bill's balls|score=1}}
+  |opponent2={{TeamOpponent|tokyo tigers|score=3}}
+  |finished=true
+  |date=April 27, 2025 - 20:30 {{Abbr/CEST}}
+}}
+
+|M2={{Match
+  |opponent1={{TeamOpponent|mælkedrengene|score=2}}
+  |opponent2={{TeamOpponent|chippy chips|score=3}}
+  |finished=true
+  |date=April 27, 2025 - 20:30 {{Abbr/CEST}}
+}}
+
+|M3={{Match
+  |opponent1={{TeamOpponent|bobrito bandito|score=3}}
+  |opponent2={{TeamOpponent|nomster|score=2}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=0|score2=2
+  }}
+  |map2={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=2
+  }}
+  |map3={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=0
+  }}
+  |map4={{Map
+    |map=Mannfield (Night)
+    |score1=4|score2=3
+  }}
+  |map5={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=1
+  }}
+  |finished=true
+  |date=April 27, 2025 - 20:30 {{Abbr/CEST}}
+}}
+
+}}
+{{box|end}}
+
+====Round 5====
+{{MatchSection|Round 5}}
+{{matchlist|id=1lgMxp5K95|title=Round 5 Matches|matchWidth=350|matchsection=Round 5
+
+|M1={{Match
+  |opponent1={{TeamOpponent|gentle mates alpine|score=3}}
+  |opponent2={{TeamOpponent|chippy chips|score=0}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=5|score2=0
+  }}
+  |map2={{Map
+    |map=Forbidden Temple
+    |score1=5|score2=1
+  }}
+  |map3={{Map
+    |map=DFH Stadium
+    |score1=3|score2=2
+  }}
+  |finished=true
+  |date=April 27, 2025 - 21:30 {{Abbr/CEST}}
+}}
+
+|M2={{Match
+  |opponent1={{TeamOpponent|cloud esport|score=2}}
+  |opponent2={{TeamOpponent|tokyo tigers|score=3}}
+  |finished=true
+  |date=April 27, 2025 - 21:30 {{Abbr/CEST}}
+}}
+
+|M3={{Match
+  |opponent1={{TeamOpponent|dopamine|score=3}}
+  |opponent2={{TeamOpponent|bobrito bandito|score=1}}
+  |map1={{Map
+    |map=Mannfield (Night)
+    |score1=1|score2=5
+  }}
+  |map2={{Map
+    |map=Mannfield (Night)
+    |score1=2|score2=1
+  }}
+  |map3={{Map
+    |map=Mannfield (Night)
+    |score1=3|score2=1
+  }}
+  |map4={{Map
+    |map=Mannfield (Night)
+    |score1=5|score2=3
+  }}
+  |finished=true
+  |date=April 27, 2025 - 21:30 {{Abbr/CEST}}
+}}
+
+}}
+
+==References==
+{{Reflist}}
+{{Rocket League Championship Series 2025 Navbox}}
