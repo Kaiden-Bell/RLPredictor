@@ -212,6 +212,11 @@ __marimo__/
 outline.txt
 venv/
 
+# Markdown Files
+CLAUDE.md
+FUTUREDESIGN.md
+DESIGN.md
+
 # SQLite database (schema lives in utils/database.py)
 data/*.db
 data/*.db-wal
