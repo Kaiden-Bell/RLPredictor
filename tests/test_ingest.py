@@ -58,3 +58,54 @@ def test_ballchasing_matching(tmp_path):
     assert tuple(row) == ("vatira", 3, 4, 1500)
     # platform id remembered for next time
     assert conn.execute("SELECT player_id FROM player_platform_ids WHERE platform_id='steam:1'").fetchone()[0] == "vatira"
+
+
+def test_worlds_season_root_is_its_own_event(tmp_path):
+    from rlpredictor.data.ingest import _event_root, season_prefixes
+    from rlpredictor.data.wikitext import PageInfo
+    from rlpredictor.data.ingest import _upsert_page
+
+    assert "Rocket League Championship Series/2026" in season_prefixes(["2026"])
+    conn = db.connect(tmp_path / "t.db")
+    worlds = "Rocket League Championship Series/2026"
+    _upsert_page(conn, worlds, 1, PageInfo(worlds, has_infobox=True))
+    _upsert_page(conn, worlds + "/Paris Major", 1, PageInfo(worlds + "/Paris Major", has_infobox=True))
+    assert _event_root(conn, worlds) == worlds
+    assert _event_root(conn, worlds + "/Paris Major/Playoffs") == worlds + "/Paris Major"
+    # a subpage with no infobox of its own does not inherit Worlds
+    assert _event_root(conn, worlds + "/Additional Content") == worlds + "/Additional Content"
+    # Esports World Cup roots keep acting as parents of their subpages
+    ewc = "Esports World Cup/2026"
+    _upsert_page(conn, ewc, 1, PageInfo(ewc, has_infobox=True))
+    assert _event_root(conn, ewc + "/Group Stage") == ewc
+
+
+def test_squad_player_reuses_id_with_history(tmp_path):
+    from datetime import date
+
+    from rlpredictor.data.ingest import resolve_squad_player, store_squad
+    from rlpredictor.data.wikitext import SquadMember
+
+    conn = db.connect(tmp_path / "t.db")
+    kc = db.get_or_create_team(conn, "karmine corp", "Karmine Corp")
+    gm = db.get_or_create_team(conn, "gentle mates", "Gentle Mates")
+    conn.execute("INSERT INTO pages (title, has_infobox, start_date) VALUES ('E1', 1, '2026-01-01')")
+    conn.execute("INSERT INTO pages (title, has_infobox, start_date) VALUES ('E2', 1, '2026-02-01')")
+    for pid in ("atow.", "atow", "diaz (brazilian player)", "diaz", "pigeon.", ".pigeon"):
+        conn.execute("INSERT INTO players (id, name) VALUES (?, ?)", (pid, pid))
+    # "atow." has the real history (two events with KC); "atow" one stray appearance
+    for root, pid in (("E1", "atow."), ("E2", "atow."), ("E1", "atow"), ("E1", "diaz"),
+                      ("E2", "diaz"), ("E1", "diaz (brazilian player)"), ("E1", ".pigeon"),
+                      ("E2", ".pigeon"), ("E1", "pigeon.")):
+        conn.execute("INSERT INTO event_rosters VALUES (?,?,?,1)", (root, kc, pid))
+    conn.execute("INSERT INTO event_rosters VALUES ('E2', ?, 'pigeon.', 2)", (gm,))
+
+    assert resolve_squad_player(conn, gm, "Atow", "Atow") == "atow."
+    # a disambiguated link only matches the same disambiguation
+    assert resolve_squad_player(conn, gm, "Diaz (Brazilian Player)", "diaz") == "diaz (brazilian player)"
+    # this team's own history wins over overall count
+    assert resolve_squad_player(conn, gm, "Pigeon", "Pigeon") == "pigeon."
+    assert resolve_squad_player(conn, gm, "Brandnew", "brandnew") == "brandnew"
+
+    store_squad(conn, gm, [SquadMember("Atow", "Atow", "", date(2026, 10, 28))])
+    assert conn.execute("SELECT player_id FROM team_squads WHERE team_id = ?", (gm,)).fetchone()[0] == "atow."

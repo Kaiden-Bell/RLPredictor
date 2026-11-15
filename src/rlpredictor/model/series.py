@@ -59,3 +59,18 @@ def game_prob_from_series(p_series: float, best_of: int, tol: float = 1e-9) -> f
             break
             
     return (lo + hi) / 2
+
+
+def series_win_prob_vec(p, best_of):
+    """Vectorised series_win_prob over arrays of p and best_of."""
+    import numpy as np
+
+    p = np.asarray(p, dtype=float)
+    bo = np.broadcast_to(np.asarray(best_of), p.shape)
+    out = np.zeros_like(p)
+    for b in np.unique(bo):
+        m = bo == b
+        n = (int(b) + 1) // 2
+        pm, qm = p[m], 1.0 - p[m]
+        out[m] = sum(comb(n - 1 + k, k) * pm**n * qm**k for k in range(n))
+    return out
