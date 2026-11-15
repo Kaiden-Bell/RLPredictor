@@ -23,6 +23,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "httpx>=0.27"]
+sentiment = ["vaderSentiment>=3.3.2"]
 
 [project.scripts]
 rlpredict = "rlpredictor.cli:app"

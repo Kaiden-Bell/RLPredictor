@@ -41,6 +41,7 @@ H2H_WINDOW = timedelta(days=365)
 FORM_GAMES = 20
 CHANGE_WINDOW = timedelta(days=120)
 PV_METRICS = ["score", "ga", "saves", "shots"]
+THIN_GAMES = 50                 # rated games before a player's Elo is trusted
 
 
 @dataclass
@@ -69,6 +70,8 @@ class Dataset:
     series_of_row: np.ndarray
     series: list[SeriesRecord]
     series_X: np.ndarray     # one row per series (same order as `series`)
+    series_U: np.ndarray     # per series: trio series together (t1, t2), idle days (t1, t2),
+                             # share of starters with thin rating history (t1, t2); -1 = unknown
 
 def load_series(conn: sqlite3.Connection, finished_only: bool = True) -> list[SeriesRecord]:
     rosters: dict[tuple[str, int], list[tuple[int, str]]] = defaultdict(list)
@@ -195,6 +198,21 @@ class History:
 
         return math.log1p(together), together, new
 
+    def _idle(self, t: int, on: date) -> float | None:
+        """Days since the team's last game before `on` (None if it never played)."""
+        for g in reversed(self.team_games.get(t, [])):
+            if g[0] < on:
+                return float((on - g[0]).days)
+        return None
+
+    def _thin(self, roster: tuple[str, ...] | None) -> tuple[float | None, list[tuple[str, int]]]:
+        """Share of the three starters with fewer than THIN_GAMES rated games (cold-start Elo)."""
+        if not roster or len(roster) < 3:
+            return None, []
+        thin = [(p, self.ratings.players.games(p)) for p in roster[:3]
+                if self.ratings.players.games(p) < THIN_GAMES]
+        return len(thin) / 3, thin
+
     def _player_value(self, roster: tuple[str, ...] | None):
         if not roster or len(roster) < 3:
             return None, {}
@@ -233,6 +251,8 @@ class History:
             "form": ((w1, l1, rgd1), (w2, l2, rgd2)),
             "continuity": ((n1, new1), (n2, new2)),
             "player_value": ((pv1, pvs1), (pv2, pvs2)),
+            "idle": (self._idle(t1, on), self._idle(t2, on)),
+            "thin": (self._thin(r1), self._thin(r2)),
         }
 
         return x, ev
@@ -276,10 +296,14 @@ class History:
 def build(conn: sqlite3.Connection) -> tuple[Dataset, History]:
     series = load_series(conn)
     hist = History(team_regions(conn))
-    X_rows, y, sidx, sX = [], [], [], []
+    X_rows, y, sidx, sX, sU = [], [], [], [], []
     for i, s in enumerate(series):
-        x, _ = hist.features(s.t1, s.t2, s.roster1, s.roster2, s.date)
+        x, ev = hist.features(s.t1, s.t2, s.roster1, s.roster2, s.date)
         sX.append(x)
+        (n1, _), (n2, _) = ev["continuity"]
+        i1, i2 = ev["idle"]
+        (th1, _), (th2, _) = ev["thin"]
+        sU.append(tuple(-1 if v is None else v for v in (n1, n2, i1, i2, th1, th2)))
         for w in s.winners:
             X_rows.append(x)
             y.append(1 if w == 1 else 0)
@@ -289,6 +313,7 @@ def build(conn: sqlite3.Connection) -> tuple[Dataset, History]:
     ds = Dataset(
         X=np.array(X_rows).reshape(-1, nf), y=np.array(y), series_of_row=np.array(sidx),
         series=series, series_X=np.array(sX).reshape(-1, nf),
+        series_U=np.array(sU, dtype=float).reshape(-1, 6),
     )
     
     return ds, hist

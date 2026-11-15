@@ -22,15 +22,15 @@ class Factor:
         return asdict(self)
 
 
-def contributions(model: GameModel, x: np.ndarray, best_of: int) -> dict[str, float]:
+def contributions(model: GameModel, x: np.ndarray, best_of: int, u: float = 0.0) -> dict[str, float]:
     """Team1 series-win pp attributable to each factor group: P(full) − P(group neutral)."""
-    p_full = series_win_prob(float(model.p_game(x)), best_of)
+    p_full = series_win_prob(float(model.p_game(x, u)), best_of)
     out = {}
     for group, feats in FACTOR_GROUPS.items():
         x0 = x.copy()
         for f in feats:
             x0[FEATURES.index(f)] = 0.0
-        out[group] = (p_full - series_win_prob(float(model.p_game(x0)), best_of)) * 100
+        out[group] = (p_full - series_win_prob(float(model.p_game(x0, u)), best_of)) * 100
 
     return out
 
@@ -86,9 +86,9 @@ def evidence_text(group: str, ev: dict, a: str, b: str, pname) -> str:
 
 
 def explain(model: GameModel, x: np.ndarray, ev: dict, best_of: int, a: str, b: str,
-            pname=lambda p: p) -> list[Factor]:
+            pname=lambda p: p, u: float = 0.0) -> list[Factor]:
 
-    contrib = contributions(model, x, best_of)
+    contrib = contributions(model, x, best_of, u)
     out = []
     for group, feats in FACTOR_GROUPS.items():
         c = contrib[group]

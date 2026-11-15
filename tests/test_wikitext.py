@@ -75,3 +75,18 @@ def test_helpers():
     assert team_key("  Team_Vitality ") == "team vitality"
     assert region_from_title("RLCS/2025/Raleigh Major/Europe/Open 4") == "Europe"
     assert region_from_title("RLCS/2025/Raleigh Major") == "International"
+
+
+def test_active_squad_expansion():
+    from rlpredictor.data.wikitext import parse_squad, split_expanded
+
+    parts = split_expanded((FIX / "active_squads_expanded.txt").read_text())
+    assert sorted(parts) == [0, 1, 2, 3]
+    kc = parse_squad(parts[0])
+    # coaches (Extra, Jordi) are dropped; role column present
+    assert [m.link for m in kc] == ["Bibbaba", "M0nkey M00n", "Reyyn"]
+    vit = parse_squad(parts[2])
+    assert [(m.name, m.link) for m in vit][0] == ("diaz", "Diaz (Brazilian Player)")
+    gm = parse_squad(parts[3])  # no role column at all
+    assert [m.name for m in gm] == ["Atow", "Vatira", "zen"]
+    assert all(str(m.join_date) == "2026-10-28" and not m.is_sub for m in gm)

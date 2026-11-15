@@ -21,12 +21,17 @@ class GameModel:
     trained_through: str | None = None
     n_games: int = 0
     metrics: dict = field(default_factory=dict)
+    shrink: dict = field(default_factory=dict)   # {beta, k, gamma}; empty = no shrink
 
     def logit(self, x: np.ndarray) -> np.ndarray:
         return np.asarray(x) @ self.weights
 
-    def p_game(self, x: np.ndarray) -> np.ndarray | float:
+    def p_game(self, x: np.ndarray, u=0.0) -> np.ndarray | float:
+        """Per-game win probability. `u` (confidence.uncertainty) pulls it toward 50%."""
         z = self.logit(x)
+        beta = self.shrink.get("beta", 0.0)
+        if beta:
+            z = z / (1.0 + beta * np.asarray(u))
         return 1.0 / (1.0 + np.exp(-z))
 
     def save(self, path: Path | None = None) -> Path:
